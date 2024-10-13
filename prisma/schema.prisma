@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @unique
+  Question_categories Question_categories[]
+}
+
+model Discipline {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  Question Question[]
+}
+
+model Question {
+  id                       Int                   @id @default(autoincrement())
+  year                     String                @db.VarChar(4)
+  disciplineId             Int?
+  subjectId                Int?
+  context                  String?
+  alternativesIntroduction String?
+  correctAlternative       String                @db.VarChar(1)
+  alternativeA             String
+  alternativeB             String
+  alternativeC             String
+  alternativeD             String
+  alternativeE             String
+  Discipline               Discipline?           @relation(fields: [disciplineId], references: [id])
+  Subject                  Subject?              @relation(fields: [subjectId], references: [id])
+  Question_categories      Question_categories[]
+  Simulated_questions      Simulated_questions[]
+}
+
+model Question_categories {
+  questionId   Int
+  categoriesId Int
+  Category     Category @relation(fields: [categoriesId], references: [id])
+  Question     Question @relation(fields: [questionId], references: [id])
+
+  @@id([questionId, categoriesId])
+}
+
+model Simulated {
+  id                  Int                   @id @default(autoincrement())
+  type                String                @db.VarChar(100)
+  userId              String                @db.Uuid
+  createdAt           DateTime              @default(now()) @db.Timestamp(0)
+  finishedAt          DateTime?             @db.Timestamp(0)
+  status              String                @db.VarChar(20)
+  User                User                  @relation(fields: [userId], references: [id])
+  Simulated_questions Simulated_questions[]
+}
+
+model Simulated_questions {
+  simulatedId Int
+  questionId  Int
+  hit         Boolean?
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  lastSeenAt  DateTime? @db.Timestamp(0)
+  Question    Question  @relation(fields: [questionId], references: [id])
+  Simulated   Simulated @relation(fields: [simulatedId], references: [id])
+
+  @@id([simulatedId, questionId])
+}
+
+model Subject {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  Question Question[]
+}
+
+model User {
+  id        String      @id @db.Uuid
+  name      String      @db.VarChar(255)
+  email     String      @unique @db.VarChar(255)
+  password  String
+  createdAt DateTime    @default(now()) @db.Timestamp(0)
+  Simulated Simulated[]
+}
