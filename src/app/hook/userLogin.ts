@@ -8,6 +8,8 @@ const useLogin = (onSuccess: OnSuccessCallback) => {
   const [error, setError] = useState("");
   const { status } = useSession();
 
+  if (status === "authenticated") onSuccess();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -23,10 +25,6 @@ const useLogin = (onSuccess: OnSuccessCallback) => {
       if (onSuccess) onSuccess();
     }
   };
-
-  if (status === "authenticated") {
-    signOut({ redirect: false });
-  }
 
   return {
     email,
