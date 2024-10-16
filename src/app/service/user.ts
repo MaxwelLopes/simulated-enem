@@ -27,7 +27,6 @@ export const createUser = async (
         name: name,
         email: email,
         password: hashedPassword,
-        createdAt: new Date()
     }
 
     const newUser = await prisma.user.create({

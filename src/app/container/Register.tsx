@@ -1,8 +1,10 @@
-"use client"
+"use client";
 
 import useRegister from "../hook/userRegister";
+import { useRouter } from 'next/navigation';
 
 const Register = () => {
+  const router = useRouter();
   const {
     name,
     setName,
@@ -14,7 +16,6 @@ const Register = () => {
     success,
     handleSubmit,
   } = useRegister();
-  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -60,7 +61,8 @@ const Register = () => {
           />
         </div>
         {error && <div className="text-red-600">{error}</div>}
-        {success && <div className="text-green-600">{success}</div>}
+        {success && <div  className="text-green-600 cursor-pointer mt-4 hover:text-green-800 hover:underline transition duration-200" onClick={() => router.push('/login')}>{success}
+        </div>}
         <button
           type="submit"
           className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md shadow hover:bg-blue-600 transition duration-200"

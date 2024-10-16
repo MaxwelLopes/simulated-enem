@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
     session: {
         strategy: 'jwt'
     },
@@ -79,9 +80,9 @@ export const authOptions: NextAuthOptions = {
 
 
     async redirect({ url, baseUrl }) {
-        // Redireciona para a rota /home após o login
-        return '/home';
-    }
+        if (url.startsWith("/")) return `${baseUrl}${url}`
+        return baseUrl
+      }
 }
 }
 
