@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createUser } from "@/app/service/user";
+import { signOut, useSession } from "next-auth/react";
 
 const useRegister = () => {
   const [name, setName] = useState("");
@@ -7,6 +8,7 @@ const useRegister = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { status } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +22,10 @@ const useRegister = () => {
       setSuccess("");
     }
   };
+
+  if (status === "authenticated") {
+    signOut({ redirect: false });
+  }
 
   return {
     name,

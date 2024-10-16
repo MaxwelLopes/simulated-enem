@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 type OnSuccessCallback = () => void;
 
 const useLogin = (onSuccess: OnSuccessCallback) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { status } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,10 @@ const useLogin = (onSuccess: OnSuccessCallback) => {
       if (onSuccess) onSuccess();
     }
   };
+
+  if (status === "authenticated") {
+    signOut({ redirect: false });
+  }
 
   return {
     email,
