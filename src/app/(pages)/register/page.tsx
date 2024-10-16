@@ -6,7 +6,6 @@ const RegisterPage = () => {
   return (
     <div>
       <Register />
-      <p>oi</p>
     </div>
   );
 };

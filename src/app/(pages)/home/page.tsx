@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LoginButton, LogoutButton } from "../auth";
+import { LogoutButton } from "@/app/auth";
 import { useSession } from "next-auth/react";
 
 export default function Home() {
@@ -16,7 +16,6 @@ export default function Home() {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="text-center">
-        <LoginButton />
         <LogoutButton />
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
           Bem-vindo ao Simulador ENEM
