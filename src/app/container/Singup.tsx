@@ -3,7 +3,7 @@
 import useRegister from "../hook/userRegister";
 import { useRouter } from 'next/navigation';
 
-const Register = () => {
+const Singup = () => {
   const router = useRouter();
   const {
     name,
@@ -74,4 +74,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Singup;

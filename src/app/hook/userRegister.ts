@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createUser } from "@/app/service/user";
 import { signOut, useSession } from "next-auth/react";
 
-const useRegister = () => {
+const useSingup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,4 +40,4 @@ const useRegister = () => {
   };
 };
 
-export default useRegister;
+export default useSingup;

@@ -42,7 +42,7 @@ const Login = () => {
         </form>
         <div className="pt-2">
           <button
-            onClick={() => router.push("/register")}
+            onClick={() => router.push("/singup")}
             className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md shadow hover:bg-blue-600 transition duration-200"
           >
             Criar Novo Usuário
