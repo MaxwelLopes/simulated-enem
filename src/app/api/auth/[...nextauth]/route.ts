@@ -53,6 +53,9 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+  pages: {
+    signIn: 'login', // Definindo a página customizada de login
+},
   callbacks: {
     session: ({ session, token }) => {
         console.log('Session Callback', {session, token})
