@@ -6,10 +6,13 @@ import { useSession } from "next-auth/react";
 
 export default function Home() {
   const router = useRouter();
-  const { data: session } = useSession(); 
+  const { data: session } = useSession();
 
   const handleCreateSimulated = () => {
     router.push("/createSimuled");
+  };
+  const handleMySimulateds = () => {
+    router.push("/simulations");
   };
 
   return (
@@ -25,12 +28,21 @@ export default function Home() {
         <p className="text-md text-gray-500 mb-8">
           Prepare-se para o ENEM criando seus simulados personalizados.
         </p>
-        <button
-          onClick={handleCreateSimulated}
-          className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md shadow hover:bg-blue-600 transition duration-200"
-        >
-          Criar Simulado
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={handleCreateSimulated}
+            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md shadow hover:bg-blue-600 transition duration-200"
+          >
+            Criar Simulado
+          </button>
+
+          <button
+            onClick={handleMySimulateds}
+            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md shadow hover:bg-blue-600 transition duration-200"
+          >
+            Meus Simulados
+          </button>
+        </div>{" "}
       </div>
     </div>
   );

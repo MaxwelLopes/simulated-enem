@@ -2,8 +2,17 @@ import { compare } from 'bcryptjs';
 import NextAuth, { NextAuthOptions } from "next-auth"
 import { PrismaClient } from "@prisma/client";
 import CredentialsProvider from "next-auth/providers/credentials"
+import prisma from '../../../../../prisma/prisma';
 
-const prisma = new PrismaClient();
+declare module "next-auth" {
+    interface Session {
+      user: {
+        id: string; 
+        name: string;
+        email: string;
+      };
+    }
+}
 
 export const authOptions: NextAuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
@@ -57,7 +66,7 @@ export const authOptions: NextAuthOptions = {
     signIn: 'login', // Definindo a página customizada de login
 },
   callbacks: {
-    session: ({ session, token }) => {
+    session: ({ session, token, user }) => {
         console.log('Session Callback', {session, token})
         return {
             ...session,

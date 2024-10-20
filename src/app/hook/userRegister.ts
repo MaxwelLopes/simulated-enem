@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createUser } from "@/app/service/user";
+import { createUser } from "@/app/service/userService";
 import { signOut, useSession } from "next-auth/react";
 
 const useSingup = () => {

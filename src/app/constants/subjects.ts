@@ -1,0 +1,17 @@
+export const subjects = [
+  "Matemática",
+  "Língua Portuguesa",
+  "Literatura",
+  "Artes",
+  "Educação Física",
+  "Tecnologia da Informação e Comunicação",
+  "História",
+  "Geografia",
+  "Filosofia",
+  "Sociologia",
+  "Biologia",
+  "Física",
+  "Química",
+  "Inglês",
+  "Espanhol",
+];

@@ -3,12 +3,13 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { findQuestionByDisciplineId } from "../service/QuestionService";
 
 const Login = () => {
   const router = useRouter();
-  const [email, setEmail] = useState<string>(""); // Definindo o tipo como string
-  const [password, setPassword] = useState<string>(""); // Definindo o tipo como string
-  const [error, setError] = useState<string | null>(null); // Permite null ou string
+  const [email, setEmail] = useState<string>(""); 
+  const [password, setPassword] = useState<string>(""); 
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,14 +21,13 @@ const Login = () => {
     });
 
     if (res?.error) {
-      // Verifica se há um erro e define uma mensagem de erro apropriada
       if (res.error === "CredentialsSignin") {
         setError("Email ou senha incorretos.");
       } else {
         setError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
       }
     } else {
-      router.push("/home"); // Redirecionar para a página inicial após o login
+      router.push("/home"); 
     }
   };
 
