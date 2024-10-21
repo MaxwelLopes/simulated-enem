@@ -1,8 +1,8 @@
 "use server";
 
-import prisma from '../../../prisma/prisma';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { findUserByEmail, createUser as createUserRepository } from '../repositories/userRepository';
 
 export const createUser = async (
   name: string,
@@ -10,9 +10,7 @@ export const createUser = async (
   password: string
 ) => {
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
       return { success: false, message: "Usuário já existe" };
@@ -27,9 +25,7 @@ export const createUser = async (
         password: hashedPassword,
     }
 
-    const newUser = await prisma.user.create({
-      data: user,
-    });
+    const newUser = createUserRepository(user);
 
     return { success: true, user: newUser, message: ''};
   } catch (error) {

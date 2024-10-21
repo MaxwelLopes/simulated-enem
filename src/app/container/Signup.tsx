@@ -1,41 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { createUser } from "@/app/service/userService";
-import { signOut, useSession } from "next-auth/react";
+import { userSingup } from "../hook/userSingup";
 
 const Signup = () => {
   const router = useRouter();
-  const { status } = useSession();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    setError,
+    success,
+    setSuccess,
+  } = userSingup();
 
-  if (status === "authenticated") {
-    signOut({ redirect: false });
-  }
-
-  const handleSubmitWithRedirect = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitWithRedirect = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
-  
+
     const result = await createUser(name, email, password);
-  
+
     if (result?.success) {
       setSuccess("Usuário registrado com sucesso! Você pode fazer login.");
       setError("");
       setTimeout(() => {
-        router.push('/login');
+        router.push("/login");
       }, 500);
     } else {
-      setError(result?.message || "Ocorreu um erro ao tentar registrar. Tente novamente.");
+      setError(
+        result?.message ||
+          "Ocorreu um erro ao tentar registrar. Tente novamente."
+      );
       setSuccess("");
     }
   };
-  
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <h1 className="text-4xl font-bold text-gray-800 mb-4">Registro</h1>
@@ -44,7 +50,9 @@ const Signup = () => {
         className="w-full max-w-md bg-white p-8 rounded-lg shadow"
       >
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Nome:</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Nome:
+          </label>
           <input
             type="text"
             value={name}
@@ -54,7 +62,9 @@ const Signup = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Email:</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Email:
+          </label>
           <input
             type="email"
             value={email}
@@ -64,7 +74,9 @@ const Signup = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Senha:</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Senha:
+          </label>
           <input
             type="password"
             value={password}
