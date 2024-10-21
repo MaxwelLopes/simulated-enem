@@ -1,30 +1,11 @@
+"use client";
+
 import { useState } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
-type OnSuccessCallback = () => void;
 
-const useLogin = (onSuccess: OnSuccessCallback) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const { status } = useSession();
-
-  if (status === "authenticated") onSuccess();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const result = await signIn("credentials", {
-      redirect: false,
-      email: email,
-      password: password,
-    });
-
-    if (result?.error) {
-      setError("Falha no login. Verifique seu email e senha.");
-    } else {
-      if (onSuccess) onSuccess();
-    }
-  };
+const useLogin = () => {
+  const [email, setEmail] = useState<string>(""); 
+  const [password, setPassword] = useState<string>(""); 
+  const [error, setError] = useState<string | null>(null);
 
   return {
     email,
@@ -32,7 +13,7 @@ const useLogin = (onSuccess: OnSuccessCallback) => {
     password,
     setPassword,
     error,
-    handleSubmit,
+    setError,
   };
 };
 

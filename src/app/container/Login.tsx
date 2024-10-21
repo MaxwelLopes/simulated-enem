@@ -1,15 +1,13 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { findQuestionByDisciplineId } from "../service/QuestionService";
+import useLogin from "../hook/userLogin";
 
 const Login = () => {
   const router = useRouter();
-  const [email, setEmail] = useState<string>(""); 
-  const [password, setPassword] = useState<string>(""); 
-  const [error, setError] = useState<string | null>(null);
+  const { email, setEmail, password, setPassword, error, setError } =
+    useLogin();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +25,7 @@ const Login = () => {
         setError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
       }
     } else {
-      router.push("/home"); 
+      router.push("/home");
     }
   };
 
