@@ -2,6 +2,18 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authenticateUser } from "@/app/service/authService";
 
+declare module "next-auth" {
+  interface User {
+    id: string;
+    email: string;
+    name: string;
+  }
+
+  interface Session {
+    user: User;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Simulated" ALTER COLUMN "review" DROP NOT NULL,
+ALTER COLUMN "unseen" DROP NOT NULL;

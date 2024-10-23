@@ -50,6 +50,9 @@ model Question_categories {
 model Simulated {
   id                  Int                   @id @default(autoincrement())
   type                String                @db.VarChar(100)
+  subtype             String[]               @db.VarChar(100)
+  unseen              Boolean?              @default(false)
+  review              Boolean?              @default(false)
   userId              String                @db.Uuid
   createdAt           DateTime              @default(now()) @db.Timestamp(0)
   finishedAt          DateTime?             @db.Timestamp(0)
