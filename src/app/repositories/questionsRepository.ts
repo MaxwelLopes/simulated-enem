@@ -1,5 +1,13 @@
 import prisma from "../../../prisma/prisma";
 
+export const findQuestionById = async (questionId: number) =>{
+  return await prisma.question.findUnique({
+    where:{
+      id: questionId,
+    }
+  })
+}
+
 export const findQuestionByDiscipline = async (
   disciplineName: string,
   unseen?: boolean,

@@ -1,11 +1,15 @@
 "use server";
 
-import prisma from "../../../prisma/prisma";
-import { cache } from "../data/questionIdsCache";
+
 import { SimulatedType } from "../enum/simulated";
-import { findIdDisciplineByName } from "../repositories/disciplineRepository";
-import { findQuestionByDiscipline } from "../repositories/questionsRepository";
-import { createSimulated as createSimulatedInRepostitory } from "../repositories/simulatedRepository";
+import {
+  findQuestionByDiscipline,
+} from "../repositories/questionsRepository";
+import {
+  createSimulated as createSimulatedInRepostitory,
+  findQuestionsBySimulationId,
+  findSimulatedByUserId,
+} from "../repositories/simulatedRepository";
 
 type Input = {
   typeOfSimuled: string;
@@ -24,27 +28,37 @@ export const createSimulated = async ({
   unseen,
   review,
   subtypes,
-  userId
+  userId,
 }: Input) => {
   if (typeOfSimuled === SimulatedType.DISCIPLINE) {
     try {
-      const questionsCountByType = questionCount ? questionCount / subtypes.length : undefined;
-      let questions:{id: number}[] = [];
+      const questionsCountByType = questionCount
+        ? questionCount / subtypes.length
+        : undefined;
+      let questions: { id: number }[] = [];
       subtypes.map(async (subType: string) => {
-        const questionsId = subType ? await findQuestionByDiscipline(subType, unseen, review, userId, questionsCountByType) : null;
-        if(questionsId) questions.push(...questionsId);
+        const questionsId = subType
+          ? await findQuestionByDiscipline(
+              subType,
+              unseen,
+              review,
+              userId,
+              questionsCountByType
+            )
+          : null;
+        if (questionsId) questions.push(...questionsId);
       });
       console.log(questions);
-      createSimulatedInRepostitory(typeOfSimuled, userId, questions)
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
     } catch {}
   }
 };
 
-export const findSimulation = async (userId: string) =>{
-  const simulations = await prisma.simulated.findMany({
-    where:{
-      userId: userId,
-    }
-  })
-  return simulations ? simulations : [];
-}
+export const getSimulations = async (userId: string) => {
+  const simulations = await findSimulatedByUserId(userId);
+  return simulations;
+};
+
+export const getQuestionOfSimulated = async (simulatedId: number) => {
+  return await findQuestionsBySimulationId(simulatedId);
+};

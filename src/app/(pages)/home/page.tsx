@@ -12,7 +12,7 @@ export default function Home() {
     router.push("/createSimuled");
   };
   const handleMySimulateds = () => {
-    router.push("/simulations");
+    router.push("/simulated");
   };
 
   return (
