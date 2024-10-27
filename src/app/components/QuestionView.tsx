@@ -1,10 +1,12 @@
 import { Question } from "@prisma/client";
+import AlternativeItem from "./AlternativeItem";
 
 type props = {
-  question: Question;
+  currentQuestion: { question: Question; selectedResponse: string };
+  setResponse: Function;
 };
 
-export const QuestionView = ({ question } : props) => {
+export const QuestionView = ({ currentQuestion, setResponse }: props) => {
   const {
     year,
     context,
@@ -14,7 +16,10 @@ export const QuestionView = ({ question } : props) => {
     alternativeC,
     alternativeD,
     alternativeE,
-  } = question;
+  } = currentQuestion.question;
+
+  const response = currentQuestion.selectedResponse;
+  console.log("repsonse: ", response)
 
   return (
     <div className="p-6 bg-white shadow-md rounded-lg max-w-2xl mx-auto my-4 border border-gray-300">
@@ -27,26 +32,36 @@ export const QuestionView = ({ question } : props) => {
       )}
 
       <ul className="space-y-2">
-        <li className="flex items-start">
-          <span className="font-semibold text-gray-600 mr-2">A:</span>
-          <span>{alternativeA}</span>
-        </li>
-        <li className="flex items-start">
-          <span className="font-semibold text-gray-600 mr-2">B:</span>
-          <span>{alternativeB}</span>
-        </li>
-        <li className="flex items-start">
-          <span className="font-semibold text-gray-600 mr-2">C:</span>
-          <span>{alternativeC}</span>
-        </li>
-        <li className="flex items-start">
-          <span className="font-semibold text-gray-600 mr-2">D:</span>
-          <span>{alternativeD}</span>
-        </li>
-        <li className="flex items-start">
-          <span className="font-semibold text-gray-600 mr-2">E:</span>
-          <span>{alternativeE}</span>
-        </li>
+        <AlternativeItem
+          letter="A"
+          text={alternativeA}
+          response={response}
+          setResponse={setResponse}
+        />
+        <AlternativeItem
+          letter="B"
+          text={alternativeB}
+          response={response}
+          setResponse={setResponse}
+        />
+        <AlternativeItem
+          letter="C"
+          text={alternativeC}
+          response={response}
+          setResponse={setResponse}
+        />
+        <AlternativeItem
+          letter="D"
+          text={alternativeD}
+          response={response}
+          setResponse={setResponse}
+        />
+        <AlternativeItem
+          letter="E"
+          text={alternativeE}
+          response={response}
+          setResponse={setResponse}
+        />
       </ul>
     </div>
   );

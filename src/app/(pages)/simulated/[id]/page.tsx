@@ -6,13 +6,14 @@ import { QuestionView } from "@/app/components/QuestionView";
 import { simulation } from "@/app/hook/simulation";
 import { useEffect } from "react";
 
-const SimulationsPage = ({ params }: { params: { id: number } }) => {
+const SimulationsPage = ({ params }: { params: { id: string } }) => {
   const {
     setSimulatedId,
     currentQuestion,
     nextQuestion,
     previousQuestion,
     loading,
+    setResponse,
   } = simulation();
 
   useEffect(() => {
@@ -27,7 +28,7 @@ const SimulationsPage = ({ params }: { params: { id: number } }) => {
         <>
           <div className="flex flex-col min-h-screen">
             <div className="flex-grow pb-16">
-              <QuestionView question={currentQuestion} />
+              <QuestionView currentQuestion={currentQuestion} setResponse={setResponse} />
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex justify-between items-center">

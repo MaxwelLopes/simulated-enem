@@ -7,10 +7,12 @@ export const simulation = () => {
   const [simulatedId, setSimulatedId] = useState<number>();
   const [questionOrder, setQuestionOrder] = useState<number[]>([]);
   const [questionsCache, setQuestionsCache] = useState<{
-    [id: number]: Question;
+    [id: number]: { question: Question; selectedResponse: string };
   }>({});
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [response, setResponseState] = useState<string>("");
 
   useEffect(() => {
     const fetchQuestionsOrder = async () => {
@@ -41,7 +43,7 @@ export const simulation = () => {
         if (question) {
           setQuestionsCache((prevCache) => ({
             ...prevCache,
-            [question.id as number]: question as Question,
+            [question.id]: { question, selectedResponse: "" },  
           }));
         }
       } catch (error) {
@@ -49,6 +51,8 @@ export const simulation = () => {
       } finally {
         setLoading(false);
       }
+    } else {
+      setResponseState(questionsCache[questionId].selectedResponse);
     }
   };
 
@@ -58,7 +62,19 @@ export const simulation = () => {
     }
   }, [currentIndex, questionOrder]);
 
-  const currentQuestion = questionsCache[questionOrder[currentIndex]];
+  const currentQuestionData = questionsCache[questionOrder[currentIndex]];
+
+  const setResponse = (selectedResponse: string) => {
+    const questionId = questionOrder[currentIndex];
+    setResponseState(selectedResponse);
+    setQuestionsCache((prevCache) => ({
+      ...prevCache,
+      [questionId]: {
+        ...prevCache[questionId],
+        selectedResponse,
+      },
+    }));
+  };
 
   const nextQuestion = () => {
     if (currentIndex < questionOrder.length - 1) {
@@ -75,9 +91,12 @@ export const simulation = () => {
   return {
     simulatedId,
     setSimulatedId,
-    currentQuestion,
+    currentQuestion: currentQuestionData, 
     nextQuestion,
     previousQuestion,
     loading,
+    response,
+    setResponse,
+    selectedResponse: currentQuestionData?.selectedResponse,
   };
 };
