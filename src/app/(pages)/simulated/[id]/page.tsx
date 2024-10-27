@@ -27,8 +27,6 @@ const SimulationsPage = ({ params }: { params: { id: number } }) => {
         <>
           <div className="flex flex-col min-h-screen">
             <div className="flex-grow pb-16">
-              {" "}
-              {/* Adicione padding-bottom aqui */}
               <QuestionView question={currentQuestion} />
             </div>
 
