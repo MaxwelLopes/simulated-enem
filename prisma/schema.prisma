@@ -50,7 +50,7 @@ model Question_categories {
 model Simulated {
   id                  Int                   @id @default(autoincrement())
   type                String                @db.VarChar(100)
-  subtype             String[]               @db.VarChar(100)
+  subtype             String[]              @db.VarChar(100)
   unseen              Boolean?              @default(false)
   review              Boolean?              @default(false)
   userId              String                @db.Uuid
@@ -65,6 +65,7 @@ model Simulated_questions {
   simulatedId Int
   questionId  Int
   hit         Boolean?
+  response    String?
   createdAt   DateTime  @default(now()) @db.Timestamp(0)
   lastSeenAt  DateTime? @db.Timestamp(0)
   Question    Question  @relation(fields: [questionId], references: [id])
