@@ -2,6 +2,7 @@
 
 import { GenericError } from "@/app/components/GenericError";
 import { Loading } from "@/app/components/Loading";
+import ProgressBar from "@/app/components/ProgressBar";
 import { QuestionView } from "@/app/components/QuestionView";
 import { simulation } from "@/app/hook/simulation";
 import { finishSimulation } from "@/app/service/simualationService";
@@ -16,17 +17,29 @@ const SimulationsPage = ({ params }: { params: { id: string } }) => {
     previousQuestion,
     loading,
     setResponse,
+    questionsCache,
+    questionOrder,
+    currentIndex,
+    setCurrentIndex,
   } = simulation();
 
   useEffect(() => {
     setSimulatedId(Number(params.id));
   }, [params.id, setSimulatedId]);
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <div>
       {loading && <Loading />}
       <>
+        <ProgressBar
+          totalQuestions={questionOrder.length}
+          questionsCache={questionsCache}
+          currentIndex={currentIndex}
+          
+          setCurrentIndex={setCurrentIndex}
+        />
+
         <div className="flex flex-col min-h-screen">
           <div className="flex-grow pb-16">
             {currentQuestion && (
@@ -41,7 +54,7 @@ const SimulationsPage = ({ params }: { params: { id: string } }) => {
             <button
               onClick={() => {
                 finishSimulation(Number(params.id));
-                router.push('/home')
+                router.push("/home");
               }}
               className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
             >
