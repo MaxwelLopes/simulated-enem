@@ -1,10 +1,11 @@
 'use client';
 
-import Simulations from "@/app/container/Simulations";
+
+import SimulatedList from "@/app/container/Simulateds";
 
 const SimulationsPage = () =>{
   return(
-    <Simulations/>
+    <SimulatedList/>
   )
 }
 
