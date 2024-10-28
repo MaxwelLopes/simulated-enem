@@ -1,14 +1,13 @@
 "use server";
 
-
 import { SimulatedType } from "../enum/simulated";
-import {
-  findQuestionByDiscipline,
-} from "../repositories/questionsRepository";
+import { findQuestionByDiscipline } from "../repositories/questionsRepository";
 import {
   createSimulated as createSimulatedInRepostitory,
   findQuestionsBySimulationId,
   findSimulatedByUserId,
+  updateAnswerBySilulation,
+  updatesimulated,
 } from "../repositories/simulatedRepository";
 
 type Input = {
@@ -24,7 +23,6 @@ type Input = {
 export const createSimulated = async ({
   typeOfSimuled,
   questionCount,
-  error,
   unseen,
   review,
   subtypes,
@@ -48,7 +46,6 @@ export const createSimulated = async ({
           : null;
         if (questionsId) questions.push(...questionsId);
       });
-      console.log(questions);
       createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
     } catch {}
   }
@@ -62,3 +59,17 @@ export const getSimulations = async (userId: string) => {
 export const getQuestionOfSimulated = async (simulatedId: number) => {
   return await findQuestionsBySimulationId(simulatedId);
 };
+
+export const answerQuestion = async (
+  simulatedId: number,
+  questionId: number,
+  rightAnswer: string,
+  response: string
+) => {
+  const hit = rightAnswer === response;
+  await updateAnswerBySilulation(simulatedId, questionId, hit, response);
+};
+
+export const finishSimulation = async (id: number) => {
+    await updatesimulated(id)
+}

@@ -1,13 +1,34 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { getQuestionOfSimulated } from "../service/simualationService";
+import {
+  answerQuestion,
+  getQuestionOfSimulated,
+} from "../service/simualationService";
 import { getQuestion } from "../service/QuestionService";
 import { Question, Simulated_questions } from "@prisma/client";
 
+interface QuestionWithCategories extends Question {
+  Question_categories: {
+    Category: {
+      name: string;
+      id: number;
+    };
+  }[];
+}
+
 export const simulation = () => {
   const [simulatedId, setSimulatedId] = useState<number>();
-  const [questionOrder, setQuestionOrder] = useState<number[]>([]);
+  const [questionOrder, setQuestionOrder] = useState<
+    { id: number; index: number }[]
+  >([]);
   const [questionsCache, setQuestionsCache] = useState<{
-    [id: number]: { question: Question; selectedResponse: string };
+    [id: number]: {
+      question: QuestionWithCategories;
+      selectedResponse: string;
+      index: number;
+      response: boolean;
+    };
   }>({});
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -21,7 +42,10 @@ export const simulation = () => {
       try {
         const simulatedQuestions = await getQuestionOfSimulated(simulatedId);
         const questionIds = simulatedQuestions.map(
-          (question: Simulated_questions) => question.questionId
+          (question: Simulated_questions, index: number) => ({
+            id: question.questionId,
+            index: index,
+          })
         );
 
         setQuestionOrder(questionIds);
@@ -43,7 +67,12 @@ export const simulation = () => {
         if (question) {
           setQuestionsCache((prevCache) => ({
             ...prevCache,
-            [question.id]: { question, selectedResponse: "" },  
+            [question.id]: {
+              question,
+              selectedResponse: "",
+              index: currentIndex,
+              response: false,
+            },
           }));
         }
       } catch (error) {
@@ -58,32 +87,56 @@ export const simulation = () => {
 
   useEffect(() => {
     if (questionOrder[currentIndex]) {
-      loadQuestion(questionOrder[currentIndex]);
+      loadQuestion(questionOrder[currentIndex].id);
     }
   }, [currentIndex, questionOrder]);
 
-  const currentQuestionData = questionsCache[questionOrder[currentIndex]];
+  const questionId = questionOrder[currentIndex]; 
+  const currentQuestionData = questionsCache[questionId?.id];
 
   const setResponse = (selectedResponse: string) => {
-    const questionId = questionOrder[currentIndex];
+    const questionId = questionOrder[currentIndex].id;
     setResponseState(selectedResponse);
     setQuestionsCache((prevCache) => ({
       ...prevCache,
       [questionId]: {
         ...prevCache[questionId],
         selectedResponse,
+        response: true,
       },
     }));
   };
 
   const nextQuestion = () => {
     if (currentIndex < questionOrder.length - 1) {
+      if (response !== "") {
+        const { id: questionId, correctAlternative } =
+          currentQuestionData.question;
+        const { selectedResponse } = currentQuestionData;
+        answerQuestion(
+          simulatedId as number,
+          questionId,
+          correctAlternative,
+          selectedResponse
+        );
+      }
       setCurrentIndex(currentIndex + 1);
     }
   };
 
   const previousQuestion = () => {
     if (currentIndex > 0) {
+      if (response !== "") {
+        const { id: questionId, correctAlternative } =
+          currentQuestionData.question;
+        const { selectedResponse } = currentQuestionData;
+        answerQuestion(
+          simulatedId as number,
+          questionId,
+          correctAlternative,
+          selectedResponse
+        );
+      }
       setCurrentIndex(currentIndex - 1);
     }
   };
@@ -91,12 +144,13 @@ export const simulation = () => {
   return {
     simulatedId,
     setSimulatedId,
-    currentQuestion: currentQuestionData, 
+    currentQuestion: currentQuestionData,
     nextQuestion,
     previousQuestion,
     loading,
     response,
     setResponse,
     selectedResponse: currentQuestionData?.selectedResponse,
+    questionsCache,
   };
 };

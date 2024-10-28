@@ -10,3 +10,14 @@ export const findIdDisciplineByName = async (name: string) => {
     },
   });
 };
+
+export const findIdDisciplineById = async (id: number) =>{
+  return await prisma.discipline.findUnique({
+    where:{
+      id
+    },
+    select: {
+      name: true,
+    },
+  })
+}

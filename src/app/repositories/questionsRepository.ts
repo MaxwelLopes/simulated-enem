@@ -2,10 +2,17 @@ import prisma from "../../../prisma/prisma";
 
 export const findQuestionById = async (questionId: number) =>{
   return await prisma.question.findUnique({
-    where:{
+    where: {
       id: questionId,
-    }
-  })
+    },
+    include: {
+      Question_categories: {
+        include: {
+          Category: true, 
+        },
+      },
+    },
+  });
 }
 
 export const findQuestionByDiscipline = async (

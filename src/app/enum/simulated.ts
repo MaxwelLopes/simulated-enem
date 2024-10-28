@@ -7,6 +7,13 @@ export enum SimulatedType {
 }
 
 export enum SimulatedCriterion {
-    UNSEEN = "Questões Inéditas",
-    REVIEW = "Revisão",
-  }
+  UNSEEN = "Questões Inéditas",
+  REVIEW = "Revisão",
+}
+
+export enum SimulatedStatus {
+  IN_PROGRESS = "Em Andamento",
+  COMPLETED = "Finalizado",
+  CANCELLED = "Cancelado",
+  PENDING = "Pendente",
+}

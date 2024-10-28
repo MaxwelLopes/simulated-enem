@@ -1,4 +1,5 @@
 import prisma from "../../../prisma/prisma";
+import { SimulatedStatus } from "../enum/simulated";
 
 export const createSimulated = async (
   type: string,
@@ -11,7 +12,7 @@ export const createSimulated = async (
       type,
       userId,
       subtype,
-      status: "Não iniciado",
+      status: SimulatedStatus.PENDING,
     },
   });
 
@@ -38,6 +39,38 @@ export const findQuestionsBySimulationId = async (simulatedId: number) => {
   return await prisma.simulated_questions.findMany({
     where: {
       simulatedId: simulatedId,
+    },
+  });
+};
+
+export const updateAnswerBySilulation = async (
+  simulatedId: number,
+  questionId: number,
+  hit: boolean,
+  response: string
+) => {
+  await prisma.simulated_questions.update({
+    where: {
+      simulatedId_questionId: {
+        simulatedId: simulatedId,
+        questionId: questionId,
+      },
+    },
+    data: {
+      hit,
+      lastSeenAt: new Date(),
+      response,
+    },
+  });
+};
+
+export const updatesimulated = async (simulatedId: number) => {
+  await prisma.simulated.update({
+    where: {
+      id: simulatedId,
+    },
+    data: {
+      status: SimulatedStatus.COMPLETED
     },
   });
 };

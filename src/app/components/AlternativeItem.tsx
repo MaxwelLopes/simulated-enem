@@ -14,7 +14,6 @@ const AlternativeItem = ({
   const isSelected = response == letter;
   const handleClick = () => {
     isSelected;
-    console.log(letter, response, '----------------')
     setResponse(letter);
   };
   return (
