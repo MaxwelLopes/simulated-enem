@@ -1,10 +1,12 @@
 "use server";
 
-import { SimulatedType } from "../enum/simulated";
+import { SimulatedStatus, SimulatedType } from "../enum/simulated";
 import { findQuestionByDiscipline } from "../repositories/questionsRepository";
 import {
   createSimulated as createSimulatedInRepostitory,
   findQuestionsBySimulationId,
+  findResponse,
+  findSimulatedById,
   findSimulatedByUserId,
   updateAnswerBySilulation,
   updatesimulated,
@@ -67,9 +69,21 @@ export const answerQuestion = async (
   response: string
 ) => {
   const hit = rightAnswer === response;
-  await updateAnswerBySilulation(simulatedId, questionId, hit, response);
+  const status = await getSimulationStatus(simulatedId);
+  if (status !== SimulatedStatus.COMPLETED)
+    await updateAnswerBySilulation(simulatedId, questionId, hit, response);
 };
 
 export const finishSimulation = async (id: number) => {
-    await updatesimulated(id)
+  await updatesimulated(id);
+};
+
+export const getSimulationStatus = async (id: number) => {
+  const simulation = await findSimulatedById(id);
+  return simulation?.status || null;
+};
+
+export const getResponse = async (simulatedId: number, questionId: number) =>{
+  return await findResponse(simulatedId, questionId);
+
 }

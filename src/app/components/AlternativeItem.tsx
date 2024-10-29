@@ -1,8 +1,11 @@
+import { SimulatedStatus } from "../enum/simulated";
+
 type AlternativeItemProps = {
   letter: string;
   text: string;
   response: string;
   setResponse: Function;
+  simulationStatus: string | null;
 };
 
 const AlternativeItem = ({
@@ -10,11 +13,15 @@ const AlternativeItem = ({
   text,
   response,
   setResponse,
+  simulationStatus,
 }: AlternativeItemProps) => {
   const isSelected = response == letter;
   const handleClick = () => {
-    isSelected;
+    if(simulationStatus !== SimulatedStatus.COMPLETED){
+      isSelected;
     setResponse(letter);
+    }
+    
   };
   return (
     <li

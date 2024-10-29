@@ -5,11 +5,16 @@ import { Loading } from "@/app/components/Loading";
 import ProgressBar from "@/app/components/ProgressBar";
 import { QuestionView } from "@/app/components/QuestionView";
 import { simulation } from "@/app/hook/simulation";
-import { finishSimulation } from "@/app/service/simualationService";
+import {
+  finishSimulation,
+  getSimulationStatus,
+} from "@/app/service/simualationService";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { SimulatedStatus } from "../enum/simulated";
 
-export const Simulation = ({ params }: { params: { id: string } }) => {
+export const Simulation = (simulated: { id: string }) => {
+  const id = Number(simulated.id);
   const {
     setSimulatedId,
     currentQuestion,
@@ -21,12 +26,19 @@ export const Simulation = ({ params }: { params: { id: string } }) => {
     questionOrder,
     currentIndex,
     setCurrentIndex,
+    simulationStatus,
+    setSimulationStatus,
   } = simulation();
-  const id = Number(params.id);
 
   useEffect(() => {
+    const fetchStatus = async () => {
+      const status = await getSimulationStatus(id);
+      setSimulationStatus(status);
+    };
+    fetchStatus();
     setSimulatedId(id);
   }, [id, setSimulatedId]);
+
   const router = useRouter();
 
   return (
@@ -37,7 +49,6 @@ export const Simulation = ({ params }: { params: { id: string } }) => {
           totalQuestions={questionOrder.length}
           questionsCache={questionsCache}
           currentIndex={currentIndex}
-          
           setCurrentIndex={setCurrentIndex}
         />
 
@@ -47,6 +58,7 @@ export const Simulation = ({ params }: { params: { id: string } }) => {
               <QuestionView
                 currentQuestion={currentQuestion}
                 setResponse={setResponse}
+                simulationStatus={simulationStatus}
               />
             )}
           </div>
@@ -54,12 +66,12 @@ export const Simulation = ({ params }: { params: { id: string } }) => {
           <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex justify-between items-center">
             <button
               onClick={() => {
-                finishSimulation(id);
-                router.push("/home");
+                if(simulationStatus !== SimulatedStatus.COMPLETED) finishSimulation(id);
+                router.push("/simulated");
               }}
               className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
             >
-              Finalizar
+             { simulationStatus !== SimulatedStatus.COMPLETED ? "Finalizar": "Voltar"}
             </button>
 
             <div className="flex space-x-2">
@@ -84,4 +96,3 @@ export const Simulation = ({ params }: { params: { id: string } }) => {
     </div>
   );
 };
-

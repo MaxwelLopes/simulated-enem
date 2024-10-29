@@ -45,14 +45,8 @@ const CreateSimuled = () => {
         subtypes,
         userId,
       });
-      router.push('/simulations')
+      router.push("/simulated");
     }
-
-    // if (status.success) {
-    //   router.push("/simulations");
-    // } else {
-    //   setError("Erro ao criar simulado");
-    // }
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -185,8 +179,8 @@ const CreateSimuled = () => {
               </label>
               <input
                 type="number"
-                value={questionCount}
-                onChange={(e) => setQuestionCount(Number(e.target.value))}
+                defaultValue={questionCount}
+                onChange={(e) => setQuestionCount(Number(e.target.value))} 
                 min={1}
                 max={2700}
                 placeholder="Número de questões"

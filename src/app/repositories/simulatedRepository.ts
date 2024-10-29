@@ -74,3 +74,23 @@ export const updatesimulated = async (simulatedId: number) => {
     },
   });
 };
+
+export const findSimulatedById = async (id: number) =>{
+  return await prisma.simulated.findUnique({
+    where:{
+      id
+    }
+  })
+}
+
+export const findResponse = async (simulatedId: number, questionId: number) =>{
+  return await prisma.simulated_questions.findFirst({
+    where:{
+      simulatedId,
+      questionId,
+    },
+    select:{
+      response: true,
+    }
+  })
+}

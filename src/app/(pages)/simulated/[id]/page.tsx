@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
 import { Simulation } from "@/app/container/simulation";
 
-const SimulationPage = ({ params }: { params: { id: string } }) => {
-  return <Simulation params={params} />;
+type ParamsType = {
+  params: {
+    id: string;
+  };
 };
+
+const SimulationPage = ({ params }: ParamsType) => {
+  return <Simulation id={params.id} />;
+};
+
 export default SimulationPage;

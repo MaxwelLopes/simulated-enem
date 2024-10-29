@@ -14,6 +14,5 @@ export enum SimulatedCriterion {
 export enum SimulatedStatus {
   IN_PROGRESS = "Em Andamento",
   COMPLETED = "Finalizado",
-  CANCELLED = "Cancelado",
   PENDING = "Pendente",
 }

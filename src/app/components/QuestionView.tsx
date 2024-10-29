@@ -20,9 +20,10 @@ type props = {
     index: number;
   };
   setResponse: Function;
+  simulationStatus: string | null;
 };
 
-export const QuestionView = ({ currentQuestion, setResponse }: props) => {
+export const QuestionView = ({ currentQuestion, setResponse, simulationStatus }: props) => {
   const {
     year,
     context,
@@ -82,30 +83,35 @@ export const QuestionView = ({ currentQuestion, setResponse }: props) => {
           text={alternativeA}
           response={response}
           setResponse={setResponse}
+          simulationStatus={simulationStatus}
         />
         <AlternativeItem
           letter="B"
           text={alternativeB}
           response={response}
           setResponse={setResponse}
+          simulationStatus={simulationStatus}
         />
         <AlternativeItem
           letter="C"
           text={alternativeC}
           response={response}
           setResponse={setResponse}
+          simulationStatus={simulationStatus}
         />
         <AlternativeItem
           letter="D"
           text={alternativeD}
           response={response}
           setResponse={setResponse}
+          simulationStatus={simulationStatus}
         />
         <AlternativeItem
           letter="E"
           text={alternativeE}
           response={response}
           setResponse={setResponse}
+          simulationStatus={simulationStatus}
         />
       </ul>
     </div>

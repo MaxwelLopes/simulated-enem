@@ -7,6 +7,7 @@ import {
 } from "../service/simualationService";
 import { getQuestion } from "../service/QuestionService";
 import { Question } from "@prisma/client";
+import { SimulatedStatus } from "../enum/simulated";
 
 interface QuestionWithCategories extends Question {
   Question_categories: { Category: { name: string; id: number } }[];
@@ -25,12 +26,14 @@ export const simulation = () => {
         selectedResponse: string;
         index: number;
         response: boolean;
+        hit: boolean | null;
       }
     >
   >({});
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [response, setResponseState] = useState<string>("");
+  const [simulationStatus, setSimulationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (simulatedId) fetchQuestionsOrder();
@@ -48,6 +51,7 @@ export const simulation = () => {
       const questionIds = simulatedQuestions.map((question, index) => ({
         id: question.questionId,
         index,
+        hit: question.hit,
       }));
       setQuestionOrder(questionIds);
     } catch (error) {
@@ -81,6 +85,7 @@ export const simulation = () => {
         selectedResponse: "",
         index: currentIndex,
         response: false,
+        hit: null,
       },
     }));
   };
@@ -114,13 +119,19 @@ export const simulation = () => {
   };
 
   const nextQuestion = () => {
-    handleAnswerQuestion();
+    if (simulationStatus !== SimulatedStatus.COMPLETED) {
+      handleAnswerQuestion();
+    }
+
     if (currentIndex < questionOrder.length - 1)
       setCurrentIndex(currentIndex + 1);
   };
 
   const previousQuestion = () => {
-    handleAnswerQuestion();
+    if (simulationStatus !== SimulatedStatus.COMPLETED) {
+      handleAnswerQuestion();
+    }
+
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
   };
 
@@ -140,5 +151,7 @@ export const simulation = () => {
     questionOrder,
     currentIndex,
     setCurrentIndex,
+    simulationStatus,
+    setSimulationStatus,
   };
 };
