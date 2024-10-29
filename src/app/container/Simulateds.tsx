@@ -2,13 +2,11 @@
 
 import { Loading } from "@/app/components/Loading";
 import { useRouter } from "next/navigation";
-import { Simulateds } from "../hook/simulateds";
-import { Simulated } from "@prisma/client";
-import { SimulatedStatus } from "../enum/simulated";
+import { useSimulateds } from "../hook/simulateds";
 
 const SimulatedList = () => {
   const router = useRouter();
-  const { simulatedList, loading } = Simulateds();
+  const { simulatedList, loading } = useSimulateds();
 
   if (loading) {
     <Loading />;

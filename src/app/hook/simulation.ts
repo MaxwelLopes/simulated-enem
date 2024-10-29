@@ -13,7 +13,7 @@ interface QuestionWithCategories extends Question {
   Question_categories: { Category: { name: string; id: number } }[];
 }
 
-export const simulation = () => {
+export const useSimulation = () => {
   const [simulatedId, setSimulatedId] = useState<number>();
   const [questionOrder, setQuestionOrder] = useState<
     { id: number; index: number }[]

@@ -3,7 +3,7 @@
 import { disciplines } from "../constants/disciplines";
 import { subjects } from "../constants/subjects";
 import { categories } from "../constants/categories";
-import { simuledCreate } from "../hook/simuledCreate";
+import { useSimuledCreate } from "../hook/simuledCreate";
 import { createSimulated } from "../service/simualationService";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -29,7 +29,7 @@ const CreateSimuled = () => {
     setUnseen,
     setReview,
     setSubtype,
-  } = simuledCreate();
+  } = useSimuledCreate();
 
   const simulatedTypes = Object.values(SimulatedType);
 

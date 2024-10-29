@@ -4,7 +4,7 @@ import { GenericError } from "@/app/components/GenericError";
 import { Loading } from "@/app/components/Loading";
 import ProgressBar from "@/app/components/ProgressBar";
 import { QuestionView } from "@/app/components/QuestionView";
-import { simulation } from "@/app/hook/simulation";
+import { useSimulation } from "@/app/hook/simulation";
 import {
   finishSimulation,
   getSimulationStatus,
@@ -28,7 +28,7 @@ export const Simulation = (simulated: { id: string }) => {
     setCurrentIndex,
     simulationStatus,
     setSimulationStatus,
-  } = simulation();
+  } = useSimulation();
 
   useEffect(() => {
     const fetchStatus = async () => {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getSimulations } from "../service/simualationService";
 import { Simulated } from "@prisma/client";
 
-export const Simulateds = () => {
+export const useSimulateds = () => {
   const [simulatedList, setSimulatedList] = useState<Simulated[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

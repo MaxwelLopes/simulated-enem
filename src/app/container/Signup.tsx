@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createUser } from "@/app/service/userService";
-import { userSingup } from "../hook/userSingup";
+import { useSingup } from "../hook/userSingup";
 
 const Signup = () => {
   const router = useRouter();
@@ -18,7 +18,7 @@ const Signup = () => {
     setError,
     success,
     setSuccess,
-  } = userSingup();
+  } = useSingup();
 
   const handleSubmitWithRedirect = async (
     e: React.FormEvent<HTMLFormElement>

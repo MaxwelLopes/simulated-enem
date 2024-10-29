@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const userSingup = () => {
+export const useSingup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

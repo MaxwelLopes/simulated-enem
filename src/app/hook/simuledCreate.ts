@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 
-export const simuledCreate = () => {
+export const useSimuledCreate = () => {
   const [typeOfSimuled, setTypeOfSimuled] = useState<string>("Área de estudo");
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [error, setError] = useState<string | null>(null);
