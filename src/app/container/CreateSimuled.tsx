@@ -180,39 +180,40 @@ const CreateSimuled = () => {
               <input
                 type="number"
                 defaultValue={questionCount}
-                onChange={(e) => setQuestionCount(Number(e.target.value))} 
+                onChange={(e) => setQuestionCount(Number(e.target.value))}
                 min={1}
                 max={2700}
                 placeholder="Número de questões"
                 className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
-              <div className="mt-6">
-                <span className="block text-sm font-medium text-gray-700 mb-2">
-                  Selecionar Questões:
+              <div className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  checked={unseen}
+                  onChange={(e) => {
+                    setUnseen(e.target.checked);
+                    if (e.target.checked) setReview(false); 
+                  }}
+                  className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out border-gray-300 rounded focus:ring focus:ring-blue-200"
+                />
+                <span className="ml-3 text-gray-800 text-base">
+                  Questões Inéditas
                 </span>
-                <div className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    checked={unseen}
-                    onChange={(e) => setUnseen(e.target.checked)}
-                    className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out border-gray-300 rounded focus:ring focus:ring-blue-200"
-                  />
-                  <span className="ml-3 text-gray-800 text-base">
-                    Questões Inéditas
-                  </span>
-                </div>
-                <div className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    checked={review}
-                    onChange={(e) => setReview(e.target.checked)}
-                    className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out border-gray-300 rounded focus:ring focus:ring-blue-200"
-                  />
-                  <span className="ml-3 text-gray-800 text-base">
-                    Revisar Questões que Errou
-                  </span>
-                </div>
+              </div>
+              <div className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  checked={review}
+                  onChange={(e) => {
+                    setReview(e.target.checked);
+                    if (e.target.checked) setUnseen(false); 
+                  }}
+                  className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out border-gray-300 rounded focus:ring focus:ring-blue-200"
+                />
+                <span className="ml-3 text-gray-800 text-base">
+                  Revisar Questões que Errou
+                </span>
               </div>
             </div>
           )}

@@ -1,7 +1,18 @@
 "use server";
 
 import { SimulatedStatus, SimulatedType } from "../enum/simulated";
-import { findQuestionByDiscipline } from "../repositories/questionsRepository";
+import {
+  findQuestionByCategory,
+  findQuestionByCategoryReview,
+  findQuestionByCategoryUnseen,
+  findQuestionByDiscipline,
+  findQuestionByDisciplineReview,
+  findQuestionByDisciplineUnseen,
+  findQuestionBySubject,
+  findQuestionBySubjectReview,
+  findQuestionBySubjectUnseen,
+  findQuestionByYear,
+} from "../repositories/questionsRepository";
 import {
   createSimulated as createSimulatedInRepostitory,
   findQuestionsBySimulationId,
@@ -30,24 +41,201 @@ export const createSimulated = async ({
   subtypes,
   userId,
 }: Input) => {
-  if (typeOfSimuled === SimulatedType.DISCIPLINE) {
+  
+  if (typeOfSimuled === SimulatedType.DISCIPLINE && !unseen && !review) {
     try {
-      const questionsCountByType = questionCount
-        ? questionCount / subtypes.length
-        : undefined;
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionByDiscipline(subType, questionsPerSubtype)
+            : null;
+
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.DISCIPLINE && unseen && !review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionByDisciplineUnseen(
+                subType,
+                userId,
+                questionsPerSubtype
+              )
+            : null;
+
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.DISCIPLINE && !unseen && review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionByDisciplineReview(
+                subType,
+                userId,
+                questionsPerSubtype
+              )
+            : null;
+
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.SUBJECT && !unseen && !review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
       let questions: { id: number }[] = [];
       subtypes.map(async (subType: string) => {
         const questionsId = subType
-          ? await findQuestionByDiscipline(
+          ? await findQuestionBySubject(subType, questionsPerSubtype)
+          : null;
+
+        if (questionsId) questions.push(...questionsId);
+      });
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.SUBJECT && unseen && !review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+      subtypes.map(async (subType: string) => {
+        const questionsId = subType
+          ? await findQuestionBySubjectUnseen(
               subType,
-              unseen,
-              review,
               userId,
-              questionsCountByType
+              questionsPerSubtype
             )
+          : null;
+
+        if (questionsId) questions.push(...questionsId);
+      });
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.SUBJECT && !unseen && review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+      subtypes.map(async (subType: string) => {
+        const questionsId = subType
+          ? await findQuestionBySubjectReview(
+              subType,
+              userId,
+              questionsPerSubtype
+            )
+          : null;
+
+        if (questionsId) questions.push(...questionsId);
+      });
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.CATEGOTY && !unseen && !review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+      subtypes.map(async (subType: string) => {
+        const questionsId = subType
+          ? await findQuestionByCategory(subType, questionsPerSubtype)
           : null;
         if (questionsId) questions.push(...questionsId);
       });
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.CATEGOTY && unseen && !review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionByCategoryUnseen(
+                subType,
+                userId,
+                questionsPerSubtype
+              )
+            : null;
+
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.CATEGOTY && !unseen && review) {
+    try {
+      const questionsPerSubtype = questionCount
+        ? Math.floor(questionCount / subtypes.length)
+        : subtypes.length;
+      let questions: { id: number }[] = [];
+
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionByCategoryReview(
+                subType,
+                userId,
+                questionsPerSubtype
+              )
+            : null;
+
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+    } catch {}
+  }
+
+  if (typeOfSimuled === SimulatedType.YEAR) {
+    try {
+      const questions = await findQuestionByYear(subtypes[0]);
       createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
     } catch {}
   }
@@ -83,7 +271,6 @@ export const getSimulationStatus = async (id: number) => {
   return simulation?.status || null;
 };
 
-export const getResponse = async (simulatedId: number, questionId: number) =>{
+export const getResponse = async (simulatedId: number, questionId: number) => {
   return await findResponse(simulatedId, questionId);
-
-}
+};
