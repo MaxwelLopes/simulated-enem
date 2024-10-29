@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Simulated" ADD COLUMN     "correctAnswers" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "totalQuestions" INTEGER NOT NULL DEFAULT 0,
+ALTER COLUMN "subtype" SET DATA TYPE VARCHAR(200)[];
