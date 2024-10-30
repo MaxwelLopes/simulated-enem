@@ -1,4 +1,5 @@
 import { SimulatedStatus } from "../enum/simulated";
+import TextFormatter from "../utils/utils";
 
 type AlternativeItemProps = {
   letter: string;
@@ -39,7 +40,7 @@ const AlternativeItem = ({
       >
         {letter}
       </span>
-      <span className="flex-1 ml-4 text-lg">{text}</span>
+      <span className="flex-1 ml-4 text-lg"> <TextFormatter text={text} /></span>
     </li>
   );
 };

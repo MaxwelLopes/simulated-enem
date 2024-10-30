@@ -3,6 +3,7 @@
 import { Question } from "@prisma/client";
 import AlternativeItem from "./AlternativeItem";
 import { useQuestion } from "../hook/Question";
+import TextFormatter from "../utils/utils";
 
 interface QuestionWithCategories extends Question {
   Question_categories: {
@@ -23,7 +24,11 @@ type props = {
   simulationStatus: string | null;
 };
 
-export const QuestionView = ({ currentQuestion, setResponse, simulationStatus }: props) => {
+export const QuestionView = ({
+  currentQuestion,
+  setResponse,
+  simulationStatus,
+}: props) => {
   const {
     year,
     context,
@@ -44,10 +49,10 @@ export const QuestionView = ({ currentQuestion, setResponse, simulationStatus }:
   const { disciplineName, subjectName } = useQuestion(disciplineId, subjectId);
   return (
     <div className="p-6 bg-white shadow-md rounded-lg max-w-2xl mx-auto my-4 border border-gray-300">
-      <p className="text-2xl font-semibold text-gray-800 mb-1">Questão {index}</p>
-      {year && (
-        <p className="text-lg font-semibold text-gray-600">{year}</p>
-      )}
+      <p className="text-2xl font-semibold text-gray-800 mb-1">
+        Questão {index}
+      </p>
+      {year && <p className="text-lg font-semibold text-gray-600">{year}</p>}
       {disciplineName && (
         <p className="text-xl font-semibold text-gray-800 mb-1">
           {disciplineName}
@@ -63,7 +68,7 @@ export const QuestionView = ({ currentQuestion, setResponse, simulationStatus }:
       {Question_categories && (
         <div className="flex flex-wrap mb-1">
           <span className="text-sm font-semibold text-gray-700">
-            Tópicos: {" "}
+            Tópicos:{" "}
             {Question_categories.map(({ Category }) => Category.name).join(
               ", "
             )}
@@ -71,10 +76,16 @@ export const QuestionView = ({ currentQuestion, setResponse, simulationStatus }:
         </div>
       )}
 
-      {context && <p className="text-gray-800 mb-4 pt-2">{context}</p>}
+      {context && (
+        <div className="text-gray-800 mb-4 pt-2">
+          <TextFormatter text={context} />
+        </div>
+      )}
 
       {alternativesIntroduction && (
-        <p className="text-gray-600 mb-2">{alternativesIntroduction}</p>
+        <div className="text-gray-600 mb-2">
+          <TextFormatter text={alternativesIntroduction} />
+        </div>
       )}
 
       <ul className="space-y-2">
