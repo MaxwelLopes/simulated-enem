@@ -1,13 +1,13 @@
 "use client";
 
 import NavBar from "@/app/components/NavBar";
-import SimulatedList from "@/app/container/Simulateds";
+import Home from "../container/home";
 
-const SimulationsPage = () => {
+export const SimulationsPage = () => {
   return (
     <>
       <NavBar/>
-      <SimulatedList/>
+      <Home />
     </>
   );
 };

@@ -29,13 +29,12 @@ const SimulatedList = () => {
           <div key={simulated.id} className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-2">{simulated.type}</h2>
 
-            <p className="text-gray-600 mb-1">
-              {simulated.subtype.join(", ")}
-            </p>
+            <p className="text-gray-600 mb-1">{simulated.subtype.join(", ")}</p>
 
             <div className="mb-2 flex flex-wrap gap-2">
+              <StatusText status={simulated.status} />
               {simulated.unseen && <Tag color="blue" label="Inéditas" />}
-              {simulated.review && <Tag color="red" label="Revisão" />}
+              {simulated.review && <Tag color="blue" label="Revisão" />}
             </div>
 
             <div className="text-gray-500 flex items-center space-x-4 my-3">
@@ -52,9 +51,8 @@ const SimulatedList = () => {
                 />
               )}
             </div>
-            <DateInfo simulated={simulated} />
 
-            <StatusText status={simulated.status} />
+            <DateInfo simulated={simulated} />
 
             <SimulatedButton
               onClick={() => router.push(`/simulated/${simulated.id}`)}

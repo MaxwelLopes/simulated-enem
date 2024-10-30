@@ -1,11 +1,13 @@
 "use client";
 
+import NavBar from "@/app/components/NavBar";
 import CreateSimuled from "@/app/container/CreateSimuled";
 
-const CreatSimuledPage = () => {
+export const CreatSimuledPage = () => {
   return (
     <div>
-      <CreateSimuled/>
+      <NavBar />
+      <CreateSimuled />
     </div>
   );
 };

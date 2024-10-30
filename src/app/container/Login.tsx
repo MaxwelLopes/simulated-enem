@@ -25,7 +25,7 @@ const Login = () => {
         setError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
       }
     } else {
-      router.push("/home");
+      router.push("/");
     }
   };
 

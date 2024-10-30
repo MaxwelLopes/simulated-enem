@@ -36,7 +36,7 @@ const CreateSimuled = () => {
   const handleClick = async () => {
     const userId = user ? user.id : null;
     if (userId) {
-      const status = createSimulated({
+      const success = await createSimulated({
         typeOfSimuled,
         questionCount,
         error,
@@ -45,7 +45,11 @@ const CreateSimuled = () => {
         subtypes,
         userId,
       });
-      router.push("/simulated");
+
+      if(success) router.push("/simulated");
+      else{
+        setError("Não foi possível criar um simulado com essa combinação!")
+      }
     }
   };
 

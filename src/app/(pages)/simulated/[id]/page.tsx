@@ -1,5 +1,6 @@
 "use client";
 
+import NavBar from "@/app/components/NavBar";
 import { Simulation } from "@/app/container/simulation";
 
 type ParamsType = {
@@ -9,7 +10,12 @@ type ParamsType = {
 };
 
 const SimulationPage = ({ params }: ParamsType) => {
-  return <Simulation id={params.id} />;
+  return (
+    <>
+      <NavBar/>
+      <Simulation id={params.id} />
+    </>
+  );
 };
 
 export default SimulationPage;
