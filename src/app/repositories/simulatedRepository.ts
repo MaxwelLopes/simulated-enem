@@ -10,6 +10,7 @@ export const createSimulated = async (
   review: boolean = false,
 ) => {
   const totalQuestions = questionsId.length;
+  console.log(totalQuestions, questionsId);
   const simulated = await prisma.simulated.create({
     data: {
       type,

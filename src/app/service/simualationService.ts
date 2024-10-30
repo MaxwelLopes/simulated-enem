@@ -41,7 +41,13 @@ export const createSimulated = async ({
   review,
   subtypes,
   userId,
-}: Input) => {
+}: Input): Promise<boolean | undefined> => {
+  console.log(typeOfSimuled,
+    questionCount,
+    unseen,
+    review,
+    subtypes,
+    userId,)
   if (typeOfSimuled === SimulatedType.DISCIPLINE && !unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
@@ -58,7 +64,11 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      return true;
     } catch {}
   }
 
@@ -82,6 +92,9 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(
         typeOfSimuled,
         userId,
@@ -90,6 +103,7 @@ export const createSimulated = async ({
         unseen,
         review
       );
+      return true;
     } catch {}
   }
 
@@ -113,6 +127,9 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(
         typeOfSimuled,
         userId,
@@ -121,6 +138,7 @@ export const createSimulated = async ({
         unseen,
         review
       );
+      return true;
     } catch {}
   }
 
@@ -130,14 +148,20 @@ export const createSimulated = async ({
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
       let questions: { id: number }[] = [];
-      subtypes.map(async (subType: string) => {
-        const questionsId = subType
-          ? await findQuestionBySubject(subType, questionsPerSubtype)
-          : null;
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionBySubject(subType, questionsPerSubtype)
+            : null;
 
-        if (questionsId) questions.push(...questionsId);
-      });
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      return true;
     } catch {}
   }
 
@@ -147,25 +171,20 @@ export const createSimulated = async ({
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
       let questions: { id: number }[] = [];
-      subtypes.map(async (subType: string) => {
-        const questionsId = subType
-          ? await findQuestionBySubjectUnseen(
-              subType,
-              userId,
-              questionsPerSubtype
-            )
-          : null;
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionBySubjectUnseen(subType, userId, questionsPerSubtype)
+            : null;
 
-        if (questionsId) questions.push(...questionsId);
-      });
-      createSimulatedInRepostitory(
-        typeOfSimuled,
-        userId,
-        subtypes,
-        questions,
-        unseen,
-        review
+          if (questionsId) questions.push(...questionsId);
+        })
       );
+      if (questions.length < 1) {
+        return false;
+      }
+      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      return true;
     } catch {}
   }
 
@@ -175,17 +194,22 @@ export const createSimulated = async ({
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
       let questions: { id: number }[] = [];
-      subtypes.map(async (subType: string) => {
-        const questionsId = subType
-          ? await findQuestionBySubjectReview(
-              subType,
-              userId,
-              questionsPerSubtype
-            )
-          : null;
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionBySubjectReview(
+                subType,
+                userId,
+                questionsPerSubtype
+              )
+            : null;
 
-        if (questionsId) questions.push(...questionsId);
-      });
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(
         typeOfSimuled,
         userId,
@@ -194,6 +218,7 @@ export const createSimulated = async ({
         unseen,
         review
       );
+      return true;
     } catch {}
   }
 
@@ -203,13 +228,20 @@ export const createSimulated = async ({
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
       let questions: { id: number }[] = [];
-      subtypes.map(async (subType: string) => {
-        const questionsId = subType
-          ? await findQuestionByCategory(subType, questionsPerSubtype)
-          : null;
-        if (questionsId) questions.push(...questionsId);
-      });
+      await Promise.all(
+        subtypes.map(async (subType: string) => {
+          const questionsId: { id: number }[] | null = subType
+            ? await findQuestionByCategory(subType, questionsPerSubtype)
+            : null;
+
+          if (questionsId) questions.push(...questionsId);
+        })
+      );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      return true;
     } catch {}
   }
 
@@ -233,6 +265,9 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(
         typeOfSimuled,
         userId,
@@ -241,6 +276,7 @@ export const createSimulated = async ({
         unseen,
         review
       );
+      return true;
     } catch {}
   }
 
@@ -264,6 +300,9 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(
         typeOfSimuled,
         userId,
@@ -272,13 +311,18 @@ export const createSimulated = async ({
         unseen,
         review
       );
+      return true;
     } catch {}
   }
 
   if (typeOfSimuled === SimulatedType.YEAR) {
     try {
       const questions = await findQuestionByYear(subtypes[0]);
+      if (questions.length < 1) {
+        return false;
+      }
       createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      return true;
     } catch {}
   }
 };

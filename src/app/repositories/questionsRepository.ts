@@ -101,7 +101,7 @@ export const findQuestionBySubjectUnseen = async (
   const questionIds = await prisma.$queryRaw<{ id: number }[]>`
     SELECT "Question"."id" FROM "Question"
     JOIN "Subject" ON "Question"."subjectId" = "Subject"."id"
-    WHERE ""."name" = ${subjectName}
+    WHERE "Subject"."name" = ${subjectName}
     AND "Question"."id" NOT IN (
       SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
       WHERE "Simulated_questions"."simulatedId" IN (
