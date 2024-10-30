@@ -74,7 +74,7 @@ export const Simulation = (simulated: { id: string }) => {
              { simulationStatus !== SimulatedStatus.COMPLETED ? "Finalizar": "Voltar"}
             </button>
 
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 pr-16">
               <button
                 onClick={previousQuestion}
                 className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition duration-200"

@@ -32,9 +32,9 @@ const SimulatedList = () => {
             <p className="text-gray-600 mb-1">{simulated.subtype.join(", ")}</p>
 
             <div className="mb-2 flex flex-wrap gap-2">
-              <StatusText status={simulated.status} />
               {simulated.unseen && <Tag color="blue" label="Inéditas" />}
               {simulated.review && <Tag color="blue" label="Revisão" />}
+              <StatusText status={simulated.status} />
             </div>
 
             <div className="text-gray-500 flex items-center space-x-4 my-3">

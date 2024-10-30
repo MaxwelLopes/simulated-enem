@@ -6,8 +6,10 @@ import Home from "../container/home";
 export const SimulationsPage = () => {
   return (
     <>
-      <NavBar/>
-      <Home />
+      <NavBar />
+      <div className="pt-16">
+        <Home/>
+      </div>
     </>
   );
 };

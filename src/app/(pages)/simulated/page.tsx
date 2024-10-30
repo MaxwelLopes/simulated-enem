@@ -3,11 +3,13 @@
 import NavBar from "@/app/components/NavBar";
 import SimulatedList from "@/app/container/Simulateds";
 
-const SimulationsPage = () => {
+export const SimulationsPage = () => {
   return (
     <>
-      <NavBar/>
-      <SimulatedList/>
+      <NavBar />
+      <div className="pt-16">
+        <SimulatedList />
+      </div>
     </>
   );
 };

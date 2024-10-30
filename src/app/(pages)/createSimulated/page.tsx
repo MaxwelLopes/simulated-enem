@@ -7,7 +7,9 @@ export const CreatSimulatedPage = () => {
   return (
     <div>
       <NavBar />
-      <CreateSimulated/>
+      <div className="pt-16">
+        <CreateSimulated />
+      </div>
     </div>
   );
 };
