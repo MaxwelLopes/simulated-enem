@@ -19,6 +19,7 @@ import {
   findResponse,
   findSimulatedById,
   findSimulatedByUserId,
+  getCountCorrectAnswersBySimulatedId,
   updateAnswerBySilulation,
   updatesimulated,
 } from "../repositories/simulatedRepository";
@@ -41,7 +42,6 @@ export const createSimulated = async ({
   subtypes,
   userId,
 }: Input) => {
-  
   if (typeOfSimuled === SimulatedType.DISCIPLINE && !unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
@@ -82,7 +82,14 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(
+        typeOfSimuled,
+        userId,
+        subtypes,
+        questions,
+        unseen,
+        review
+      );
     } catch {}
   }
 
@@ -106,7 +113,14 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(
+        typeOfSimuled,
+        userId,
+        subtypes,
+        questions,
+        unseen,
+        review
+      );
     } catch {}
   }
 
@@ -144,7 +158,14 @@ export const createSimulated = async ({
 
         if (questionsId) questions.push(...questionsId);
       });
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(
+        typeOfSimuled,
+        userId,
+        subtypes,
+        questions,
+        unseen,
+        review
+      );
     } catch {}
   }
 
@@ -165,7 +186,14 @@ export const createSimulated = async ({
 
         if (questionsId) questions.push(...questionsId);
       });
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(
+        typeOfSimuled,
+        userId,
+        subtypes,
+        questions,
+        unseen,
+        review
+      );
     } catch {}
   }
 
@@ -205,7 +233,14 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(
+        typeOfSimuled,
+        userId,
+        subtypes,
+        questions,
+        unseen,
+        review
+      );
     } catch {}
   }
 
@@ -229,7 +264,14 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(
+        typeOfSimuled,
+        userId,
+        subtypes,
+        questions,
+        unseen,
+        review
+      );
     } catch {}
   }
 
@@ -263,7 +305,9 @@ export const answerQuestion = async (
 };
 
 export const finishSimulation = async (id: number) => {
-  await updatesimulated(id);
+  const hits = await getCountCorrectAnswersBySimulatedId(id);
+  const status = SimulatedStatus.COMPLETED;
+  await updatesimulated(id, hits, status);
 };
 
 export const getSimulationStatus = async (id: number) => {

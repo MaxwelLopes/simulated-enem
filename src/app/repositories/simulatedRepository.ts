@@ -5,14 +5,20 @@ export const createSimulated = async (
   type: string,
   userId: string,
   subtype: string[],
-  questionsId: { id: number }[]
+  questionsId: { id: number }[],
+  unseen: boolean = false,
+  review: boolean = false,
 ) => {
+  const totalQuestions = questionsId.length;
   const simulated = await prisma.simulated.create({
     data: {
       type,
       userId,
       subtype,
+      totalQuestions,
       status: SimulatedStatus.PENDING,
+      unseen,
+      review,
     },
   });
 
@@ -64,13 +70,15 @@ export const updateAnswerBySilulation = async (
   });
 };
 
-export const updatesimulated = async (simulatedId: number) => {
+export const updatesimulated = async (simulatedId: number, hits: number, status: string) => {
   await prisma.simulated.update({
     where: {
       id: simulatedId,
     },
     data: {
-      status: SimulatedStatus.COMPLETED
+      status,
+      correctAnswers: hits,
+      finishedAt: new Date()
     },
   });
 };
@@ -94,3 +102,14 @@ export const findResponse = async (simulatedId: number, questionId: number) =>{
     }
   })
 }
+
+export const getCountCorrectAnswersBySimulatedId = async (simulatedId: number) => {
+  const correctAnswersCount = await prisma.simulated_questions.count({
+    where: {
+      simulatedId: simulatedId,
+      hit: true,
+    },
+  });
+
+  return correctAnswersCount;
+};
