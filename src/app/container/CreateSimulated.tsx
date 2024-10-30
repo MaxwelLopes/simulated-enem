@@ -3,7 +3,7 @@
 import { disciplines } from "../constants/disciplines";
 import { subjects } from "../constants/subjects";
 import { categories } from "../constants/categories";
-import { useSimuledCreate } from "../hook/simuledCreate";
+import { useSimulatedCreate } from "../hook/simulatedCreate";
 import { createSimulated } from "../service/simualationService";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -11,25 +11,25 @@ import { SimulatedType } from "../enum/simulated";
 import { SelectedItems } from "../components/SelectedItems";
 import { years } from "../constants/years";
 
-const CreateSimuled = () => {
+const CreateSimulated = () => {
   const { data: session } = useSession();
   const user = session?.user;
 
   const router = useRouter();
   const {
-    typeOfSimuled,
+    typeOfSimulated,
     questionCount,
     error,
     unseen,
     review,
     subtypes,
-    setTypeOfSimuled,
+    setTypeOfSimulated,
     setQuestionCount,
     setError,
     setUnseen,
     setReview,
     setSubtype,
-  } = useSimuledCreate();
+  } = useSimulatedCreate();
 
   const simulatedTypes = Object.values(SimulatedType);
 
@@ -37,7 +37,7 @@ const CreateSimuled = () => {
     const userId = user ? user.id : null;
     if (userId) {
       const success = await createSimulated({
-        typeOfSimuled,
+        typeOfSimulated,
         questionCount,
         error,
         unseen,
@@ -78,10 +78,10 @@ const CreateSimuled = () => {
             Filtro
           </label>
           <select
-            value={typeOfSimuled as string}
+            value={typeOfSimulated as string}
             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
             onChange={(e) => {
-              setTypeOfSimuled(e.target.value);
+              setTypeOfSimulated(e.target.value);
               setSubtype([]);
             }}
           >
@@ -94,7 +94,7 @@ const CreateSimuled = () => {
         </div>
 
         <div className="mb-4">
-          {typeOfSimuled === "Área de estudo" && (
+          {typeOfSimulated === "Área de estudo" && (
             <>
               <label className="block text-sm font-medium text-gray-700">
                 Área de estudo
@@ -115,7 +115,7 @@ const CreateSimuled = () => {
               />
             </>
           )}
-          {typeOfSimuled === "Matéria" && (
+          {typeOfSimulated === "Matéria" && (
             <>
               <label className="block text-sm font-medium text-gray-700">
                 Matéria
@@ -136,7 +136,7 @@ const CreateSimuled = () => {
               />
             </>
           )}
-          {typeOfSimuled === "Tópico" && (
+          {typeOfSimulated === "Tópico" && (
             <>
               <label className="block text-sm font-medium text-gray-700">
                 Tópico
@@ -158,7 +158,7 @@ const CreateSimuled = () => {
             </>
           )}
 
-          {typeOfSimuled === "Ano" && (
+          {typeOfSimulated === "Ano" && (
             <>
               <label className="block text-sm font-medium text-gray-700">
                 Ano
@@ -176,7 +176,7 @@ const CreateSimuled = () => {
             </>
           )}
 
-          {typeOfSimuled !== "Ano" && (
+          {typeOfSimulated !== "Ano" && (
             <div className="pt-4">
               <label className="block text-sm font-medium text-gray-700">
                 Quantidade de Questões
@@ -236,4 +236,4 @@ const CreateSimuled = () => {
   );
 };
 
-export default CreateSimuled;
+export default CreateSimulated;

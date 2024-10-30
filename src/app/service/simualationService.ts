@@ -25,7 +25,7 @@ import {
 } from "../repositories/simulatedRepository";
 
 type Input = {
-  typeOfSimuled: string;
+  typeOfSimulated: string;
   questionCount?: number;
   error?: string | null;
   unseen?: boolean;
@@ -35,20 +35,20 @@ type Input = {
 };
 
 export const createSimulated = async ({
-  typeOfSimuled,
+  typeOfSimulated,
   questionCount,
   unseen,
   review,
   subtypes,
   userId,
 }: Input): Promise<boolean | undefined> => {
-  console.log(typeOfSimuled,
+  console.log(typeOfSimulated,
     questionCount,
     unseen,
     review,
     subtypes,
     userId,)
-  if (typeOfSimuled === SimulatedType.DISCIPLINE && !unseen && !review) {
+  if (typeOfSimulated === SimulatedType.DISCIPLINE && !unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -67,12 +67,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(typeOfSimulated, userId, subtypes, questions);
       return true;
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.DISCIPLINE && unseen && !review) {
+  if (typeOfSimulated === SimulatedType.DISCIPLINE && unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -96,7 +96,7 @@ export const createSimulated = async ({
         return false;
       }
       createSimulatedInRepostitory(
-        typeOfSimuled,
+        typeOfSimulated,
         userId,
         subtypes,
         questions,
@@ -107,7 +107,7 @@ export const createSimulated = async ({
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.DISCIPLINE && !unseen && review) {
+  if (typeOfSimulated === SimulatedType.DISCIPLINE && !unseen && review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -131,7 +131,7 @@ export const createSimulated = async ({
         return false;
       }
       createSimulatedInRepostitory(
-        typeOfSimuled,
+        typeOfSimulated,
         userId,
         subtypes,
         questions,
@@ -142,7 +142,7 @@ export const createSimulated = async ({
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.SUBJECT && !unseen && !review) {
+  if (typeOfSimulated === SimulatedType.SUBJECT && !unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -160,12 +160,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(typeOfSimulated, userId, subtypes, questions);
       return true;
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.SUBJECT && unseen && !review) {
+  if (typeOfSimulated === SimulatedType.SUBJECT && unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -183,12 +183,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(typeOfSimulated, userId, subtypes, questions);
       return true;
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.SUBJECT && !unseen && review) {
+  if (typeOfSimulated === SimulatedType.SUBJECT && !unseen && review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -211,7 +211,7 @@ export const createSimulated = async ({
         return false;
       }
       createSimulatedInRepostitory(
-        typeOfSimuled,
+        typeOfSimulated,
         userId,
         subtypes,
         questions,
@@ -222,7 +222,7 @@ export const createSimulated = async ({
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.CATEGOTY && !unseen && !review) {
+  if (typeOfSimulated === SimulatedType.CATEGOTY && !unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -240,12 +240,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(typeOfSimulated, userId, subtypes, questions);
       return true;
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.CATEGOTY && unseen && !review) {
+  if (typeOfSimulated === SimulatedType.CATEGOTY && unseen && !review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -269,7 +269,7 @@ export const createSimulated = async ({
         return false;
       }
       createSimulatedInRepostitory(
-        typeOfSimuled,
+        typeOfSimulated,
         userId,
         subtypes,
         questions,
@@ -280,7 +280,7 @@ export const createSimulated = async ({
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.CATEGOTY && !unseen && review) {
+  if (typeOfSimulated === SimulatedType.CATEGOTY && !unseen && review) {
     try {
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
@@ -304,7 +304,7 @@ export const createSimulated = async ({
         return false;
       }
       createSimulatedInRepostitory(
-        typeOfSimuled,
+        typeOfSimulated,
         userId,
         subtypes,
         questions,
@@ -315,13 +315,13 @@ export const createSimulated = async ({
     } catch {}
   }
 
-  if (typeOfSimuled === SimulatedType.YEAR) {
+  if (typeOfSimulated === SimulatedType.YEAR) {
     try {
       const questions = await findQuestionByYear(subtypes[0]);
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(typeOfSimuled, userId, subtypes, questions);
+      createSimulatedInRepostitory(typeOfSimulated, userId, subtypes, questions);
       return true;
     } catch {}
   }
