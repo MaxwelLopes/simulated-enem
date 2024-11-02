@@ -26,6 +26,12 @@ const NavBar = () => {
           >
             Novo Simulado
           </button>
+          <button
+            onClick={() => router.push("/desempenho")}
+            className="text-gray-800 text-lg font-semibold hover:text-blue-500 transition-all duration-300"
+          >
+            Desempenho
+          </button>
         </div>
         <LogoutButton />
       </div>

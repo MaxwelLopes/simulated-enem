@@ -215,3 +215,80 @@ export const findQuestionByYear = async (year: string) => {
     },
   });
 };
+
+// Contar acertos gerais e por categoria
+export const getCorrectAnswersCountByUserId = async (userId: string) => {
+  const correctAnswers = await prisma.simulated_questions.count({
+    where: {
+      hit: true,
+      Simulated: {
+        userId: userId,
+      },
+    },
+  });
+
+  return correctAnswers;
+};
+
+// Contar erros gerais e por categoria
+export const getIncorrectAnswersCountByUserId = async (userId: string) => {
+  const incorrectAnswers = await prisma.simulated_questions.count({
+    where: {
+      hit: false,
+      Simulated: {
+        userId: userId,
+      },
+    },
+  });
+
+  return incorrectAnswers;
+}
+export const findAllQuestionsByIdUser = async (userId: string): Promise<{ id: number; context?: string }[]> => {
+  const questions = await prisma.$queryRaw<{ id: number; context?: string }[]>`
+    SELECT "Question"."id", "Question"."context" 
+    FROM "Simulated_questions"
+    JOIN "Question" ON "Simulated_questions"."questionId" = "Question"."id"
+    WHERE "Simulated_questions"."simulatedId" IN (
+      SELECT "Simulated"."id" FROM "Simulated"
+      WHERE "Simulated"."userId" = ${userId}::UUID
+    );
+  `;
+
+  return questions;
+};
+
+export const findIncorrectAnswersCountByCategory = async (userId: string) => {
+  const incorrectAnswers = await prisma.$queryRaw<{ category: string; incorrectCount: number }[]>`
+    SELECT c."name" AS category, COUNT(*)::int AS "incorrectCount"  -- for consistency with Prisma
+    FROM "Simulated_questions" AS sq
+    JOIN "Question" AS q ON sq."questionId" = q."id"
+    JOIN "Question_categories" AS qc ON q."id" = qc."questionId"
+    JOIN "Category" AS c ON qc."categoriesId" = c."id"
+    WHERE sq."simulatedId" IN (
+      SELECT s."id" FROM "Simulated" AS s
+      WHERE s."userId" = ${userId}::UUID
+    ) AND sq."hit" = false
+    GROUP BY c."name";
+  `;
+
+  return incorrectAnswers;
+};
+
+// Repository Function for Correct Answers
+export const findCorrectAnswersCountByCategory = async (userId: string) => {
+  const correctAnswers = await prisma.$queryRaw<{ category: string; correctCount: number }[]>`
+    SELECT c."name" AS category, COUNT(*)::int AS "correctCount"  -- for consistency with Prisma
+    FROM "Simulated_questions" AS sq
+    JOIN "Question" AS q ON sq."questionId" = q."id"
+    JOIN "Question_categories" AS qc ON q."id" = qc."questionId"
+    JOIN "Category" AS c ON qc."categoriesId" = c."id"
+    WHERE sq."simulatedId" IN (
+      SELECT s."id" FROM "Simulated" AS s
+      WHERE s."userId" = ${userId}::UUID
+    ) AND sq."hit" = true
+    GROUP BY c."name";
+  `;
+
+  return correctAnswers;
+};
+
