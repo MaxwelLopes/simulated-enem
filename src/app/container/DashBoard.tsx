@@ -60,10 +60,12 @@ export default function DashBoard() {
         fetchData();
     }, [userId]);
 
-    return (
+    return ( 
         <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
             <h1 className="text-3xl font-bold text-gray-700 mb-6">Desempenho</h1>
-            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+            
+            {/* Aumente a largura máxima aqui */}
+            <div className="w-full max-w-8xl bg-white rounded-lg shadow-md p-6">
                 <p className="text-gray-500 mb-6">Usuário: <span className="text-gray-800">{session?.user.name}</span></p>
                 
                 <div className="mb-6">
@@ -74,7 +76,7 @@ export default function DashBoard() {
                     <p className="mt-1 text-gray-600">Média de Acertos: <span className="font-bold text-blue-600">{averageScore.toFixed(2)}%</span></p>
                     <p className="mt-1 text-gray-600">Média de Duração dos Simulados: <span className="font-bold text-purple-600">{averageDuration.toFixed(2)} horas</span></p>
                 </div>
-
+    
                 <div>
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">Desempenho por Categoria (Erros)</h3>
                     {errorsByCategory.length > 0 ? (
@@ -89,7 +91,7 @@ export default function DashBoard() {
                         <p className="text-gray-500">Nenhum erro registrado por categoria.</p>
                     )}
                 </div>
-
+    
                 <div>
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">Desempenho por Categoria (Acertos)</h3>
                     {correctsByCategory.length > 0 ? (
@@ -107,4 +109,5 @@ export default function DashBoard() {
             </div>
         </div>
     );
+    
 }
