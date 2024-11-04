@@ -26,6 +26,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/chart.js": "^2.9.41",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^20",
     "@types/react": "^18",
