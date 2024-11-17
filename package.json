@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.6",

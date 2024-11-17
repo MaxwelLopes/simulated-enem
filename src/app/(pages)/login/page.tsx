@@ -1,11 +1,11 @@
 "use client";
 
-import Login from "@/app/container/Login";
+import { LoginForm } from "@/app/components/login-form";
 
 const LoginPage = () => {
   return (
-    <div>
-      <Login />
+    <div className="flex h-screen w-full items-center justify-center px-4">
+      <LoginForm />
     </div>
   );
 };
