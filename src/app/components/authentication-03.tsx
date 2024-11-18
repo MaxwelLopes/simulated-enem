@@ -60,8 +60,7 @@ export default function RegisterForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmitWithRedirect}>
-        <div className="grid gap-4 bg-white">
+        <form className="grid gap-4 bg-white" onSubmit={handleSubmitWithRedirect}>
             <div className="grid gap-2">
               <Label htmlFor="first-name">Nome</Label>
               <Input 
@@ -96,7 +95,6 @@ export default function RegisterForm() {
           <Button type="submit" className="w-full">
             Criar uma conta
           </Button>
-        </div>
         </form>
         <div className="mt-4 text-center text-sm">
           Já possui uma conta?{" "}
