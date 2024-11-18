@@ -1,11 +1,11 @@
 "use client";
 
-import Signup from "@/app/container/Signup";
+import RegisterForm from "@/app/components/authentication-03";
 
 const SignupPage = () => {
   return (
-    <div>
-      <Signup />
+    <div className="flex h-screen w-full items-center justify-center px-4">
+      <RegisterForm/>
     </div>
   );
 };
