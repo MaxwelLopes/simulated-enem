@@ -60,7 +60,7 @@ export default function RegisterForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="grid gap-4 bg-white" onSubmit={handleSubmitWithRedirect}>
+        <form className="grid gap-4 bg-card text-card-foreground" onSubmit={handleSubmitWithRedirect}>
             <div className="grid gap-2">
               <Label htmlFor="first-name">Nome</Label>
               <Input 
