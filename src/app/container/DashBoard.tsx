@@ -7,12 +7,14 @@ import {
   getUserCorrectAnswersCount, 
   getUserIncorrectAnswersCount, 
   getIncorrectAnswersCountByCategory,
-  getCorrectAnswersCountByCategory
+  getCorrectAnswersCountByCategory,
+  getOverallAverageScore,
+  getDisciplineAffinity
 } from "../service/QuestionService";
 import { getSimulations } from "../service/simualationService";
 
-import { TrendingUp, ChevronLeft, ChevronRight, FileQuestion, BarChart2 } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell } from "recharts"
+import { TrendingUp, ChevronLeft, ChevronRight, FileQuestion, BarChart2, ArrowUp, ArrowDown,Minus } from 'lucide-react'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Tooltip, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
 
 import {
   Card,
@@ -84,6 +86,8 @@ export default function DashBoard() {
   const [simulationsData, setSimulationsData] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const simulationsPerPage = 5;
+  const [overallAverageScore, setOverallAverageScore] = useState(0);
+  const [disciplineAffinity, setDisciplineAffinity] = useState<{ name: string; affinity: number }[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,7 +98,11 @@ export default function DashBoard() {
         const incorrect = await getUserIncorrectAnswersCount(userId);
         const incorrectByCategory = await getIncorrectAnswersCountByCategory(userId);
         const correctByCategory = await getCorrectAnswersCountByCategory(userId);
+        const overallAverage = await getOverallAverageScore();
+        const affinityData = await getDisciplineAffinity(userId)
 
+        setDisciplineAffinity(affinityData)
+        setOverallAverageScore(overallAverage);
         setCorrectCount(correct);
         setIncorrectCount(incorrect);
         setErrorsByCategory(incorrectByCategory);
@@ -118,7 +126,6 @@ export default function DashBoard() {
         const avgDuration = simulationsData.length > 0 ? totalDuration / simulationsData.length : 0;
         setAverageDuration(avgDuration);
 
-        // Process simulation data for the chart and table
         const processedSimulations = simulationsData.map((sim, index) => ({
           id: sim.id,
           name: `Simulado ${index + 1}`,
@@ -152,9 +159,6 @@ export default function DashBoard() {
   })
   .reverse();
 
-
-
-  // Combine correct and incorrect data for each category
   const categoryData = correctsByCategory.map(correct => {
     const incorrect = errorsByCategory.find(err => err.category === correct.category);
     return {
@@ -165,7 +169,6 @@ export default function DashBoard() {
     };
   });
 
-  // Calculate average scores and prepare data for charts
   const prepareChartData = (type: 'correct' | 'incorrect') => {
     return categoryData
       .map(item => {
@@ -187,10 +190,13 @@ export default function DashBoard() {
   const topCorrectCategories = prepareChartData('correct');
   const topIncorrectCategories = prepareChartData('incorrect');
 
+  const difference = averageScore - overallAverageScore;
+  const isHigher = difference > 0;
+  const isEqual = difference === 0;
+
   return ( 
     <div className="flex flex-col items-center bg-gray-100 min-h-screen w-full p-4">
       <h1 className="text-3xl font-bold text-gray-700 mb-6">Desempenho</h1>
-      
       <div className="w-full bg-white rounded-lg shadow-md p-6 overflow-y-auto flex-grow">
       <div className="grid gap-4 md:grid-cols-3 w-full mb-6">
         <Card>
@@ -221,23 +227,48 @@ export default function DashBoard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Média Geral
-            </CardTitle>
-            <BarChart2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{averageScore.toFixed(2)}%</div>
-            <p className="text-xs text-muted-foreground">
-              Porcentagem média de acertos
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Comparação de Médias
+              </CardTitle>
+              <BarChart2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Sua Média</p>
+                  <p className="text-2xl font-bold">{averageScore.toFixed(2)}%</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-muted-foreground">Média Geral</p>
+                  <p className="text-2xl font-bold">{overallAverageScore.toFixed(2)}%</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-center mt-2">
+                {isEqual ? (
+                  <Minus className="h-4 w-4 text-yellow-500 mr-1" />
+                ) : isHigher ? (
+                  <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowDown className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-lg font-semibold ${isEqual ? 'text-yellow-500' : isHigher ? 'text-green-500' : 'text-red-500'}`}>
+                  {isHigher ? '+' : ''}{difference.toFixed(2)}%
+                </span>
+              </div>
+              <p className="text-xs text-center text-muted-foreground mt-1">
+                {isEqual
+                  ? "Sua média está igual à média geral"
+                  : isHigher
+                  ? "Sua média está acima da média geral"
+                  : "Sua média está abaixo da média geral"}
+              </p>
+            </CardContent>
+          </Card>
       </div>
-
-        <Card className="w-full mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <Card className="flex flex-col">
           <CardHeader>
             <CardTitle>Desempenho dos Simulados</CardTitle>
             <CardDescription>Visualização dos resultados (5 por página)</CardDescription>
@@ -249,8 +280,8 @@ export default function DashBoard() {
                   <ResponsiveContainer width="100%" height={"100%"}>
                     <BarChart data={displayedSimulations}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} />
+                      <XAxis dataKey="name" tick={{ fontSize: 13 }} />
+                      <YAxis tick={{ fontSize: 13 }} />
                       <ChartTooltip
                         cursor={false}
                         content={({ active, payload }) => {
@@ -307,7 +338,31 @@ export default function DashBoard() {
             </Button>
           </CardFooter>
         </Card>
-
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Afinidade por Disciplina</CardTitle>
+            <CardDescription>Baseado na média de acertos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{
+              affinity: {
+                label: "Afinidade",
+                color: "hsl(var(--chart-1))",
+              },
+            }} className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={disciplineAffinity}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="name" />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                  <Radar name="Afinidade" dataKey="affinity" stroke="var(--color-affinity)" fill="var(--color-affinity)" fillOpacity={0.6} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
@@ -344,7 +399,6 @@ export default function DashBoard() {
               <p className="text-sm text-muted-foreground">Top 5 categorias com maior média de acertos</p>
             </CardFooter>
           </Card>
-
           <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
               <CardTitle>Top 5 Categorias com Pior Desempenho</CardTitle>
@@ -381,7 +435,6 @@ export default function DashBoard() {
             </CardFooter>
           </Card>
         </div>
-
         <Card className="w-full mb-6">
           <CardHeader>
             <CardTitle>Detalhes dos Simulados</CardTitle>
@@ -413,6 +466,39 @@ export default function DashBoard() {
             </ScrollArea>
           </CardContent>
         </Card>
+        {/*
+        <Card className="flex flex-col">
+          <CardHeader className="items-center pb-0">
+            <CardTitle>Sugestões de Estudo</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1">
+            {topIncorrectCategories.length > 0 ? (
+              <div>
+                <p className="text-sm mb-2 text-muted-foreground">
+                  Aqui estão suas categorias com menor desempenho. Recomendamos que você revise esses tópicos para melhorar seus resultados:
+                </p>
+                <ul className="list-disc pl-4">
+                  {topIncorrectCategories.map((category, index) => (
+                    <li key={index} className="text-sm">
+                      <span className="font-bold">{category.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Parabéns! Você não possui categorias com baixo desempenho no momento.
+              </p>
+            )}
+          </CardContent>
+          <CardFooter>
+            {topIncorrectCategories.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Dica: Revise suas categorias de baixo desempenho e pratique questões relacionadas a esses tópicos.
+              </p>
+            )}
+          </CardFooter>
+        </Card>*/}
         {/*
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-gray-700">Desempenho Geral</h3>

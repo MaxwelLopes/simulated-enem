@@ -1,25 +1,27 @@
 "use client";
 
 import { signIn, signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+import { Button } from "@/app/components/ui/button"; // ShadCN Button
 
 export const LoginButton = () => {
   return (
-    <button
-      onClick={() => signIn()}
-      className="px-4 py-2 bg-blue-500 text-white font-medium rounded-lg shadow hover:bg-blue-600 transition duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    >
+    <Button onClick={() => signIn()} className="bg-primary text-primary-foreground">
       Entrar
-    </button>
+    </Button>
   );
 };
 
 export const LogoutButton = () => {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={() => signOut()}
-      className="px-4 py-2 bg-red-500 text-white font-medium rounded-lg shadow hover:bg-red-600 transition duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400"
+      className="text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive/50"
     >
-      Sair
-    </button>
+      <LogOut className="h-5 w-5" />
+      <span className="sr-only">Sair</span>
+    </Button>
   );
 };

@@ -53,3 +53,66 @@ export const getCorrectAnswersCountByCategory = async (userId: string): Promise<
   return correctAnswersCountByCategory;
 };
 
+export const getOverallAverageScore = async (): Promise<number> => {
+  const result = await prisma.simulated.aggregate({
+    _sum: {
+      correctAnswers: true,
+      totalQuestions: true,
+    },
+  });
+  
+  const totalCorrect = result._sum.correctAnswers || 0;
+  const totalQuestions = result._sum.totalQuestions || 0;
+  
+  if (totalQuestions === 0) {
+    return 0;
+  }
+  
+  return (totalCorrect / totalQuestions) * 100;
+};
+
+export const getDisciplineAffinity = async (userId: string): Promise<{ name: string; affinity: number }[]> => {
+
+  const disciplines = await prisma.discipline.findMany();
+
+  const rawAffinityData = await Promise.all(
+    disciplines.map(async (discipline) => {
+
+      const questions = await prisma.question.findMany({
+        where: { disciplineId: discipline.id },
+        select: { id: true }
+      });
+
+      const questionIds = questions.map(q => q.id);
+
+      const simulatedQuestions = await prisma.simulated_questions.findMany({
+        where: {
+          questionId: { in: questionIds },
+          Simulated: { userId: userId }
+        },
+        select: {
+          hit: true
+        }
+      });
+
+      const totalQuestions = simulatedQuestions.length;
+      const correctAnswers = simulatedQuestions.filter(sq => sq.hit === true).length;
+
+      const rawAffinity = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+
+      return {
+        name: discipline.name,
+        affinity: rawAffinity
+      };
+    })
+  );
+
+  const maxAffinity = Math.max(...rawAffinityData.map(d => d.affinity));
+
+  const scaledAffinityData = rawAffinityData.map(d => ({
+    name: d.name,
+    affinity: maxAffinity > 0 ? Math.round((d.affinity / maxAffinity) * 100 * 100) / 100 : 0
+  }));
+
+  return scaledAffinityData;
+};
