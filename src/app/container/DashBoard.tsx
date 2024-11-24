@@ -11,7 +11,7 @@ import {
 } from "../service/QuestionService";
 import { getSimulations } from "../service/simualationService";
 
-import { TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { TrendingUp, ChevronLeft, ChevronRight, FileQuestion, BarChart2 } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell } from "recharts"
 
 import {
@@ -192,6 +192,51 @@ export default function DashBoard() {
       <h1 className="text-3xl font-bold text-gray-700 mb-6">Desempenho</h1>
       
       <div className="w-full bg-white rounded-lg shadow-md p-6 overflow-y-auto flex-grow">
+      <div className="grid gap-4 md:grid-cols-3 w-full mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Simulados Realizados
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalSimulations}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de simulados completados
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Questões Respondidas
+            </CardTitle>
+            <FileQuestion className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{correctCount + incorrectCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de questões respondidas
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Média Geral
+            </CardTitle>
+            <BarChart2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{averageScore.toFixed(2)}%</div>
+            <p className="text-xs text-muted-foreground">
+              Porcentagem média de acertos
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
         <Card className="w-full mb-6">
           <CardHeader>
             <CardTitle>Desempenho dos Simulados</CardTitle>
@@ -368,7 +413,7 @@ export default function DashBoard() {
             </ScrollArea>
           </CardContent>
         </Card>
-  
+        {/*
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-gray-700">Desempenho Geral</h3>
           <p className="mt-2 text-gray-600">Acertos: <span className="font-bold text-green-600">{correctCount}</span></p>
@@ -395,7 +440,7 @@ export default function DashBoard() {
           ) : (
             <p className="text-gray-500">Nenhum dado registrado por categoria.</p>
           )}
-        </div>
+        </div>*/}
       </div>
     </div>
   );
