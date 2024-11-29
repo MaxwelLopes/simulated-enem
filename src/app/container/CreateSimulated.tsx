@@ -10,6 +10,24 @@ import { useSession } from "next-auth/react";
 import { SimulatedType } from "../enum/simulated";
 import { SelectedItems } from "../components/SelectedItems";
 import { years } from "../constants/years";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { Input } from "../components/ui/input";
+import { Checkbox } from "../components/ui/checkbox";
+import { Button } from "../components/ui/button";
+import { Label } from "../components/ui/label";
+import { ErrorMessage } from "../components/ui/error-message";
 
 const CreateSimulated = () => {
   const { data: session } = useSession();
@@ -46,192 +64,175 @@ const CreateSimulated = () => {
         userId,
       });
 
-      if(success) router.push("/simulated");
-      else{
-        setError("Não foi possível criar um simulado com essa combinação!")
+      if (success) router.push("/simulated");
+      else {
+        setError("Não foi possível criar um simulado com essa combinação!");
       }
     }
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-
-    setSubtype((prevList) => {
-      const newList = [...prevList, ...selectedOptions];
-      return Array.from(new Set(newList));
-    });
+  const handleSelectChange = (value: string) => {
+    if (!subtypes.includes(value)) {
+      setSubtype([...subtypes, value]);
+    }
   };
 
-  const handleRemoveSubType = (subType: string) => {
-    setSubtype((prev) => prev.filter((c) => c !== subType));
+  const handleRemoveSubType = (subtype: string) => {
+    setSubtype(subtypes.filter((item) => item !== subtype));
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">Criar Simulado</h1>
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow">
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Filtro
-          </label>
-          <select
-            value={typeOfSimulated as string}
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            onChange={(e) => {
-              setTypeOfSimulated(e.target.value);
-              setSubtype([]);
-            }}
-          >
-            {simulatedTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+      <Card className="w-full max-w-3xl bg-white shadow-lg rounded-lg">
+        <CardHeader className="border-b pb-4">
+          <CardTitle className="text-3xl font-semibold text-gray-800 text-center">
+            Criar Simulado
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          {/* Filtro */}
+          <div className="space-y-4">
+            <Label
+              htmlFor="simulatedType"
+              className="text-gray-700 font-medium"
+            >
+              Filtro
+            </Label>
+            <Select
+              onValueChange={(value) => {
+                setTypeOfSimulated(value);
+                setSubtype([]);
+              }}
+            >
+              <SelectTrigger id="simulatedType" className="w-full">
+                <SelectValue placeholder="Selecione o tipo de simulado" />
+              </SelectTrigger>
+              <SelectContent>
+                {simulatedTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="mb-4">
-          {typeOfSimulated === "Área de estudo" && (
-            <>
-              <label className="block text-sm font-medium text-gray-700">
-                Área de estudo
-              </label>
-              <select
-                onChange={handleSelectChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {disciplines.map((discipline) => (
-                  <option key={discipline} value={discipline}>
-                    {discipline}
-                  </option>
-                ))}
-              </select>
-              <SelectedItems
-                subtypes={subtypes}
-                handleRemoveSubType={handleRemoveSubType}
-              />
-            </>
-          )}
-          {typeOfSimulated === "Matéria" && (
-            <>
-              <label className="block text-sm font-medium text-gray-700">
-                Matéria
-              </label>
-              <select
-                onChange={handleSelectChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {subjects.map((subject) => (
-                  <option key={subject} value={subject}>
-                    {subject}
-                  </option>
-                ))}
-              </select>
-              <SelectedItems
-                subtypes={subtypes}
-                handleRemoveSubType={handleRemoveSubType}
-              />
-            </>
-          )}
-          {typeOfSimulated === "Tópico" && (
-            <>
-              <label className="block text-sm font-medium text-gray-700">
-                Tópico
-              </label>
-              <select
-                onChange={handleSelectChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              <SelectedItems
-                subtypes={subtypes}
-                handleRemoveSubType={handleRemoveSubType}
-              />
-            </>
-          )}
-
+          {/* Ano */}
           {typeOfSimulated === "Ano" && (
-            <>
-              <label className="block text-sm font-medium text-gray-700">
+            <div className="space-y-4">
+              <Label htmlFor="year" className="text-gray-700 font-medium">
                 Ano
-              </label>
-              <select
-                onChange={(e) => setSubtype([String(e.target.value)])}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
-
-          {typeOfSimulated !== "Ano" && (
-            <div className="pt-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Quantidade de Questões
-              </label>
-              <input
-                type="number"
-                defaultValue={questionCount}
-                onChange={(e) => setQuestionCount(Number(e.target.value))}
-                min={1}
-                max={2700}
-                placeholder="Número de questões"
-                className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              <div className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  checked={unseen}
-                  onChange={(e) => {
-                    setUnseen(e.target.checked);
-                    if (e.target.checked) setReview(false); 
-                  }}
-                  className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out border-gray-300 rounded focus:ring focus:ring-blue-200"
-                />
-                <span className="ml-3 text-gray-800 text-base">
-                  Questões Inéditas
-                </span>
-              </div>
-              <div className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  checked={review}
-                  onChange={(e) => {
-                    setReview(e.target.checked);
-                    if (e.target.checked) setUnseen(false); 
-                  }}
-                  className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out border-gray-300 rounded focus:ring focus:ring-blue-200"
-                />
-                <span className="ml-3 text-gray-800 text-base">
-                  Revisar Questões que Errou
-                </span>
-              </div>
+              </Label>
+              <Select onValueChange={(value) => setSubtype([value])}>
+                <SelectTrigger id="year" className="w-full">
+                  <SelectValue placeholder="Selecione o ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
-        </div>
-        {error && <div className="text-red-600 mb-4">{error}</div>}
-        <button
-          onClick={() => {
-            handleClick();
-          }}
-          className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md shadow hover:bg-blue-600 transition duration-200"
-        >
-          Criar Simulado
-        </button>
-      </div>
+
+          {/* Matéria ou Tópico */}
+          {(typeOfSimulated === "Matéria" || typeOfSimulated === "Tópico") && (
+            <div className="space-y-4">
+              <Label
+                htmlFor="subjectOrTopic"
+                className="text-gray-700 font-medium"
+              >
+                {typeOfSimulated}
+              </Label>
+              <Select onValueChange={handleSelectChange}>
+                <SelectTrigger id="subjectOrTopic" className="w-full">
+                  <SelectValue
+                    placeholder={`Selecione a ${
+                      typeOfSimulated === "Matéria" ? "matéria" : "tópico"
+                    }`}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {(typeOfSimulated === "Matéria" ? subjects : categories).map(
+                    (item) => (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+              <SelectedItems
+                subtypes={subtypes}
+                handleRemoveSubType={handleRemoveSubType}
+              />
+            </div>
+          )}
+
+           {/* Quantidade de Questões */}
+           <div className="space-y-4">
+            <Label
+              htmlFor="questionCount"
+              className="text-gray-700 font-medium"
+            >
+              Quantidade de Questões
+            </Label>
+            <Input
+              id="questionCount"
+              type="number"
+              value={questionCount}
+              onChange={(e) => setQuestionCount(Number(e.target.value))}
+              min={1}
+              max={2700}
+              className="w-full"
+            />
+          </div>
+
+          {/* Opções de Questões */}
+          <div className="space-y-2">
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="unseen"
+                checked={unseen}
+                onCheckedChange={(checked) => {
+                  setUnseen(checked as boolean);
+                  if (checked) setReview(false);
+                }}
+              />
+              <Label htmlFor="unseen" className="text-gray-600">
+                Questões Inéditas
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="review"
+                checked={review}
+                onCheckedChange={(checked) => {
+                  setReview(checked as boolean);
+                  if (checked) setUnseen(false);
+                }}
+              />
+              <Label htmlFor="review" className="text-gray-600">
+                Revisar Questões que Errou
+              </Label>
+            </div>
+          </div>
+
+          {/* Mensagem de Erro */}
+          {error && <ErrorMessage title="Erro!" message={error} />}
+
+          {/* Botão */}
+          <Button
+            onClick={handleClick}
+            className="w-full bg-primary hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+          >
+            Criar Simulado
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
