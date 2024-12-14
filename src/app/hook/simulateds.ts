@@ -23,7 +23,7 @@ export const useSimulateds = () => {
         console.error("Erro ao buscar simulados:", error);
         setError("Erro ao carregar os simulados.");
       } finally {
-        setLoading(true);
+        setLoading(false);
       }
     };
 

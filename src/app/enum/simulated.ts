@@ -15,4 +15,5 @@ export enum SimulatedStatus {
   IN_PROGRESS = "Em Andamento",
   COMPLETED = "Finalizado",
   PENDING = "Pendente",
+  NOTSTARTED = "Não iniciado"
 }

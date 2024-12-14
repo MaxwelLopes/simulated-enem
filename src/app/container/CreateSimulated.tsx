@@ -117,6 +117,27 @@ const CreateSimulated = () => {
             </Select>
           </div>
 
+          {/* Area de estudo */}
+          {typeOfSimulated === "Área de estudo" && (
+            <div className="space-y-4">
+              <Label htmlFor="year" className="text-gray-700 font-medium">
+                Área de estudo
+              </Label>
+              <Select onValueChange={(value) => setSubtype([value])}>
+                <SelectTrigger id="year" className="w-full">
+                  <SelectValue placeholder="Selecione a área de estudo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {disciplines.map((discipline) => (
+                    <SelectItem key={discipline} value={discipline}>
+                      {discipline}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Ano */}
           {typeOfSimulated === "Ano" && (
             <div className="space-y-4">
@@ -150,8 +171,8 @@ const CreateSimulated = () => {
               <Select onValueChange={handleSelectChange}>
                 <SelectTrigger id="subjectOrTopic" className="w-full">
                   <SelectValue
-                    placeholder={`Selecione a ${
-                      typeOfSimulated === "Matéria" ? "matéria" : "tópico"
+                    placeholder={`Selecione ${
+                      typeOfSimulated === "Matéria" ? "a matéria" : "o tópico"
                     }`}
                   />
                 </SelectTrigger>
