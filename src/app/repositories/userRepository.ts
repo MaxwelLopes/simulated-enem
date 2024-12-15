@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "../../../prisma/prisma";
+import { prisma } from "../../../prisma/prisma";
 
 export const findUserByEmail = async (email: string) => {
   return await prisma.user.findUnique({
@@ -9,11 +9,11 @@ export const findUserByEmail = async (email: string) => {
 };
 
 type User = {
-    id: string,
-    name: string,
-    email: string,
-    password: string,
-} 
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+};
 
 export const createUser = async (user: User) => {
   return await prisma.user.create({

@@ -1,4 +1,4 @@
-import prisma from "../../../prisma/prisma";
+import { prisma } from "../../../prisma/prisma";
 
 export const findIdDisciplineByName = async (name: string) => {
   return await prisma.discipline.findUnique({
@@ -11,13 +11,13 @@ export const findIdDisciplineByName = async (name: string) => {
   });
 };
 
-export const findIdDisciplineById = async (id: number) =>{
+export const findIdDisciplineById = async (id: number) => {
   return await prisma.discipline.findUnique({
-    where:{
-      id
+    where: {
+      id,
     },
     select: {
       name: true,
     },
-  })
-}
+  });
+};

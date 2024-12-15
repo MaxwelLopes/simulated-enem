@@ -1,4 +1,4 @@
-import prisma from "../../../prisma/prisma";
+import { prisma } from "../../../prisma/prisma";
 import { SimulatedStatus } from "../enum/simulated";
 
 export const createSimulated = async (
@@ -7,7 +7,7 @@ export const createSimulated = async (
   subtype: string[],
   questionsId: { id: number }[],
   unseen: boolean = false,
-  review: boolean = false,
+  review: boolean = false
 ) => {
   const totalQuestions = questionsId.length;
   console.log(totalQuestions, questionsId);
@@ -71,7 +71,11 @@ export const updateAnswerBySilulation = async (
   });
 };
 
-export const updatesimulated = async (simulatedId: number, hits: number, status: string) => {
+export const updatesimulated = async (
+  simulatedId: number,
+  hits: number,
+  status: string
+) => {
   await prisma.simulated.update({
     where: {
       id: simulatedId,
@@ -79,32 +83,34 @@ export const updatesimulated = async (simulatedId: number, hits: number, status:
     data: {
       status,
       correctAnswers: hits,
-      finishedAt: new Date()
+      finishedAt: new Date(),
     },
   });
 };
 
-export const findSimulatedById = async (id: number) =>{
+export const findSimulatedById = async (id: number) => {
   return await prisma.simulated.findUnique({
-    where:{
-      id
-    }
-  })
-}
+    where: {
+      id,
+    },
+  });
+};
 
-export const findResponse = async (simulatedId: number, questionId: number) =>{
+export const findResponse = async (simulatedId: number, questionId: number) => {
   return await prisma.simulated_questions.findFirst({
-    where:{
+    where: {
       simulatedId,
       questionId,
     },
-    select:{
+    select: {
       response: true,
-    }
-  })
-}
+    },
+  });
+};
 
-export const getCountCorrectAnswersBySimulatedId = async (simulatedId: number) => {
+export const getCountCorrectAnswersBySimulatedId = async (
+  simulatedId: number
+) => {
   const correctAnswersCount = await prisma.simulated_questions.count({
     where: {
       simulatedId: simulatedId,
