@@ -1,8 +1,8 @@
 "use client";
 
 import { disciplines } from "../constants/disciplines";
-import { subjects } from "../constants/subjects";
-import { categories } from "../constants/categories";
+import { subjects, subjectsByDiscipline } from "../constants/subjects";
+import { categories, categoriesBySubject } from "../constants/categories";
 import { useSimulatedCreate } from "../hook/simulatedCreate";
 import { createSimulated } from "../service/simualationService";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
@@ -177,12 +179,29 @@ const CreateSimulated = () => {
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {(typeOfSimulated === "Matéria" ? subjects : categories).map(
-                    (item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    )
+                  {typeOfSimulated === SimulatedType.CATEGOTY && (
+                    <SelectGroup>
+                      {Object.keys(categoriesBySubject).map((subject) => (
+                        <SelectGroup>
+                          <SelectLabel>{subject}</SelectLabel>
+                          {categoriesBySubject[subject].map((category) => (
+                            <SelectItem value={category}>{category}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {typeOfSimulated === SimulatedType.SUBJECT && (
+                    <SelectGroup>
+                      {Object.keys(subjectsByDiscipline).map((discipline) => (
+                        <SelectGroup>
+                          <SelectLabel>{discipline}</SelectLabel>
+                          {subjectsByDiscipline[discipline].map((subject) => (
+                            <SelectItem value={subject}>{subject}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
+                    </SelectGroup>
                   )}
                 </SelectContent>
               </Select>
@@ -193,8 +212,8 @@ const CreateSimulated = () => {
             </div>
           )}
 
-           {/* Quantidade de Questões */}
-           <div className="space-y-4">
+          {/* Quantidade de Questões */}
+          <div className="space-y-4">
             <Label
               htmlFor="questionCount"
               className="text-gray-700 font-medium"
