@@ -2,11 +2,11 @@
 
 import { SimulatedStatus, SimulatedType } from "../enum/simulated";
 import {
-  findQuestionByCategory,
-  findQuestionByDiscipline,
-  findQuestionBySubject,
   findQuestionByYear,
   findQuestionRandom,
+  findSimulationQuestionsByCategory,
+  findSimulationQuestionsByDiscipline,
+  findSimulationQuestionsBySubject,
 } from "../repositories/questionsRepository";
 import {
   createSimulated as createSimulatedInRepostitory,
@@ -71,7 +71,7 @@ export const createSimulated = async ({
       await Promise.all(
         subtypes.map(async (subType: string) => {
           const questionsId: { id: number }[] | null = subType
-            ? await findQuestionByDiscipline(
+            ? await findSimulationQuestionsByDiscipline(
                 subType,
                 questionsPerSubtype,
                 userId,
@@ -105,7 +105,7 @@ export const createSimulated = async ({
       await Promise.all(
         subtypes.map(async (subType: string) => {
           const questionsId: { id: number }[] | null = subType
-            ? await findQuestionBySubject(
+            ? await findSimulationQuestionsBySubject(
                 subType,
                 questionsPerSubtype,
                 userId,
@@ -139,7 +139,7 @@ export const createSimulated = async ({
       await Promise.all(
         subtypes.map(async (subType: string) => {
           const questionsId: { id: number }[] | null = subType
-            ? await findQuestionByCategory(
+            ? await findSimulationQuestionsByCategory(
                 subType,
                 questionsPerSubtype,
                 userId,
@@ -202,10 +202,10 @@ export const answerQuestion = async (
     await updateAnswerBySilulation(simulatedId, questionId, hit, response);
 };
 
-export const finishSimulation = async (id: number) => {
-  const hits = await getCountCorrectAnswersBySimulatedId(id);
+export const finishSimulation = async (questionId: number) => {
+  const hits = await getCountCorrectAnswersBySimulatedId(questionId);
   const status = SimulatedStatus.COMPLETED;
-  await updatesimulated(id, hits, status);
+  await updatesimulated(questionId, hits, status);
 };
 
 export const getSimulationStatus = async (id: number) => {

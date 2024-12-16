@@ -1,5 +1,8 @@
+import { cn } from "@/lib/utils";
 import { SimulatedStatus } from "../enum/simulated";
 import TextFormatter from "../utils/utils";
+import { Label } from "./ui/label";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 type AlternativeItemProps = {
   letter: string;
@@ -25,23 +28,37 @@ const AlternativeItem = ({
     
   };
   return (
-    <li
-      onClick={handleClick}
-      className={`flex items-center p-4 mb-3 rounded-lg cursor-pointer 
-    ${
-      isSelected
-        ? "bg-blue-500 text-white transition-colors duration-300 ease-in-out"
-        : "bg-gray-100 hover:bg-blue-100"
-    }`}
-    >
-      <span
-        className={`flex items-center justify-center w-8 h-8 rounded-full font-bold 
-          ${isSelected ? "bg-white text-blue-500" : "bg-blue-500 text-white"}`}
-      >
-        {letter}
-      </span>
-      <span className="flex-1 ml-4 text-lg"> <TextFormatter text={text} /></span>
-    </li>
+    <RadioGroup value={response} onValueChange={handleClick} disabled={isSelected}>
+      <div className="mb-3">
+        <RadioGroupItem
+          value={letter}
+          id={`alternative-${letter}`}
+          className="peer sr-only"
+        />
+        <Label
+          htmlFor={`alternative-${letter}`}
+          className={cn(
+            "flex items-center p-4 rounded-lg cursor-pointer transition-colors duration-300 ease-in-out",
+            isSelected
+              ? "bg-blue-500 text-white"
+              : "bg-gray-100 hover:bg-blue-100",
+            isSelected && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          <span
+            className={cn(
+              "flex items-center justify-center w-8 h-8 rounded-full font-bold",
+              isSelected ? "bg-white text-blue-500" : "bg-blue-500 text-white"
+            )}
+          >
+            {letter}
+          </span>
+          <span className="flex-1 ml-4 text-lg">
+            <TextFormatter text={text} />
+          </span>
+        </Label>
+      </div>
+    </RadioGroup>
   );
 };
 

@@ -34,6 +34,7 @@ export const useSimulation = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [response, setResponseState] = useState<string>("");
   const [simulationStatus, setSimulationStatus] = useState<string | null>(null);
+  const [totalQuestions, setTotalQuestions] = useState<number>(0);
 
   useEffect(() => {
     if (simulatedId) fetchQuestionsOrder();
@@ -54,6 +55,7 @@ export const useSimulation = () => {
         hit: question.hit,
       }));
       setQuestionOrder(questionIds);
+      setTotalQuestions(simulatedQuestions.length);
     } catch (error) {
       console.error("Erro ao buscar questões do simulado:", error);
     } finally {
@@ -153,5 +155,7 @@ export const useSimulation = () => {
     setCurrentIndex,
     simulationStatus,
     setSimulationStatus,
+    setLoading,
+    totalQuestions,
   };
 };

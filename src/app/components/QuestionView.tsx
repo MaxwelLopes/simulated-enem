@@ -4,6 +4,9 @@ import { Question } from "@prisma/client";
 import AlternativeItem from "./AlternativeItem";
 import { useQuestion } from "../hook/Question";
 import TextFormatter from "../utils/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Separator } from "@radix-ui/react-select";
 
 interface QuestionWithCategories extends Question {
   Question_categories: {
@@ -22,6 +25,7 @@ type props = {
   };
   setResponse: Function;
   simulationStatus: string | null;
+  setLoading: Function;
 };
 
 export const QuestionView = ({
@@ -47,84 +51,80 @@ export const QuestionView = ({
   const index = currentQuestion.index + 1;
 
   const { disciplineName, subjectName } = useQuestion(disciplineId, subjectId);
+  
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg max-w-2xl mx-auto my-4 border border-gray-300">
-      <p className="text-2xl font-semibold text-gray-800 mb-1">
-        Questão {index}
-      </p>
-      {year && <p className="text-lg font-semibold text-gray-600">{year}</p>}
-      {disciplineName && (
-        <p className="text-xl font-semibold text-gray-800 mb-1">
-          {disciplineName}
-        </p>
-      )}
-
-      {subjectName && (
-        <p className="text-lg font-semibold text-gray-700 mb-1">
-          {subjectName}
-        </p>
-      )}
-
-      {Question_categories && (
-        <div className="flex flex-wrap mb-1">
-          <span className="text-sm font-semibold text-gray-700">
-            Tópicos:{" "}
-            {Question_categories.map(({ Category }) => Category.name).join(
-              ", "
-            )}
-          </span>
+    <Card className="w-full max-w-4xl mx-auto my-8">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-3xl font-bold">Questão {index}</CardTitle>
+          {year && <Badge variant="secondary" className="text-lg">{year}</Badge>}
         </div>
-      )}
-
-      {context && (
-        <div className="text-gray-800 mb-4 pt-2">
-          <TextFormatter text={context} />
+        {disciplineName && (
+          <h3 className="text-2xl font-semibold text-muted-foreground">{disciplineName}</h3>
+        )}
+        {subjectName && (
+          <h4 className="text-xl font-medium text-muted-foreground">{subjectName}</h4>
+        )}
+        {Question_categories && Question_categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {Question_categories.map(({ Category }) => (
+              <Badge key={Category.id} variant="outline">{Category.name}</Badge>
+            ))}
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {context && (
+          <div className="text-lg leading-relaxed">
+            <TextFormatter text={context} />
+          </div>
+        )}
+        {alternativesIntroduction && (
+          <>
+            <Separator />
+            <div className="text-lg font-medium">
+              <TextFormatter text={alternativesIntroduction} />
+            </div>
+          </>
+        )}
+        <div className="space-y-4">
+          <AlternativeItem
+            letter="A"
+            text={alternativeA}
+            response={response}
+            setResponse={setResponse}
+            simulationStatus={simulationStatus}
+          />
+          <AlternativeItem
+            letter="B"
+            text={alternativeB}
+            response={response}
+            setResponse={setResponse}
+            simulationStatus={simulationStatus}
+          />
+          <AlternativeItem
+            letter="C"
+            text={alternativeC}
+            response={response}
+            setResponse={setResponse}
+            simulationStatus={simulationStatus}
+          />
+          <AlternativeItem
+            letter="D"
+            text={alternativeD}
+            response={response}
+            setResponse={setResponse}
+            simulationStatus={simulationStatus}
+          />
+          <AlternativeItem
+            letter="E"
+            text={alternativeE}
+            response={response}
+            setResponse={setResponse}
+            simulationStatus={simulationStatus}
+          />
         </div>
-      )}
-
-      {alternativesIntroduction && (
-        <div className="text-gray-600 mb-2">
-          <TextFormatter text={alternativesIntroduction} />
-        </div>
-      )}
-
-      <ul className="space-y-2">
-        <AlternativeItem
-          letter="A"
-          text={alternativeA}
-          response={response}
-          setResponse={setResponse}
-          simulationStatus={simulationStatus}
-        />
-        <AlternativeItem
-          letter="B"
-          text={alternativeB}
-          response={response}
-          setResponse={setResponse}
-          simulationStatus={simulationStatus}
-        />
-        <AlternativeItem
-          letter="C"
-          text={alternativeC}
-          response={response}
-          setResponse={setResponse}
-          simulationStatus={simulationStatus}
-        />
-        <AlternativeItem
-          letter="D"
-          text={alternativeD}
-          response={response}
-          setResponse={setResponse}
-          simulationStatus={simulationStatus}
-        />
-        <AlternativeItem
-          letter="E"
-          text={alternativeE}
-          response={response}
-          setResponse={setResponse}
-          simulationStatus={simulationStatus}
-        />
-      </ul>
-    </div>
+      </CardContent>
+    </Card>
   );
-};
+}

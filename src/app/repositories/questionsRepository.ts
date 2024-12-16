@@ -1,3 +1,4 @@
+import { Discipline } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 
 export const findQuestionById = async (questionId: number) => {
@@ -15,7 +16,7 @@ export const findQuestionById = async (questionId: number) => {
   });
 };
 
-export const findQuestionByDiscipline = async (
+export const findSimulationQuestionsByDiscipline = async (
   disciplineName: string,
   questionCount: number,
   userId: string,
@@ -66,7 +67,7 @@ export const findQuestionByDiscipline = async (
   `;
 };
 
-export const findQuestionBySubject = async (
+export const findSimulationQuestionsBySubject = async (
   subjectName: string,
   questionCount: number,
   userId: string,
@@ -116,7 +117,7 @@ export const findQuestionBySubject = async (
   `;
 };
 
-export const findQuestionByCategory = async (
+export const findSimulationQuestionsByCategory = async (
   categoryName: string,
   questionCount: number,
   userId: string,
@@ -305,4 +306,32 @@ export const findCorrectAnswersCountByCategory = async (userId: string) => {
   `;
 
   return correctAnswers;
+};
+
+export const findQuestionByDiscipline = async (discipline: Discipline) => {
+  return await prisma.question.findMany({
+    where: { disciplineId: discipline.id },
+    select: { id: true },
+  });
+};
+
+export const findQuestionsByUser = async (userId: string) => {
+  return prisma.simulated_questions.findMany({
+    where: {
+      Simulated: { userId: userId }
+    },
+    select: {
+      hit: true,
+      Question: {
+        select: {
+          disciplineId: true,
+          Discipline: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
+    }
+  });
 };

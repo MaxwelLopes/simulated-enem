@@ -1,12 +1,12 @@
-import prisma from "../../../prisma/prisma";
+import { prisma } from "../../../prisma/prisma";
 
-export const findIdSubjectById = async (id: number) =>{
+export const findIdSubjectById = async (id: number) => {
   return await prisma.subject.findUnique({
-    where:{
-      id
+    where: {
+      id,
     },
     select: {
       name: true,
     },
-  })
-}
+  });
+};

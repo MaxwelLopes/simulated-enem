@@ -12,6 +12,13 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SimulatedStatus } from "../enum/simulated";
+import { Button } from "../components/ui/button";
+import {
+  ArrowLeft,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 export const Simulation = (simulated: { id: string }) => {
   const id = Number(simulated.id);
@@ -28,6 +35,8 @@ export const Simulation = (simulated: { id: string }) => {
     setCurrentIndex,
     simulationStatus,
     setSimulationStatus,
+    setLoading,
+    totalQuestions,
   } = useSimulation();
 
   useEffect(() => {
@@ -59,35 +68,58 @@ export const Simulation = (simulated: { id: string }) => {
                 currentQuestion={currentQuestion}
                 setResponse={setResponse}
                 simulationStatus={simulationStatus}
+                setLoading={setLoading}
               />
             )}
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex justify-between items-center">
-            <button
+          <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex items-center justify-between">
+            <Button
               onClick={() => {
-                if(simulationStatus !== SimulatedStatus.COMPLETED) finishSimulation(id);
+                if (simulationStatus !== SimulatedStatus.COMPLETED)
+                  finishSimulation(id);
                 router.push("/simulated");
               }}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
+              variant="default"
+              className="w-full w-min"
             >
-             { simulationStatus !== SimulatedStatus.COMPLETED ? "Finalizar": "Voltar"}
-            </button>
-
-            <div className="flex space-x-2 pr-16">
-              <button
+              {simulationStatus !== SimulatedStatus.COMPLETED ? (
+                <>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Finalizar
+                </>
+              ) : (
+                <>
+                  Voltar
+                </>
+              )}
+            </Button>
+            <div className="flex items-center flex-1 justify-center space-x-4">
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={previousQuestion}
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition duration-200"
+                disabled={currentIndex === 0}
+                className="p-1 hover:bg-gray-100"
               >
-                Anterior
-              </button>
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Questão anterior</span>
+              </Button>
 
-              <button
+              <span className="text-sm font-medium">
+                Questão {currentIndex + 1} de {totalQuestions}
+              </span>
+
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={nextQuestion}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                disabled={currentIndex === totalQuestions - 1}
+                className="p-1 hover:bg-gray-100"
               >
-                Próxima
-              </button>
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Próxima questão</span>
+              </Button>
             </div>
           </div>
         </div>
