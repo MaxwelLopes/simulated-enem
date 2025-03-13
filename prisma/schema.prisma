@@ -32,8 +32,8 @@ model Question {
   alternativeC             String
   alternativeD             String
   alternativeE             String
-  Discipline               Discipline?           @relation(fields: [disciplineId], references: [id])
-  Subject                  Subject?              @relation(fields: [subjectId], references: [id])
+  Discipline               Discipline?           @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
+  Subject                  Subject?              @relation(fields: [subjectId], references: [id], onDelete: SetNull)
   Question_categories      Question_categories[]
   Simulated_questions      Simulated_questions[]
 }
@@ -41,8 +41,8 @@ model Question {
 model Question_categories {
   questionId   Int
   categoriesId Int
-  Category     Category @relation(fields: [categoriesId], references: [id])
-  Question     Question @relation(fields: [questionId], references: [id])
+  Category     Category @relation(fields: [categoriesId], references: [id], onDelete: Cascade)
+  Question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@id([questionId, categoriesId])
 }
@@ -57,10 +57,11 @@ model Simulated {
   createdAt           DateTime              @default(now()) @db.Timestamp(0)
   finishedAt          DateTime?             @db.Timestamp(0)
   status              String                @db.VarChar(20)
-  totalQuestions      Int                   @default(0) 
+  totalQuestions      Int                   @default(0)
   correctAnswers      Int                   @default(0)
-  User                User                  @relation(fields: [userId], references: [id])
+  User                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   Simulated_questions Simulated_questions[]
+  Essay               Essay?
 }
 
 model Simulated_questions {
@@ -70,8 +71,8 @@ model Simulated_questions {
   response    String?
   createdAt   DateTime  @default(now()) @db.Timestamp(0)
   lastSeenAt  DateTime? @db.Timestamp(0)
-  Question    Question  @relation(fields: [questionId], references: [id])
-  Simulated   Simulated @relation(fields: [simulatedId], references: [id])
+  Question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  Simulated   Simulated @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
 
   @@id([simulatedId, questionId])
 }
@@ -89,4 +90,27 @@ model User {
   password  String
   createdAt DateTime    @default(now()) @db.Timestamp(0)
   Simulated Simulated[]
+}
+
+model Essay {
+  id                Int          @id @default(autoincrement())
+  theme             String
+  totalScore        Int          @default(0)
+  simulatedId       Int          @unique
+  Simulated         Simulated    @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
+  motivationalTexts String[]
+  createdAt         DateTime     @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime     @updatedAt @db.Timestamp(0)
+  Scores            EssayScore[]
+}
+
+model EssayScore {
+  id            Int     @id @default(autoincrement())
+  criterion     String
+  score         Int
+  justification String?
+  essayId       Int
+  Essay         Essay   @relation(fields: [essayId], references: [id], onDelete: Cascade)
+
+  @@unique([essayId, criterion])
 }
