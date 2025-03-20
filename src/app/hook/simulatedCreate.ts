@@ -9,6 +9,8 @@ export const useSimulatedCreate = () => {
   const [review, setReview] = useState<boolean>(false);
   const [subtypes, setSubtype] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [essay, setEssay] = useState<"specific" | "random">("specific");
+  const [nonInepEssay, setNonInepEssay] = useState<boolean>(false);
 
   return {
     typeOfSimulated,
@@ -25,5 +27,9 @@ export const useSimulatedCreate = () => {
     setSubtype,
     loading,
     setLoading,
+    essay,
+    setEssay,
+    nonInepEssay,
+    setNonInepEssay,
   };
 };

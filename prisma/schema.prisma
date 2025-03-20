@@ -8,79 +8,84 @@ datasource db {
 }
 
 model Category {
-  id                  Int                   @id @default(autoincrement())
-  name                String                @unique
-  Question_categories Question_categories[]
+  id                 Int                @id @default(autoincrement())
+  name               String             @unique
+  questionCategories QuestionCategory[]
 }
 
 model Discipline {
-  id       Int        @id @default(autoincrement())
-  name     String     @unique
-  Question Question[]
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  questions Question[]
+}
+
+model Subject {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  questions Question[]
 }
 
 model Question {
-  id                       Int                   @id @default(autoincrement())
-  year                     String                @db.VarChar(4)
+  id                       Int                 @id @default(autoincrement())
+  year                     String              @db.VarChar(4)
   disciplineId             Int?
   subjectId                Int?
   context                  String?
   alternativesIntroduction String?
-  correctAlternative       String                @db.VarChar(1)
+  correctAlternative       String              @db.VarChar(1)
   alternativeA             String
   alternativeB             String
   alternativeC             String
   alternativeD             String
   alternativeE             String
-  Discipline               Discipline?           @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
-  Subject                  Subject?              @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  Question_categories      Question_categories[]
-  Simulated_questions      Simulated_questions[]
+  discipline               Discipline?         @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
+  subject                  Subject?            @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  questionCategories       QuestionCategory[]
+  simulatedQuestions       SimulatedQuestion[]
 }
 
-model Question_categories {
-  questionId   Int
-  categoriesId Int
-  Category     Category @relation(fields: [categoriesId], references: [id], onDelete: Cascade)
-  Question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+model QuestionCategory {
+  questionId Int
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-  @@id([questionId, categoriesId])
+  @@id([questionId, categoryId])
 }
 
 model Simulated {
-  id                  Int                   @id @default(autoincrement())
-  type                String                @db.VarChar(100)
-  subtype             String[]              @db.VarChar(200)
-  unseen              Boolean?              @default(false)
-  review              Boolean?              @default(false)
-  userId              String                @db.Uuid
-  createdAt           DateTime              @default(now()) @db.Timestamp(0)
-  finishedAt          DateTime?             @db.Timestamp(0)
-  status              String                @db.VarChar(20)
-  totalQuestions      Int                   @default(0)
-  correctAnswers      Int                   @default(0)
-  User                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Simulated_questions Simulated_questions[]
-  Essay               Essay?
+  id                    Int                   @id @default(autoincrement())
+  type                  String                @db.VarChar(100)
+  subtype               String[]              @db.VarChar(200)
+  unseen                Boolean?              @default(false)
+  review                Boolean?              @default(false)
+  userId                String                @db.Uuid
+  createdAt             DateTime              @default(now()) @db.Timestamp(0)
+  finishedAt            DateTime?             @db.Timestamp(0)
+  status                String                @db.VarChar(20)
+  totalQuestions        Int                   @default(0)
+  correctAnswers        Int                   @default(0)
+  completionTimeSeconds Int?
+  essayId               Int?
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  simulatedQuestions    SimulatedQuestion[]
+  essay                 Essay?                @relation(fields: [essayId], references: [id], onDelete: SetNull)
+  simulatedEssayScores  SimulatedEssayScore[]
+  essayScore            Int?
+  userText              String?               @db.Text
 }
 
-model Simulated_questions {
+model SimulatedQuestion {
   simulatedId Int
   questionId  Int
   hit         Boolean?
   response    String?
   createdAt   DateTime  @default(now()) @db.Timestamp(0)
   lastSeenAt  DateTime? @db.Timestamp(0)
-  Question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  Simulated   Simulated @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  simulated   Simulated @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
 
   @@id([simulatedId, questionId])
-}
-
-model Subject {
-  id       Int        @id @default(autoincrement())
-  name     String     @unique
-  Question Question[]
 }
 
 model User {
@@ -89,28 +94,25 @@ model User {
   email     String      @unique @db.VarChar(255)
   password  String
   createdAt DateTime    @default(now()) @db.Timestamp(0)
-  Simulated Simulated[]
+  simulated Simulated[]
 }
 
 model Essay {
-  id                Int          @id @default(autoincrement())
+  id                Int         @id @default(autoincrement())
+  year              String?     @db.VarChar(4)
   theme             String
-  totalScore        Int          @default(0)
-  simulatedId       Int          @unique
-  Simulated         Simulated    @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
   motivationalTexts String[]
-  createdAt         DateTime     @default(now()) @db.Timestamp(0)
-  updatedAt         DateTime     @updatedAt @db.Timestamp(0)
-  Scores            EssayScore[]
+  isFromInep        Boolean     @default(false)
+  createdAt         DateTime    @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime    @updatedAt @db.Timestamp(0)
+  simulated         Simulated[]
 }
 
-model EssayScore {
-  id            Int     @id @default(autoincrement())
+model SimulatedEssayScore {
+  id            Int       @id @default(autoincrement())
+  simulatedId   Int
   criterion     String
   score         Int
   justification String?
-  essayId       Int
-  Essay         Essay   @relation(fields: [essayId], references: [id], onDelete: Cascade)
-
-  @@unique([essayId, criterion])
+  simulated     Simulated @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
 }

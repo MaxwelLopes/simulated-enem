@@ -7,9 +7,9 @@ export const findQuestionById = async (questionId: number) => {
       id: questionId,
     },
     include: {
-      Question_categories: {
+      questionCategories: {
         include: {
-          Category: true,
+          category: true,
         },
       },
     },
@@ -29,8 +29,8 @@ export const findSimulationQuestionsByDiscipline = async (
       JOIN "Discipline" ON "Question"."disciplineId" = "Discipline"."id"
       WHERE "Discipline"."name" = ${disciplineName}
       AND "Question"."id" NOT IN (
-        SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
-        WHERE "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID 
         )
@@ -46,9 +46,9 @@ export const findSimulationQuestionsByDiscipline = async (
       JOIN "Discipline" ON "Question"."disciplineId" = "Discipline"."id"
       WHERE "Discipline"."name" = ${disciplineName}
       AND "Question"."id" IN (
-        SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
-        WHERE "Simulated_questions"."hit" = false
-        AND "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."hit" = false
+        AND "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID  
         )
@@ -80,8 +80,8 @@ export const findSimulationQuestionsBySubject = async (
       JOIN "Subject" ON "Question"."subjectId" = "Subject"."id"
       WHERE "Subject"."name" = ${subjectName}
       AND "Question"."id" NOT IN (
-        SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
-        WHERE "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestions"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID 
         )
@@ -97,9 +97,9 @@ export const findSimulationQuestionsBySubject = async (
       JOIN "Subject" ON "Question"."subjectId" = "Subject"."id"
       WHERE "Subject"."name" = ${subjectName}
       AND "Question"."id" IN (
-        SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
-        WHERE "Simulated_questions"."hit" = false
-        AND "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."hit" = false
+        AND "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID  
         )
@@ -127,12 +127,12 @@ export const findSimulationQuestionsByCategory = async (
   if (unseen) {
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "Question"."id" FROM "Question"
-      JOIN "Question_categories" ON "Question"."id" = "Question_categories"."questionId"
-      JOIN "Category" ON "Question_categories"."categoriesId" = "Category"."id"
+      JOIN "QuestionCategory" ON "Question"."id" = "QuestionCategory"."questionId"
+      JOIN "Category" ON "QuestionCategory"."categoriesId" = "Category"."id"
       WHERE "Category"."name" = ${categoryName}
       AND "Question"."id" NOT IN (
-        SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
-        WHERE "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID 
         )
@@ -145,13 +145,13 @@ export const findSimulationQuestionsByCategory = async (
   if (review) {
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "Question"."id" FROM "Question"
-      JOIN "Question_categories" ON "Question"."id" = "Question_categories"."questionId"
-      JOIN "Category" ON "Question_categories"."categoriesId" = "Category"."id"
+      JOIN "QuestionCategory" ON "Question"."id" = "QuestionCategory"."questionId"
+      JOIN "Category" ON "QuestionCategory"."categoriesId" = "Category"."id"
       WHERE "Category"."name" = ${categoryName}
       AND "Question"."id" IN (
-        SELECT "Simulated_questions"."questionId" FROM "Simulated_questions"
-        WHERE "Simulated_questions"."hit" = false
-        AND "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."hit" = false
+        AND "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID
         )
@@ -162,8 +162,8 @@ export const findSimulationQuestionsByCategory = async (
   }
   return await prisma.$queryRaw<{ id: number }[]>`
     SELECT "Question"."id" FROM "Question"
-    JOIN "Question_categories" ON "Question"."id" = "Question_categories"."questionId"
-    JOIN "Category" ON "Question_categories"."categoriesId" = "Category"."id"
+    JOIN "QuestionCategory" ON "Question"."id" = "QuestionCategory"."questionId"
+    JOIN "Category" ON "QuestionCategory"."categoriesId" = "Category"."id"
     WHERE "Category"."name" = ${categoryName}
     ORDER BY RANDOM()
     LIMIT ${questionCount};
@@ -192,9 +192,9 @@ export const findQuestionRandom = async (
       SELECT "id"
       FROM "Question"
       WHERE "Question"."id" NOT IN (
-        SELECT "Simulated_questions"."questionId"
-        FROM "Simulated_questions"
-        WHERE "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId"
+        FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id"
           FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID
@@ -208,10 +208,10 @@ export const findQuestionRandom = async (
       SELECT "id"
       FROM "Question"
       WHERE "Question"."id" IN (
-        SELECT "Simulated_questions"."questionId"
-        FROM "Simulated_questions"
-        WHERE "Simulated_questions"."hit" = false
-        AND "Simulated_questions"."simulatedId" IN (
+        SELECT "SimulatedQuestion"."questionId"
+        FROM "SimulatedQuestion"
+        WHERE "SimulatedQuestion"."hit" = false
+        AND "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id"
           FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID
@@ -228,10 +228,10 @@ export const findQuestionRandom = async (
 };
 
 export const getCorrectAnswersCountByUserId = async (userId: string) => {
-  const correctAnswers = await prisma.simulated_questions.count({
+  const correctAnswers = await prisma.simulatedQuestion.count({
     where: {
       hit: true,
-      Simulated: {
+      simulated: {
         userId: userId,
       },
     },
@@ -242,10 +242,10 @@ export const getCorrectAnswersCountByUserId = async (userId: string) => {
 
 // Contar erros gerais e por categoria
 export const getIncorrectAnswersCountByUserId = async (userId: string) => {
-  const incorrectAnswers = await prisma.simulated_questions.count({
+  const incorrectAnswers = await prisma.simulatedQuestion.count({
     where: {
       hit: false,
-      Simulated: {
+      simulated: {
         userId: userId,
       },
     },
@@ -258,9 +258,9 @@ export const findAllQuestionsByIdUser = async (
 ): Promise<{ id: number; context?: string }[]> => {
   const questions = await prisma.$queryRaw<{ id: number; context?: string }[]>`
     SELECT "Question"."id", "Question"."context" 
-    FROM "Simulated_questions"
-    JOIN "Question" ON "Simulated_questions"."questionId" = "Question"."id"
-    WHERE "Simulated_questions"."simulatedId" IN (
+    FROM "SimulatedQuestion"
+    JOIN "Question" ON "SimulatedQuestion"."questionId" = "Question"."id"
+    WHERE "SimulatedQuestion"."simulatedId" IN (
       SELECT "Simulated"."id" FROM "Simulated"
       WHERE "Simulated"."userId" = ${userId}::UUID
     );
@@ -273,11 +273,11 @@ export const findIncorrectAnswersCountByCategory = async (userId: string) => {
   const incorrectAnswers = await prisma.$queryRaw<
     { category: string; incorrectCount: number }[]
   >`
-    SELECT c."name" AS category, COUNT(*)::int AS "incorrectCount"  -- for consistency with Prisma
-    FROM "Simulated_questions" AS sq
+    SELECT c."name" AS category, COUNT(*)::int AS "incorrectCount"
+    FROM "SimulatedQuestion" AS sq
     JOIN "Question" AS q ON sq."questionId" = q."id"
-    JOIN "Question_categories" AS qc ON q."id" = qc."questionId"
-    JOIN "Category" AS c ON qc."categoriesId" = c."id"
+    JOIN "QuestionCategory" AS qc ON q."id" = qc."questionId"
+    JOIN "Category" AS c ON qc."categoryId" = c."id"  -- Corrigido aqui
     WHERE sq."simulatedId" IN (
       SELECT s."id" FROM "Simulated" AS s
       WHERE s."userId" = ${userId}::UUID
@@ -294,10 +294,10 @@ export const findCorrectAnswersCountByCategory = async (userId: string) => {
     { category: string; correctCount: number }[]
   >`
     SELECT c."name" AS category, COUNT(*)::int AS "correctCount"  -- for consistency with Prisma
-    FROM "Simulated_questions" AS sq
+    FROM "SimulatedQuestion" AS sq
     JOIN "Question" AS q ON sq."questionId" = q."id"
-    JOIN "Question_categories" AS qc ON q."id" = qc."questionId"
-    JOIN "Category" AS c ON qc."categoriesId" = c."id"
+    JOIN "QuestionCategory" AS qc ON q."id" = qc."questionId"
+    JOIN "Category" AS c ON qc."categoryId" = c."id"
     WHERE sq."simulatedId" IN (
       SELECT s."id" FROM "Simulated" AS s
       WHERE s."userId" = ${userId}::UUID
@@ -316,16 +316,16 @@ export const findQuestionByDiscipline = async (discipline: Discipline) => {
 };
 
 export const findQuestionsByUser = async (userId: string) => {
-  return prisma.simulated_questions.findMany({
+  return prisma.simulatedQuestion.findMany({
     where: {
-      Simulated: { userId: userId }
+      simulated: { userId: userId }
     },
     select: {
       hit: true,
-      Question: {
+      question: {
         select: {
           disciplineId: true,
-          Discipline: {
+          discipline: {
             select: {
               name: true
             }

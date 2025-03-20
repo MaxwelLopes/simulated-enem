@@ -10,6 +10,7 @@ type AlternativeItemProps = {
   response: string;
   setResponse: Function;
   simulationStatus: string | null;
+  handleAnswerQuestion: Function;
 };
 
 const AlternativeItem = ({
@@ -18,6 +19,7 @@ const AlternativeItem = ({
   response,
   setResponse,
   simulationStatus,
+  handleAnswerQuestion,
 }: AlternativeItemProps) => {
   const isSelected = response == letter;
   const handleClick = () => {
@@ -25,7 +27,7 @@ const AlternativeItem = ({
       isSelected;
     setResponse(letter);
     }
-    
+    handleAnswerQuestion(letter);
   };
   return (
     <RadioGroup value={response} onValueChange={handleClick} disabled={isSelected}>

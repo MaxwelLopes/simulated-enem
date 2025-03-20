@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import {
   answerQuestion,
   getQuestionOfSimulated,
+  getSimulatedById,
 } from "../service/simualationService";
 import { getQuestion } from "../service/QuestionService";
-import { Question } from "@prisma/client";
+import { Essay, Question } from "@prisma/client";
 import { SimulatedStatus } from "../enum/simulated";
+import { getEssayById } from "../service/essayService";
 
 interface QuestionWithCategories extends Question {
-  Question_categories: { Category: { name: string; id: number } }[];
+  questionCategories: { category: { name: string; id: number } }[];
 }
 
 export const useSimulation = () => {
@@ -35,6 +37,10 @@ export const useSimulation = () => {
   const [response, setResponseState] = useState<string>("");
   const [simulationStatus, setSimulationStatus] = useState<string | null>(null);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
+  const [essay, setEssay] = useState<null | Essay>(null);
+  const [showEssayInstructions, setShowEssayInstructions] = useState(false);
+  const [showEssay, setShowEssay] = useState(false);
+  const [showEssayForm, setShowEssayForm] = useState(false);
 
   useEffect(() => {
     if (simulatedId) fetchQuestionsOrder();
@@ -48,14 +54,27 @@ export const useSimulation = () => {
   const fetchQuestionsOrder = async () => {
     setLoading(true);
     try {
+      let essay;
       const simulatedQuestions = await getQuestionOfSimulated(simulatedId!);
       const questionIds = simulatedQuestions.map((question, index) => ({
         id: question.questionId,
         index,
         hit: question.hit,
       }));
+      const simulated = await getSimulatedById(simulatedId!);
+      if (simulated?.essayId) {
+        essay = await getEssayById(simulated.essayId);
+        setEssay(essay);
+      }
       setQuestionOrder(questionIds);
       setTotalQuestions(simulatedQuestions.length);
+      if (essay) {
+        setShowEssayInstructions(true);
+        setShowEssay(true);
+      } else {
+        setShowEssayInstructions(false);
+        setShowEssay(false);
+      }
     } catch (error) {
       console.error("Erro ao buscar questões do simulado:", error);
     } finally {
@@ -121,6 +140,11 @@ export const useSimulation = () => {
   };
 
   const nextQuestion = () => {
+    if (showEssay) {
+      setShowEssay(false);
+      setCurrentIndex(0);
+      return;
+    }
     if (simulationStatus !== SimulatedStatus.COMPLETED) {
       handleAnswerQuestion();
     }
@@ -157,5 +181,14 @@ export const useSimulation = () => {
     setSimulationStatus,
     setLoading,
     totalQuestions,
+    handleAnswerQuestion,
+    essay,
+    setEssay,
+    showEssayInstructions,
+    setShowEssayInstructions,
+    showEssay,
+    setShowEssay,
+    showEssayForm,
+    setShowEssayForm,
   };
 };

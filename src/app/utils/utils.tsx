@@ -1,7 +1,5 @@
 import React from 'react';
 
-import '@/app/public/imgs/000e6ab5-5267-4411-a21d-3c05d89f2832.png'
-
 type TextSegment = {
   type: 'text' | 'italic' | 'bold' | 'img';
   content: string;
@@ -46,6 +44,7 @@ function formatText(text: string) {
         case 'italic':
           return <em key={`${lineIndex}-${index}`}>{segment.content}</em>;
         case 'img':
+          console.log(segment.content);
           return <img key={`${lineIndex}-${index}`} src={`/imgs/${segment.content}`} alt="Imagem" />;
         default:
           return <span key={`${lineIndex}-${index}`}>{segment.content}</span>;

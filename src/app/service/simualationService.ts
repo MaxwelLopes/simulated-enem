@@ -1,6 +1,7 @@
 "use server";
 
 import { SimulatedStatus, SimulatedType } from "../enum/simulated";
+import { createEssay, getEssayByYear } from "../repositories/essayRepository";
 import {
   findQuestionByYear,
   findQuestionRandom,
@@ -14,10 +15,13 @@ import {
   findResponse,
   findSimulatedById,
   findSimulatedByUserId,
+  findUnseenEssayForUser,
   getCountCorrectAnswersBySimulatedId,
+  getEssayScores,
   updateAnswerBySilulation,
-  updatesimulated,
+  updateSimulated,
 } from "../repositories/simulatedRepository";
+import { generateTheme } from "./essayService";
 
 type Input = {
   typeOfSimulated: string;
@@ -27,6 +31,7 @@ type Input = {
   review: boolean;
   subtypes: string[];
   userId: string;
+  nonInepEssay?: boolean;
 };
 
 export const createSimulated = async ({
@@ -36,6 +41,7 @@ export const createSimulated = async ({
   review,
   subtypes,
   userId,
+  nonInepEssay = false,
 }: Input): Promise<boolean | undefined> => {
   console.log(typeOfSimulated, questionCount, unseen, review, subtypes, userId);
 
@@ -51,12 +57,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(
-        typeOfSimulated,
+      createSimulatedInRepostitory({
+        type: typeOfSimulated,
         userId,
-        subtypes,
-        questions
-      );
+        subtype: subtypes,
+        questionsId: questions,
+      });
       return true;
     } catch {}
   }
@@ -83,15 +89,16 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(
-        typeOfSimulated,
+      createSimulatedInRepostitory({
+        type: typeOfSimulated,
         userId,
-        subtypes,
-        questions
-      );
+        subtype: subtypes,
+        questionsId: questions,
+      });
       return true;
     } catch {}
   }
@@ -120,12 +127,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(
-        typeOfSimulated,
+      createSimulatedInRepostitory({
+        type: typeOfSimulated,
         userId,
-        subtypes,
-        questions
-      );
+        subtype: subtypes,
+        questionsId: questions,
+      });
       return true;
     } catch {}
   }
@@ -154,12 +161,12 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(
-        typeOfSimulated,
+      createSimulatedInRepostitory({
+        type: typeOfSimulated,
         userId,
-        subtypes,
-        questions
-      );
+        subtype: subtypes,
+        questionsId: questions,
+      });
       return true;
     } catch {}
   }
@@ -170,12 +177,50 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory(
-        typeOfSimulated,
+      createSimulatedInRepostitory({
+        type: typeOfSimulated,
         userId,
-        subtypes,
-        questions
-      );
+        subtype: subtypes,
+        questionsId: questions,
+      });
+      return true;
+    } catch {}
+  }
+
+  if (typeOfSimulated === SimulatedType.ESSAY) {
+    try {
+      if (nonInepEssay) {
+        let essay = await findUnseenEssayForUser(userId);
+        if (!essay) {
+          const generatedEssay = await generateTheme();
+          essay = await createEssay(
+            generatedEssay.theme,
+            generatedEssay.motivationalTexts
+          );
+        }
+
+        if (!essay || !essay.id) {
+          throw new Error("Falha ao criar.");
+        }
+
+        createSimulatedInRepostitory({
+          type: typeOfSimulated,
+          userId,
+          subtype: subtypes,
+          essayId: essay.id,
+        });
+      } else {
+        const essay = await getEssayByYear(subtypes[0]);
+        if (!essay || !essay.id) {
+          throw new Error("Falha ao obter a redação.");
+        }
+        createSimulatedInRepostitory({
+          type: typeOfSimulated,
+          userId,
+          subtype: subtypes,
+          essayId: essay.id,
+        });
+      }
       return true;
     } catch {}
   }
@@ -202,10 +247,10 @@ export const answerQuestion = async (
     await updateAnswerBySilulation(simulatedId, questionId, hit, response);
 };
 
-export const finishSimulation = async (questionId: number) => {
-  const hits = await getCountCorrectAnswersBySimulatedId(questionId);
+export const finishSimulation = async (simulatedId: number) => {
+  const hits = await getCountCorrectAnswersBySimulatedId(simulatedId);
   const status = SimulatedStatus.COMPLETED;
-  await updatesimulated(questionId, hits, status);
+  await updateSimulated({ simulatedId, status, hits });
 };
 
 export const getSimulationStatus = async (id: number) => {
@@ -215,4 +260,25 @@ export const getSimulationStatus = async (id: number) => {
 
 export const getResponse = async (simulatedId: number, questionId: number) => {
   return await findResponse(simulatedId, questionId);
+};
+
+export const getSimulatedById = async (id: number) => {
+  return await findSimulatedById(id);
+};
+
+export const getCriteria = async (simulatedId: number) => {
+  const scores = await getEssayScores(simulatedId);
+  const criteria = scores.map((score) => {
+    return {
+      criterion: score.criterion,
+      score: score.score,
+      justification: score.justification,
+    };
+  });
+  return criteria;
+};
+
+export const getUserText = async (simulatedId: number) => {
+  const simulated = await findSimulatedById(simulatedId);
+  return simulated?.userText || null;
 };

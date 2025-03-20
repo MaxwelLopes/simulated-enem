@@ -4,6 +4,7 @@ export enum SimulatedType {
   CATEGOTY = "Tópico",
   YEAR = "Ano",
   GENERAL = "Geral",
+  ESSAY = "Redação",
 }
 
 export enum SimulatedCriterion {
@@ -15,5 +16,6 @@ export enum SimulatedStatus {
   IN_PROGRESS = "Em Andamento",
   COMPLETED = "Finalizado",
   PENDING = "Pendente",
-  NOTSTARTED = "Não iniciado"
+  NOTSTARTED = "Não iniciado",
+  CORRECTING_ESSAY = "Corrigindo Redação",
 }

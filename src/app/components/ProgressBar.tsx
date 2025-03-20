@@ -20,6 +20,9 @@ interface ProgressProps {
   >;
   currentIndex: number;
   onQuestionSelect: (index: number) => void;
+  essay: boolean
+  showEssay: boolean,
+  setShowEssay: (show: boolean) => void;
 }
 
 function Progress({
@@ -27,14 +30,28 @@ function Progress({
   questionsCache,
   currentIndex,
   onQuestionSelect,
+  essay,
+  showEssay,
+  setShowEssay
 }: ProgressProps) {
   return (
     <ScrollArea className="h-[calc(100vh-4rem)] w-full">
       <div className="flex flex-col gap-2 items-center p-4">
+        {essay && (
+          <Button
+            key="essay"
+            onClick={() => setShowEssay(true)}
+            variant={
+              showEssay ? "default" : "outline"
+            }
+            className="w-20 h-10 p-0 font-semibold transition-opacity bg-blue-200 text-black"
+          >
+            Redação
+          </Button>
+        )}
         {[...Array(totalQuestions)].map((_, index) => {
-          const isAnswered = Object.values(questionsCache).some(
-            (q) => q.index === index && q.response
-          );
+          const question = questionsCache[index] || {}; // Obtém a questão do cache
+          const isAnswered = question.response;
           const isCurrent = index === currentIndex;
 
           return (
@@ -54,6 +71,7 @@ function Progress({
             </Button>
           );
         })}
+
       </div>
     </ScrollArea>
   );
@@ -71,6 +89,9 @@ interface ProgressBarProps {
   >;
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
+  essay: boolean,
+  showEssay: boolean,
+  setShowEssay: (show: boolean) => void;
 }
 
 export function ProgressBar({
@@ -78,6 +99,9 @@ export function ProgressBar({
   questionsCache,
   currentIndex,
   setCurrentIndex,
+  essay,
+  showEssay,
+  setShowEssay,
 }: ProgressBarProps) {
   const [open, setOpen] = useState(false);
 
@@ -91,9 +115,8 @@ export function ProgressBar({
       <Button
         variant="outline"
         size="icon"
-        className={`fixed top-4 right-4 z-50 transition-all duration-300 transform ${
-          open ? "translate-x-[-100px]" : ""
-        }`}
+        className={`fixed top-4 right-4 z-50 transition-all duration-300 transform ${open ? "translate-x-[-100px]" : ""
+          }`}
         onClick={() => setOpen(!open)}
       >
         {open ? (
@@ -105,15 +128,17 @@ export function ProgressBar({
 
       {open && (
         <div
-          className={`fixed top-0 right-0 w-min h-full bg-white p-4 shadow-lg transition-transform duration-300 ease-in-out ${
-            open ? "translate-x-0" : "translate-x-[100%]"
-          }`}
+          className={`fixed top-0 right-0 w-min h-full bg-white p-4 shadow-lg transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "translate-x-[100%]"
+            }`}
         >
           <Progress
             totalQuestions={totalQuestions}
             questionsCache={questionsCache}
             currentIndex={currentIndex}
             onQuestionSelect={goToQuestion}
+            essay={essay}
+            showEssay={showEssay}
+            setShowEssay={setShowEssay}
           />
         </div>
       )}

@@ -16,11 +16,13 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
         inProgress:
-          "border-transparent bg-yellow-500 text-yellow-800 hover:bg-yellow-400", // Amarelo para "Em Andamento"
+          "border-transparent bg-yellow-500 text-yellow-800 hover:bg-yellow-400",
         completed:
-          "border-transparent bg-green-300 text-green-800 hover:bg-green-400", // Verde para "Finalizado"
+          "border-transparent bg-green-300 text-green-800 hover:bg-green-400",
         pending:
-          "border-transparent bg-gray-300 text-gray-800 hover:bg-gray-200", // Cinza para "Pendente"
+          "border-transparent bg-gray-300 text-gray-800 hover:bg-gray-200",
+        warning:
+          "border-transparent bg-orange-300 text-orange-800 hover:bg-orange-200",
       },
     },
     defaultVariants: {
@@ -31,12 +33,12 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  VariantProps<typeof badgeVariants> { }
 
-function Badge({color=undefined, className, variant, ...props }: BadgeProps) {
+function Badge({ color = undefined, className, variant, ...props }: BadgeProps) {
 
   const variantClass = variant === "default" && color
-    ? `bg-${color}-500 text-${color}-800 hover:bg-${color}-400` 
+    ? `bg-${color}-500 text-${color}-800 hover:bg-${color}-400`
     : badgeVariants({ variant });
 
   return (

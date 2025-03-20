@@ -1,3 +1,7 @@
+"use client";
+
+import type React from "react";
+
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "../auth";
 import { Sheet, SheetTrigger, SheetContent } from "../components/ui/sheet";
@@ -81,12 +85,12 @@ const NavBar = () => {
         </Sheet>
 
         {/* Logout Button */}
-        <div className="mr-6">
+        <div className="ml-auto lg:ml-0 lg:mr-6">
           <LogoutButton />
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="flex gap-6">
+        <nav className="hidden lg:flex gap-6">
           {navigationLinks.map((link) => (
             <button
               key={link.label}
@@ -97,12 +101,6 @@ const NavBar = () => {
             </button>
           ))}
         </nav>
-
-        {/* Logo */}
-        <Link href="/" className="ml-auto flex items-center" prefetch={false}>
-          <MountainIcon className="h-8 w-8" />
-          <span className="ml-2 text-xl font-bold">NextApp</span>
-        </Link>
       </div>
     </header>
   );

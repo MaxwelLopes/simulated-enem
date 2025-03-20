@@ -6,18 +6,27 @@ import { useSimulateds } from "../hook/simulateds";
 import { Skeleton } from "../components/ui/skeleton";
 import { SimulatedItem } from "../components/ui/SimulatedItem";
 import { Button } from "../components/ui/button";
+import { Simulated } from "@prisma/client";
+import { SimulatedStatus, SimulatedType } from "../enum/simulated";
 
 const SimulatedList = () => {
   const router = useRouter();
   const { simulatedList, loading } = useSimulateds();
 
-  const handleSelectSimulated = (id: number) => {
-    router.push(`/simulated/${id}`);
-  };
+  const handleSelectSimulated = (id: number, simulated: Simulated) => {
+    if (simulated.type === SimulatedType.ESSAY && simulated.status !== SimulatedStatus.PENDING ) {
+      router.push(`/simulationResult/${id}`);
+
+    } else {
+      router.push(`/simulated/${id}`);
+
+    }
+  }
 
   if (loading) {
     return <Loading />;
   }
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -33,13 +42,15 @@ const SimulatedList = () => {
         <>
           {simulatedList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-              {simulatedList.map((simulated) => (
-                <SimulatedItem
-                  key={simulated.id}
-                  simulated={simulated}
-                  onSelect={handleSelectSimulated}
-                />
-              ))}
+              {simulatedList
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) 
+                .map((simulated) => (
+                  <SimulatedItem
+                    key={simulated.id}
+                    simulated={simulated}
+                    onSelect={handleSelectSimulated}
+                  />
+                ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed rounded-lg">
@@ -49,7 +60,7 @@ const SimulatedList = () => {
               <p className="text-muted-foreground mt-2">
                 Crie seu primeiro simulado clicando no botão abaixo.
               </p>
-              <Button onClick={() => {router.push('/createSimulated')}} className="mt-4">
+              <Button onClick={() => { router.push('/createSimulated') }} className="mt-4">
                 Criar Simulado
               </Button>
             </div>
@@ -59,5 +70,6 @@ const SimulatedList = () => {
     </div>
   );
 };
+
 
 export default SimulatedList;

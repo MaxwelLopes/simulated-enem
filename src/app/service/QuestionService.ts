@@ -12,6 +12,7 @@ import {
   getCorrectAnswersCountByUserId,
   getIncorrectAnswersCountByUserId,
 } from "../repositories/questionsRepository";
+import { aggregateSimulated } from "../repositories/simulatedRepository";
 
 export const getQuestion = async (id: number) => {
   return await findQuestionById(id);
@@ -76,12 +77,7 @@ export const getCorrectAnswersCountByCategory = async (
 };
 
 export const getOverallAverageScore = async (): Promise<number> => {
-  const result = await prisma.simulated.aggregate({
-    _sum: {
-      correctAnswers: true,
-      totalQuestions: true,
-    },
-  });
+  const result = await aggregateSimulated();
 
   const totalCorrect = result._sum.correctAnswers || 0;
   const totalQuestions = result._sum.totalQuestions || 0;
@@ -90,7 +86,7 @@ export const getOverallAverageScore = async (): Promise<number> => {
     return 0;
   }
 
-  return (totalCorrect / totalQuestions) * 100;
+  return (totalCorrect / totalQuestions) * 100; //
 };
 
 export const getDisciplineAffinity = async (
@@ -101,8 +97,8 @@ export const getDisciplineAffinity = async (
     {};
 
   simulatedQuestions.forEach((sq) => {
-    if (sq.Question.Discipline) {
-      const disciplineName = sq.Question.Discipline.name;
+    if (sq.question.discipline) {
+      const disciplineName = sq.question.discipline.name;
 
       if (!disciplineStats[disciplineName]) {
         disciplineStats[disciplineName] = { total: 0, correct: 0 };

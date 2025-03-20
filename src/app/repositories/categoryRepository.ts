@@ -1,4 +1,3 @@
-import { Question } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 
 export const findCategoryById = async (id: number): Promise<string | null> => {
@@ -11,10 +10,10 @@ export const findCategoryById = async (id: number): Promise<string | null> => {
 
 // Função que conta as respostas por categoria
 export const getAnswersCountByUserIdAndCategory = async (userId: string) => {
-  const counts = await prisma.simulated_questions.groupBy({
+  const counts = await prisma.simulatedQuestion.groupBy({
     by: ["simulatedId", "questionId"],
     where: {
-      Simulated: {
+      simulated: {
         userId: userId,
       },
     },
@@ -33,7 +32,7 @@ export const getAnswersCountByUserIdAndCategory = async (userId: string) => {
       return {
         categoryId: question?.subjectId || 0,
         correctCount: item._count.hit,
-        incorrectCount: await prisma.simulated_questions.count({
+        incorrectCount: await prisma.simulatedQuestion.count({
           where: {
             hit: false,
             simulatedId: item.simulatedId,
