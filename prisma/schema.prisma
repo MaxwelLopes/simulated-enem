@@ -27,21 +27,25 @@ model Subject {
 
 model Question {
   id                       Int                 @id @default(autoincrement())
-  year                     String              @db.VarChar(4)
-  disciplineId             Int?
-  subjectId                Int?
+  year                     String
+  disciplineId             Int?                @map("disciplineId")
+  subjectId                Int?                @map("subjectId")
   context                  String?
   alternativesIntroduction String?
-  correctAlternative       String              @db.VarChar(1)
-  alternativeA             String
-  alternativeB             String
-  alternativeC             String
-  alternativeD             String
-  alternativeE             String
-  discipline               Discipline?         @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
-  subject                  Subject?            @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  questionCategories       QuestionCategory[]
+  alternatives             Alternative[]
+  discipline               Discipline?         @relation(fields: [disciplineId], references: [id])
+  subject                  Subject?            @relation(fields: [subjectId], references: [id])
+  categories               QuestionCategory[]
   simulatedQuestions       SimulatedQuestion[]
+}
+
+model Alternative {
+  id         Int      @id @default(autoincrement())
+  questionId Int      @map("questionId")
+  letter     String
+  text       String
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model QuestionCategory {
@@ -54,35 +58,35 @@ model QuestionCategory {
 }
 
 model Simulated {
-  id                    Int                   @id @default(autoincrement())
+  id                    String                @id @default(uuid()) @db.Uuid
   type                  String                @db.VarChar(100)
-  subtype               String[]              @db.VarChar(200)
-  unseen                Boolean?              @default(false)
-  review                Boolean?              @default(false)
   userId                String                @db.Uuid
   createdAt             DateTime              @default(now()) @db.Timestamp(0)
   finishedAt            DateTime?             @db.Timestamp(0)
   status                String                @db.VarChar(20)
-  totalQuestions        Int                   @default(0)
+  review                Boolean?              @default(false)
+  unseen                Boolean?              @default(false)
+  subtype               String[]              @db.VarChar(200)
   correctAnswers        Int                   @default(0)
+  totalQuestions        Int                   @default(0)
   completionTimeSeconds Int?
   essayId               Int?
-  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  simulatedQuestions    SimulatedQuestion[]
-  essay                 Essay?                @relation(fields: [essayId], references: [id], onDelete: SetNull)
-  simulatedEssayScores  SimulatedEssayScore[]
+  userText              String?
   essayScore            Int?
-  userText              String?               @db.Text
+  essay                 Essay?                @relation(fields: [essayId], references: [id])
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  simulatedEssayScores  SimulatedEssayScore[]
+  simulatedQuestions    SimulatedQuestion[]
 }
 
 model SimulatedQuestion {
-  simulatedId Int
+  simulatedId String   @db.Uuid 
   questionId  Int
   hit         Boolean?
   response    String?
-  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
   lastSeenAt  DateTime? @db.Timestamp(0)
-  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   simulated   Simulated @relation(fields: [simulatedId], references: [id], onDelete: Cascade)
 
   @@id([simulatedId, questionId])
@@ -99,18 +103,18 @@ model User {
 
 model Essay {
   id                Int         @id @default(autoincrement())
-  year              String?     @db.VarChar(4)
-  theme             String
-  motivationalTexts String[]
-  isFromInep        Boolean     @default(false)
   createdAt         DateTime    @default(now()) @db.Timestamp(0)
   updatedAt         DateTime    @updatedAt @db.Timestamp(0)
+  year              String?     @db.VarChar(4)
+  motivationalTexts String[]
+  theme             String
+  isFromInep        Boolean     @default(false)
   simulated         Simulated[]
 }
 
 model SimulatedEssayScore {
   id            Int       @id @default(autoincrement())
-  simulatedId   Int
+  simulatedId   String    @db.Uuid
   criterion     String
   score         Int
   justification String?

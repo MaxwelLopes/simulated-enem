@@ -1,21 +1,21 @@
 import { Discipline } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 
+// Retorna a questão com as alternativas e categorias associadas.
 export const findQuestionById = async (questionId: number) => {
   return await prisma.question.findUnique({
-    where: {
-      id: questionId,
-    },
+    where: { id: questionId },
     include: {
-      questionCategories: {
-        include: {
-          category: true,
-        },
+      categories: {
+        include: { category: true },
       },
+      alternatives: true,
     },
   });
 };
 
+// Busca questões para simulação por disciplina com ORDER BY RANDOM().
+// Usamos $queryRaw para manter a randomização, sem alterar a lógica.
 export const findSimulationQuestionsByDiscipline = async (
   disciplineName: string,
   questionCount: number,
@@ -36,7 +36,7 @@ export const findSimulationQuestionsByDiscipline = async (
         )
       )
       ORDER BY RANDOM()
-      LIMIT ${questionCount};  
+      LIMIT ${questionCount};
     `;
   }
 
@@ -67,6 +67,7 @@ export const findSimulationQuestionsByDiscipline = async (
   `;
 };
 
+// Busca questões para simulação por assunto com ORDER BY RANDOM().
 export const findSimulationQuestionsBySubject = async (
   subjectName: string,
   questionCount: number,
@@ -81,13 +82,13 @@ export const findSimulationQuestionsBySubject = async (
       WHERE "Subject"."name" = ${subjectName}
       AND "Question"."id" NOT IN (
         SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
-        WHERE "SimulatedQuestions"."simulatedId" IN (
+        WHERE "SimulatedQuestion"."simulatedId" IN (
           SELECT "Simulated"."id" FROM "Simulated"
           WHERE "Simulated"."userId" = ${userId}::UUID 
         )
       )
       ORDER BY RANDOM()
-      LIMIT ${questionCount};  
+      LIMIT ${questionCount};
     `;
   }
 
@@ -108,6 +109,7 @@ export const findSimulationQuestionsBySubject = async (
       LIMIT ${questionCount};
     `;
   }
+
   return await prisma.$queryRaw<{ id: number }[]>`
     SELECT "Question"."id" FROM "Question"
     JOIN "Subject" ON "Question"."subjectId" = "Subject"."id"
@@ -117,6 +119,7 @@ export const findSimulationQuestionsBySubject = async (
   `;
 };
 
+// Busca questões para simulação por categoria com ORDER BY RANDOM().
 export const findSimulationQuestionsByCategory = async (
   categoryName: string,
   questionCount: number,
@@ -128,7 +131,7 @@ export const findSimulationQuestionsByCategory = async (
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "Question"."id" FROM "Question"
       JOIN "QuestionCategory" ON "Question"."id" = "QuestionCategory"."questionId"
-      JOIN "Category" ON "QuestionCategory"."categoriesId" = "Category"."id"
+      JOIN "Category" ON "QuestionCategory"."categoryId" = "Category"."id"
       WHERE "Category"."name" = ${categoryName}
       AND "Question"."id" NOT IN (
         SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
@@ -138,7 +141,7 @@ export const findSimulationQuestionsByCategory = async (
         )
       )
       ORDER BY RANDOM()
-      LIMIT ${questionCount};  
+      LIMIT ${questionCount};
     `;
   }
 
@@ -146,7 +149,7 @@ export const findSimulationQuestionsByCategory = async (
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "Question"."id" FROM "Question"
       JOIN "QuestionCategory" ON "Question"."id" = "QuestionCategory"."questionId"
-      JOIN "Category" ON "QuestionCategory"."categoriesId" = "Category"."id"
+      JOIN "Category" ON "QuestionCategory"."categoryId" = "Category"."id"
       WHERE "Category"."name" = ${categoryName}
       AND "Question"."id" IN (
         SELECT "SimulatedQuestion"."questionId" FROM "SimulatedQuestion"
@@ -157,30 +160,29 @@ export const findSimulationQuestionsByCategory = async (
         )
       )
       ORDER BY RANDOM()
-      LIMIT ${questionCount};  
+      LIMIT ${questionCount};
     `;
   }
+
   return await prisma.$queryRaw<{ id: number }[]>`
     SELECT "Question"."id" FROM "Question"
     JOIN "QuestionCategory" ON "Question"."id" = "QuestionCategory"."questionId"
-    JOIN "Category" ON "QuestionCategory"."categoriesId" = "Category"."id"
+    JOIN "Category" ON "QuestionCategory"."categoryId" = "Category"."id"
     WHERE "Category"."name" = ${categoryName}
     ORDER BY RANDOM()
     LIMIT ${questionCount};
   `;
 };
 
+// Busca questões por ano, sem randomização.
 export const findQuestionByYear = async (year: string) => {
   return await prisma.question.findMany({
-    where: {
-      year,
-    },
-    select: {
-      id: true,
-    },
+    where: { year },
+    select: { id: true },
   });
 };
 
+// Busca questões aleatórias, mantendo ORDER BY RANDOM() com $queryRaw.
 export const findQuestionRandom = async (
   questionCount: number,
   userId: string,
@@ -191,109 +193,106 @@ export const findQuestionRandom = async (
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "id"
       FROM "Question"
-      WHERE "Question"."id" NOT IN (
+      WHERE "id" NOT IN (
         SELECT "SimulatedQuestion"."questionId"
         FROM "SimulatedQuestion"
-        WHERE "SimulatedQuestion"."simulatedId" IN (
-          SELECT "Simulated"."id"
+        WHERE "simulatedId" IN (
+          SELECT "id"
           FROM "Simulated"
-          WHERE "Simulated"."userId" = ${userId}::UUID
+          WHERE "userId" = ${userId}::UUID
         )
       )
       ORDER BY RANDOM()
-      LIMIT ${questionCount};`;
+      LIMIT ${questionCount};
+    `;
   }
   if (review) {
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "id"
       FROM "Question"
-      WHERE "Question"."id" IN (
+      WHERE "id" IN (
         SELECT "SimulatedQuestion"."questionId"
         FROM "SimulatedQuestion"
-        WHERE "SimulatedQuestion"."hit" = false
-        AND "SimulatedQuestion"."simulatedId" IN (
-          SELECT "Simulated"."id"
+        WHERE "hit" = false
+        AND "simulatedId" IN (
+          SELECT "id"
           FROM "Simulated"
-          WHERE "Simulated"."userId" = ${userId}::UUID
+          WHERE "userId" = ${userId}::UUID
         )
       )
       ORDER BY RANDOM()
-      LIMIT ${questionCount};`;
+      LIMIT ${questionCount};
+    `;
   }
   return await prisma.$queryRaw<{ id: number }[]>`
     SELECT "id"
     FROM "Question"
     ORDER BY RANDOM()
-    LIMIT ${questionCount};`;
+    LIMIT ${questionCount};
+  `;
 };
 
+// Conta as respostas corretas do usuário.
 export const getCorrectAnswersCountByUserId = async (userId: string) => {
-  const correctAnswers = await prisma.simulatedQuestion.count({
+  return await prisma.simulatedQuestion.count({
     where: {
       hit: true,
-      simulated: {
-        userId: userId,
-      },
+      simulated: { userId },
     },
   });
-
-  return correctAnswers;
 };
 
-// Contar erros gerais e por categoria
+// Conta as respostas incorretas do usuário.
 export const getIncorrectAnswersCountByUserId = async (userId: string) => {
-  const incorrectAnswers = await prisma.simulatedQuestion.count({
+  return await prisma.simulatedQuestion.count({
     where: {
       hit: false,
-      simulated: {
-        userId: userId,
-      },
+      simulated: { userId },
     },
   });
-
-  return incorrectAnswers;
 };
+
+// Busca todas as questões associadas ao usuário (por simulação).
 export const findAllQuestionsByIdUser = async (
   userId: string
-): Promise<{ id: number; context?: string }[]> => {
-  const questions = await prisma.$queryRaw<{ id: number; context?: string }[]>`
-    SELECT "Question"."id", "Question"."context" 
-    FROM "SimulatedQuestion"
-    JOIN "Question" ON "SimulatedQuestion"."questionId" = "Question"."id"
-    WHERE "SimulatedQuestion"."simulatedId" IN (
-      SELECT "Simulated"."id" FROM "Simulated"
-      WHERE "Simulated"."userId" = ${userId}::UUID
-    );
-  `;
-
-  return questions;
+): Promise<{ id: number; context: string | null }[]> => {
+  return await prisma.question.findMany({
+    where: {
+      simulatedQuestions: {
+        some: { simulated: { userId } },
+      },
+    },
+    select: {
+      id: true,
+      context: true,
+    },
+  });
 };
 
+// Calcula a contagem de erros por categoria usando query raw para manter a lógica de joins.
 export const findIncorrectAnswersCountByCategory = async (userId: string) => {
-  const incorrectAnswers = await prisma.$queryRaw<
+  return await prisma.$queryRaw<
     { category: string; incorrectCount: number }[]
   >`
     SELECT c."name" AS category, COUNT(*)::int AS "incorrectCount"
     FROM "SimulatedQuestion" AS sq
     JOIN "Question" AS q ON sq."questionId" = q."id"
     JOIN "QuestionCategory" AS qc ON q."id" = qc."questionId"
-    JOIN "Category" AS c ON qc."categoryId" = c."id"  -- Corrigido aqui
+    JOIN "Category" AS c ON qc."categoryId" = c."id"
     WHERE sq."simulatedId" IN (
       SELECT s."id" FROM "Simulated" AS s
       WHERE s."userId" = ${userId}::UUID
     ) AND sq."hit" = false
     GROUP BY c."name";
   `;
-
-  return incorrectAnswers;
 };
 
-// Repository Function for Correct Answers
+// Calcula a contagem de acertos por categoria usando query raw.
 export const findCorrectAnswersCountByCategory = async (userId: string) => {
-  const correctAnswers = await prisma.$queryRaw<
+  return await prisma.$queryRaw<
     { category: string; correctCount: number }[]
   >`
-    SELECT c."name" AS category, COUNT(*)::int AS "correctCount"  -- for consistency with Prisma
+    SELECT c."name" AS category, COUNT(*)::int AS "correctCount"
     FROM "SimulatedQuestion" AS sq
     JOIN "Question" AS q ON sq."questionId" = q."id"
     JOIN "QuestionCategory" AS qc ON q."id" = qc."questionId"
@@ -304,10 +303,9 @@ export const findCorrectAnswersCountByCategory = async (userId: string) => {
     ) AND sq."hit" = true
     GROUP BY c."name";
   `;
-
-  return correctAnswers;
 };
 
+// Busca questões por disciplina sem randomização.
 export const findQuestionByDiscipline = async (discipline: Discipline) => {
   return await prisma.question.findMany({
     where: { disciplineId: discipline.id },
@@ -315,23 +313,18 @@ export const findQuestionByDiscipline = async (discipline: Discipline) => {
   });
 };
 
+// Busca questões associadas ao usuário via simulação.
 export const findQuestionsByUser = async (userId: string) => {
-  return prisma.simulatedQuestion.findMany({
-    where: {
-      simulated: { userId: userId }
-    },
+  return await prisma.simulatedQuestion.findMany({
+    where: { simulated: { userId } },
     select: {
       hit: true,
       question: {
         select: {
           disciplineId: true,
-          discipline: {
-            select: {
-              name: true
-            }
-          }
-        }
-      }
-    }
+          discipline: { select: { name: true } },
+        },
+      },
+    },
   });
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { Question } from "@prisma/client";
+import { Question, Alternative } from "@prisma/client";
 import AlternativeItem from "./AlternativeItem";
 import { useQuestion } from "../hook/Question";
 import TextFormatter from "../utils/utils";
@@ -8,13 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Separator } from "@radix-ui/react-select";
 
-interface QuestionWithCategories extends Question {
+// Atualizamos a interface para refletir a nova estrutura:
+interface QuestionWithCategories
+  extends Omit<
+    Question,
+    "alternativeA" | "alternativeB" | "alternativeC" | "alternativeD" | "alternativeE"
+  > {
   questionCategories: {
     category: {
-      name: string;
       id: number;
+      name: string;
     };
   }[];
+  // Agora as alternativas vêm como um array:
+  alternatives: Alternative[];
 }
 
 type props = {
@@ -41,12 +48,8 @@ export const QuestionView = ({
     disciplineId,
     subjectId,
     alternativesIntroduction,
-    alternativeA,
-    alternativeB,
-    alternativeC,
-    alternativeD,
-    alternativeE,
     questionCategories,
+    alternatives,
   } = currentQuestion.question;
 
   const response = currentQuestion.selectedResponse;
@@ -100,47 +103,21 @@ export const QuestionView = ({
           </>
         )}
         <div className="space-y-4">
-          <AlternativeItem
-            letter="A"
-            text={alternativeA}
-            response={response}
-            setResponse={setResponse}
-            simulationStatus={simulationStatus}
-            handleAnswerQuestion={handleAnswerQuestion}
-          />
-          <AlternativeItem
-            letter="B"
-            text={alternativeB}
-            response={response}
-            setResponse={setResponse}
-            simulationStatus={simulationStatus}
-            handleAnswerQuestion={handleAnswerQuestion}
-          />
-          <AlternativeItem
-            letter="C"
-            text={alternativeC}
-            response={response}
-            setResponse={setResponse}
-            simulationStatus={simulationStatus}
-            handleAnswerQuestion={handleAnswerQuestion}
-          />
-          <AlternativeItem
-            letter="D"
-            text={alternativeD}
-            response={response}
-            setResponse={setResponse}
-            simulationStatus={simulationStatus}
-            handleAnswerQuestion={handleAnswerQuestion}
-          />
-          <AlternativeItem
-            letter="E"
-            text={alternativeE}
-            response={response}
-            setResponse={setResponse}
-            simulationStatus={simulationStatus}
-            handleAnswerQuestion={handleAnswerQuestion}
-          />
+          {[...alternatives]
+            .sort((a, b) => a.letter.localeCompare(b.letter))
+            .map((alt) => (
+              <AlternativeItem
+                key={alt.id}
+                letter={alt.letter}
+                text={alt.text}
+                response={response}
+                setResponse={setResponse}
+                simulationStatus={simulationStatus}
+                handleAnswerQuestion={handleAnswerQuestion}
+              />
+            ))}
         </div>
+
       </CardContent>
     </Card>
   );
