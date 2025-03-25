@@ -3,7 +3,7 @@ import { useState } from "react";
 export const useSimulatedCreate = () => {
   const [typeOfSimulated, setTypeOfSimulated] =
     useState<string>("Área de estudo");
-  const [questionCount, setQuestionCount] = useState<number>(10);
+  const [questionCount, setQuestionCount] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
   const [unseen, setUnseen] = useState<boolean>(false);
   const [review, setReview] = useState<boolean>(false);

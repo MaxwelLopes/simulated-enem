@@ -1,4 +1,4 @@
-import { Essay } from "@prisma/client";
+import { Essay, Simulated } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 import { SimulatedStatus } from "../enum/simulated";
 import { SimulatedType } from "../enum/simulated";
@@ -13,23 +13,6 @@ interface CreateSimulatedInput {
   review?: boolean;
 }
 
-interface SimulatedOutput {
-  id: string;
-  type: string;
-  userId: string;
-  essayId: number | null;
-  subtype: string[];
-  unseen: boolean | null;
-  review: boolean | null;
-  correctAnswers: number;
-  totalQuestions: number;
-  createdAt: Date;
-  finishedAt: Date | null;
-  status: string;
-  completionTimeSeconds: number | null;
-  userText: string | null;
-}
-
 export const createSimulated = async ({
   type,
   userId,
@@ -38,19 +21,22 @@ export const createSimulated = async ({
   questionsId,
   unseen = false,
   review = false,
-}: CreateSimulatedInput): Promise<SimulatedOutput> => {
+}: CreateSimulatedInput): Promise<Simulated> => {
   try {
     // Validação básica dos dados
     if (!type || !userId) {
-      throw new Error('Type and userId are required.');
+      throw new Error("Type and userId are required.");
     }
 
-    if (type !== SimulatedType.ESSAY && (!questionsId || questionsId.length === 0)) {
-      throw new Error('Questions are required for non-essay simulations.');
+    if (
+      type !== SimulatedType.ESSAY &&
+      (!questionsId || questionsId.length === 0)
+    ) {
+      throw new Error("Questions are required for non-essay simulations.");
     }
 
     if (type === SimulatedType.ESSAY && !essayId) {
-      throw new Error('EssayId is required for essay simulations.');
+      throw new Error("EssayId is required for essay simulations.");
     }
 
     // Criação do simulado
@@ -80,8 +66,8 @@ export const createSimulated = async ({
 
     return simulated;
   } catch (error) {
-    console.error('Error creating simulated:', error);
-    throw new Error('Failed to create simulated.');
+    console.error("Error creating simulated:", error);
+    throw new Error("Failed to create simulated.");
   }
 };
 
@@ -141,7 +127,7 @@ export const updateSimulated = async (params: UpdateSimulatedParams) => {
       correctAnswers: hits,
       finishedAt: new Date(),
       userText,
-      essayScore
+      essayScore,
     },
   });
 };
@@ -211,6 +197,18 @@ export const getEssayScores = async (simulatedId: string) => {
   return await prisma.simulatedEssayScore.findMany({
     where: {
       simulatedId,
+    },
+  });
+};
+
+export const findEssayBySimulatedId = async (simulatedId: string) => {
+  return await prisma.essay.findFirst({
+    where: {
+      simulated: {
+        some: {
+          id: simulatedId,
+        },
+      },
     },
   });
 };

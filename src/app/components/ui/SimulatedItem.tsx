@@ -36,10 +36,10 @@ export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {
   useEffect(() => {
     if (simulated && simulated.type === SimulatedType.ESSAY) {
       const fetchTheme = async () => {
-          const theme = await getTheme(simulated.id); 
-          setEssayTheme(theme ?? null); 
+        const theme = await getTheme(simulated.id);
+        setEssayTheme(theme ?? null);
       };
-      fetchTheme(); 
+      fetchTheme();
     } else {
       setEssayTheme(null);
     }
@@ -49,7 +49,17 @@ export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {
     <Card className="h-full flex flex-col justify-between">
       <CardHeader>
         <CardTitle>{simulated.type}</CardTitle>
-        <p className="text-sm text-muted-foreground line-clamp-2 pt-2">{simulated.subtype.join(", ")}</p>
+        {essayTheme && (
+          <div className="flex items-start gap-2">
+            <FileText className="h-4 w-4 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Tema:</p>
+              <p className="text-sm text-muted-foreground">{essayTheme}</p>
+            </div>
+          </div>
+        )}
+        {simulated.type !== SimulatedType.ESSAY && <p className="text-sm text-muted-foreground line-clamp-2 pt-2">{simulated.subtype.join(", ")}</p>}
+
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2 mb-4">
@@ -60,19 +70,10 @@ export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {
 
         {simulated.type === SimulatedType.ESSAY ? (
           <div className="space-y-2">
-            {essayTheme && (
-              <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">Tema:</p>
-                  <p className="text-sm text-muted-foreground">{essayTheme}</p>
-                </div>
-              </div>
-            )}
             {simulated.status === SimulatedStatus.COMPLETED && simulated.essayScore !== undefined && (
               <div className="flex items-center gap-2 mt-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Nota: {simulated.essayScore}</span>
+                <span>Nota da redação: {simulated.essayScore}</span>
               </div>
             )}
           </div>

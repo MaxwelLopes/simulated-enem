@@ -5,6 +5,8 @@ import {
   // answerQuestion, // Caso necessário, adicione funções para enviar respostas.
 } from "../service/simualationService";
 import { getQuestion } from "../service/QuestionService";
+import { getEssayById } from "../repositories/essayRepository";
+import { getEssayBySimulatedId } from "../service/essayService";
 
 interface QuestionOrderItem {
   id: number;
@@ -18,20 +20,13 @@ interface QuestionCacheItem {
 }
 
 export const useSimulation = () => {
-  // ID do simulado
   const [simulatedId, setSimulatedId] = useState<string | null>(null);
-  // Ordem das questões (com resposta já salva, se houver)
   const [questionOrder, setQuestionOrder] = useState<QuestionOrderItem[]>([]);
-  // Cache de questões carregadas
   const [questionsCache, setQuestionsCache] = useState<
     Record<number, QuestionCacheItem>
   >({});
-  // Índice da questão atual
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Estado de loading
   const [loading, setLoading] = useState(false);
-
-  // Estados extras para redação
   const [simulationStatus, setSimulationStatus] = useState<string | null>(null);
   const [essay, setEssay] = useState<any>(null);
   const [showEssayInstructions, setShowEssayInstructions] =
@@ -39,27 +34,35 @@ export const useSimulation = () => {
   const [showEssay, setShowEssay] = useState<boolean>(false);
   const [showEssayForm, setShowEssayForm] = useState<boolean>(false);
 
-  // Quando o simulatedId for definido, busca a ordem das questões.
   useEffect(() => {
+    setLoading(true);
     if (simulatedId) {
       fetchQuestionsOrder(simulatedId);
+      fetchEssay(simulatedId);
     }
+    setLoading(false);
   }, [simulatedId]);
 
   const fetchQuestionsOrder = async (simulatedId: string) => {
-    setLoading(true);
     try {
       const simulatedQuestions = await getQuestionOfSimulated(simulatedId);
       const questionIds = simulatedQuestions.map((q: any, index: number) => ({
         id: q.questionId,
         index,
-        response: q.response, // Pode conter resposta já salva.
+        response: q.response,
       }));
       setQuestionOrder(questionIds);
     } catch (error) {
       console.error("Erro ao buscar questões do simulado:", error);
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const fetchEssay = async (simulatedId: string) => {
+    const essay = await getEssayBySimulatedId(simulatedId);
+    if (essay) {
+      setShowEssayInstructions(true);
+      setEssay(essay);
+      setShowEssay(true);
     }
   };
 
@@ -102,8 +105,6 @@ export const useSimulation = () => {
   const handleAnswerQuestion = (response: string) => {
     if (response !== "") {
       const { question } = questionsCache[questionOrder[currentIndex].id];
-      const selectedResponse =
-        questionsCache[questionOrder[currentIndex].id].response;
 
       answerQuestion(
         simulatedId!,
@@ -127,7 +128,11 @@ export const useSimulation = () => {
   };
 
   const nextQuestion = () => {
-    if (currentIndex < questionOrder.length - 1) {
+    if (showEssay) {
+      setCurrentIndex(0);
+      loadQuestion(questionOrder[0].id);
+      setShowEssay(false);
+    } else if (currentIndex + 1 < questionOrder.length) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
       loadQuestion(questionOrder[nextIndex].id);
@@ -135,8 +140,12 @@ export const useSimulation = () => {
   };
 
   const previousQuestion = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+    if (currentIndex === 0) {
+      setShowEssay(true);
+    } else {
+      const newIndex = currentIndex - 1;
+      setCurrentIndex(newIndex);
+      loadQuestion(questionOrder[newIndex].id);
     }
   };
 

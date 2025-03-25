@@ -1,5 +1,6 @@
 "use server";
 
+import { Essay, Simulated } from "@prisma/client";
 import { SimulatedStatus, SimulatedType } from "../enum/simulated";
 import { createEssay, getEssayByYear } from "../repositories/essayRepository";
 import {
@@ -36,13 +37,16 @@ type Input = {
 
 export const createSimulated = async ({
   typeOfSimulated,
-  questionCount = 10,
+  questionCount = 1,
   unseen,
   review,
   subtypes,
   userId,
   nonInepEssay = false,
-}: Input): Promise<boolean | undefined> => {
+}: Input): Promise<string | boolean | undefined> => {
+  if (typeOfSimulated !== SimulatedType.ESSAY && typeOfSimulated !== SimulatedType.YEAR && (questionCount < 1 || questionCount > 180)) {
+    return false;
+  }
   if (typeOfSimulated === SimulatedType.GENERAL) {
     try {
       let questions: { id: number }[] = await findQuestionRandom(
@@ -55,13 +59,16 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory({
+      const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
         userId,
         subtype: subtypes,
         questionsId: questions,
       });
-      return true;
+      if (simulated) {
+        return simulated.id;
+      }
+      return false;
     } catch {}
   }
 
@@ -91,13 +98,16 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory({
+      const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
         userId,
         subtype: subtypes,
         questionsId: questions,
       });
-      return true;
+      if (simulated) {
+        return simulated.id;
+      }
+      return false;
     } catch {}
   }
 
@@ -125,13 +135,16 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory({
+      const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
         userId,
         subtype: subtypes,
         questionsId: questions,
       });
-      return true;
+      if (simulated) {
+        return simulated.id;
+      }
+      return false;
     } catch {}
   }
 
@@ -159,13 +172,16 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory({
+      const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
         userId,
         subtype: subtypes,
         questionsId: questions,
       });
-      return true;
+      if (simulated) {
+        return simulated.id;
+      }
+      return false;
     } catch {}
   }
 
@@ -175,13 +191,16 @@ export const createSimulated = async ({
       if (questions.length < 1) {
         return false;
       }
-      createSimulatedInRepostitory({
+      const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
         userId,
         subtype: subtypes,
         questionsId: questions,
       });
-      return true;
+      if (simulated) {
+        return simulated.id;
+      }
+      return false;
     } catch {}
   }
 
@@ -201,25 +220,31 @@ export const createSimulated = async ({
           throw new Error("Falha ao criar.");
         }
 
-        createSimulatedInRepostitory({
+        const simulated: Simulated = await createSimulatedInRepostitory({
           type: typeOfSimulated,
           userId,
           subtype: subtypes,
           essayId: essay.id,
         });
+        if (simulated) {
+          return simulated.id;
+        }
       } else {
         const essay = await getEssayByYear(subtypes[0]);
         if (!essay || !essay.id) {
           throw new Error("Falha ao obter a redação.");
         }
-        createSimulatedInRepostitory({
+        const simulated: Simulated = await createSimulatedInRepostitory({
           type: typeOfSimulated,
           userId,
           subtype: subtypes,
           essayId: essay.id,
         });
+        if (simulated) {
+          return simulated.id;
+        }
       }
-      return true;
+      return false;
     } catch {}
   }
 };

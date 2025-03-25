@@ -7,7 +7,10 @@ import {
   createEssayScore,
   findEssayById,
 } from "../repositories/essayRepository";
-import { updateSimulated } from "../repositories/simulatedRepository";
+import {
+  findEssayBySimulatedId,
+  updateSimulated,
+} from "../repositories/simulatedRepository";
 import { getSimulatedById } from "./simualationService";
 
 export const generateTheme = async () => {
@@ -151,7 +154,11 @@ export const evalueEssay = async (
       zeroEvaluation.motivo,
       simulatedId
     );
-    updateSimulated({ simulatedId, status: SimulatedStatus.COMPLETED, essayScore: 0 });
+    updateSimulated({
+      simulatedId,
+      status: SimulatedStatus.COMPLETED,
+      essayScore: 0,
+    });
     return { message: "Redação anulada", motivo: zeroEvaluation.motivo };
   }
 
@@ -200,7 +207,11 @@ export const evalueEssay = async (
     essayScore += evaluation.nota;
   }
 
-  updateSimulated({ simulatedId, status: SimulatedStatus.COMPLETED, essayScore });
+  updateSimulated({
+    simulatedId,
+    status: SimulatedStatus.COMPLETED,
+    essayScore,
+  });
 };
 
 export const getTheme = async (simulatedId: string) => {
@@ -209,6 +220,10 @@ export const getTheme = async (simulatedId: string) => {
   return essay?.theme;
 };
 
-export const getEssayById = (id: number) => {
+export const getEssayById = async (id: number) => {
   return findEssayById(id);
+};
+
+export const getEssayBySimulatedId = async (id: string) => {
+  return await findEssayBySimulatedId(id);
 };

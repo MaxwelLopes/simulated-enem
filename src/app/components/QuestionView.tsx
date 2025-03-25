@@ -56,7 +56,7 @@ export const QuestionView = ({
   const { disciplineName, subjectName } = useQuestion(disciplineId, subjectId);
 
   return (
-    <Card className="w-full max-w-4xl mx-auto my-8">
+    <Card className="w-full max-w-4xl mx-auto my-8 mt-24">
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-3xl font-bold">Questão {index}</CardTitle>

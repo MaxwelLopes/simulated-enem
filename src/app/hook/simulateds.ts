@@ -33,6 +33,7 @@ export const useSimulateds = () => {
   return {
     simulatedList,
     loading,
+    setLoading,
     error,
   };
 };

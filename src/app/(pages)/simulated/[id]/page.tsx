@@ -12,6 +12,7 @@ type ParamsType = {
 export const SimulationPage = ({ params }: ParamsType) => {
   return (
     <>
+      <NavBar/>
       <Simulation id={params.id} />
     </>
   );

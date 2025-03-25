@@ -66,7 +66,7 @@ const CreateSimulated = () => {
     const userId = user ? user.id : null;
     if (userId) {
       setLoading(true);
-      const success = await createSimulated({
+      const simulatedId = await createSimulated({
         typeOfSimulated,
         questionCount,
         error,
@@ -78,7 +78,9 @@ const CreateSimulated = () => {
       });
 
       setLoading(false);
-      if (success) router.push("/simulated");
+      if (simulatedId) {
+        router.push(`/simulated/${simulatedId}`)
+      }
       else {
         setError("Não foi possível criar um simulado com essa combinação!");
       }
@@ -302,7 +304,7 @@ const CreateSimulated = () => {
                     value={questionCount}
                     onChange={(e) => setQuestionCount(Number(e.target.value))}
                     min={1}
-                    max={2700}
+                    max={180}
                     className="w-full"
                   />
                 </div>

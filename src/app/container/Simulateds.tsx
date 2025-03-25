@@ -11,16 +11,17 @@ import { SimulatedStatus, SimulatedType } from "../enum/simulated";
 
 const SimulatedList = () => {
   const router = useRouter();
-  const { simulatedList, loading } = useSimulateds();
+  const { simulatedList, setLoading, loading } = useSimulateds();
 
   const handleSelectSimulated = (id: string, simulated: Simulated) => {
+    setLoading(true);
     if (simulated.type === SimulatedType.ESSAY && simulated.status !== SimulatedStatus.PENDING ) {
       router.push(`/simulationResult/${id}`);
 
     } else {
       router.push(`/simulated/${id}`);
-
     }
+    setLoading(false);
   }
 
   if (loading) {
