@@ -74,7 +74,6 @@ Retorne **apenas** um JSON válido no seguinte formato, sem explicações adicio
   try {
     const response = await generateText({ role, prompt, temperature });
     const cleanedResponse = response.replace(/```json|```/g, "").trim();
-    console.log(response);
     return JSON.parse(cleanedResponse);
   } catch (error) {
     console.error("Erro ao processar a resposta do modelo:", error);
@@ -123,7 +122,6 @@ Responda com apenas o JSON, sem quaisquer explicações ou formatação extra.`;
   const temperature = 0;
   const response = await generateText({ role, prompt, temperature });
   const cleanedResponse = response.replace(/```json|```/g, "").trim();
-  console.log(response);
   return JSON.parse(cleanedResponse);
 };
 

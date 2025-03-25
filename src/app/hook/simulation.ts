@@ -131,7 +131,6 @@ export const useSimulation = () => {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
       loadQuestion(questionOrder[nextIndex].id);
-      console.log(currentIndex, questionOrder, questionsCache);
     }
   };
 

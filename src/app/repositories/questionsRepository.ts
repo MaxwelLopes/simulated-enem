@@ -76,7 +76,6 @@ export const findSimulationQuestionsBySubject = async (
   unseen: boolean,
   review: boolean
 ): Promise<{ id: number }[]> => {
-  console.log(subjectName, questionCount, userId, unseen, review);
   if (unseen) {
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "Question"."id" FROM "Question"
@@ -118,7 +117,6 @@ export const findSimulationQuestionsBySubject = async (
     ORDER BY RANDOM()
     LIMIT ${questionCount};
 `;
-  console.log(teste, "chegou aqui :D");
   return teste;
 };
 

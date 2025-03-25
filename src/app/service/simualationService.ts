@@ -43,8 +43,6 @@ export const createSimulated = async ({
   userId,
   nonInepEssay = false,
 }: Input): Promise<boolean | undefined> => {
-  console.log(typeOfSimulated, questionCount, unseen, review, subtypes, userId);
-
   if (typeOfSimulated === SimulatedType.GENERAL) {
     try {
       let questions: { id: number }[] = await findQuestionRandom(
@@ -124,7 +122,6 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
-      console.log(questions);
       if (questions.length < 1) {
         return false;
       }

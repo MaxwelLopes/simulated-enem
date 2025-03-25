@@ -119,6 +119,5 @@ export const getDisciplineAffinity = async (
       return { name: disciplineName, affinity };
     }
   );
-  console.log(disciplineAffinity);
   return disciplineAffinity;
 };

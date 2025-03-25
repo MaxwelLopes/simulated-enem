@@ -44,7 +44,6 @@ function formatText(text: string) {
         case 'italic':
           return <em key={`${lineIndex}-${index}`}>{segment.content}</em>;
         case 'img':
-          console.log(segment.content);
           return <img key={`${lineIndex}-${index}`} src={`/imgs/${segment.content}`} alt="Imagem" />;
         default:
           return <span key={`${lineIndex}-${index}`}>{segment.content}</span>;

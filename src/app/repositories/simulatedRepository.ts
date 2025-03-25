@@ -204,9 +204,6 @@ export async function findUnseenEssayForUser(
       },
     },
   });
-
-  console.log(result);
-
   return result;
 }
 
