@@ -1,5 +1,6 @@
 "use server";
 
+import { Question } from "@prisma/client";
 import { getAnswersCountByUserIdAndCategory } from "../repositories/categoryRepository";
 import {
   findAllQuestionsByIdUser,
@@ -52,7 +53,7 @@ export const getUserAnswersCountByCategory = async (
 // Função que retorna todas as questões de um usuário
 export const getAllQuestionsByUserId = async (
   userId: string
-): Promise<{ id: number; context?: string }[]> => {
+): Promise<{ id: number; context: string | null }[]> => {
   const allQuestions = await findAllQuestionsByIdUser(userId);
   return allQuestions;
 };

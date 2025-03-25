@@ -3,6 +3,33 @@ import { prisma } from "../../../prisma/prisma";
 import { SimulatedStatus } from "../enum/simulated";
 import { SimulatedType } from "../enum/simulated";
 
+interface CreateSimulatedInput {
+  type: string;
+  userId: string;
+  essayId?: number;
+  subtype?: string[];
+  questionsId?: { id: number }[];
+  unseen?: boolean;
+  review?: boolean;
+}
+
+interface SimulatedOutput {
+  id: string;
+  type: string;
+  userId: string;
+  essayId: number | null;
+  subtype: string[];
+  unseen: boolean | null;
+  review: boolean | null;
+  correctAnswers: number;
+  totalQuestions: number;
+  createdAt: Date;
+  finishedAt: Date | null;
+  status: string;
+  completionTimeSeconds: number | null;
+  userText: string | null;
+}
+
 export const createSimulated = async ({
   type,
   userId,
@@ -11,67 +38,51 @@ export const createSimulated = async ({
   questionsId,
   unseen = false,
   review = false,
-}: {
-  type: string;
-  userId: string;
-  essayId?: number;
-  subtype?: string[];
-  questionsId?: { id: number }[];
-  unseen?: boolean;
-  review?: boolean;
-}) => {
-  let simulated: {
-    type: string;
-    userId: string;
-    essayId: number | null;
-    subtype: string[];
-    unseen: boolean | null;
-    review: boolean | null;
-    id: number;
-    correctAnswers: number;
-    totalQuestions: number;
-    createdAt: Date;
-    finishedAt: Date | null;
-    status: string;
-    completionTimeSeconds: number | null;
-    userText: string | null;
-  } | null = null;
-  if (type !== SimulatedType.ESSAY) {
-    const totalQuestions = questionsId?.length;
+}: CreateSimulatedInput): Promise<SimulatedOutput> => {
+  try {
+    // Validação básica dos dados
+    if (!type || !userId) {
+      throw new Error('Type and userId are required.');
+    }
 
-    simulated = await prisma.simulated.create({
+    if (type !== SimulatedType.ESSAY && (!questionsId || questionsId.length === 0)) {
+      throw new Error('Questions are required for non-essay simulations.');
+    }
+
+    if (type === SimulatedType.ESSAY && !essayId) {
+      throw new Error('EssayId is required for essay simulations.');
+    }
+
+    // Criação do simulado
+    const simulated = await prisma.simulated.create({
       data: {
         type,
         userId,
         subtype,
-        totalQuestions,
+        totalQuestions: questionsId?.length || 0,
         status: SimulatedStatus.PENDING,
         unseen,
         review,
-        ...(essayId && { essayId: essayId }),
+        ...(essayId && { essayId }),
       },
     });
 
-    if (questionsId && simulated) {
+    // Criação das questões associadas (se houver)
+    if (questionsId && questionsId.length > 0) {
       await prisma.simulatedQuestion.createMany({
         data: questionsId.map((question) => ({
-          simulatedId: simulated!.id,
+          simulatedId: simulated.id,
           questionId: question.id,
           hit: null,
         })),
       });
     }
-  } else if (essayId) {
-    simulated = await prisma.simulated.create({
-      data: {
-        type,
-        userId,
-        essayId,
-        status: SimulatedStatus.PENDING,
-      },
-    });
+
+    return simulated;
+  } catch (error) {
+    console.error('Error creating simulated:', error);
+    throw new Error('Failed to create simulated.');
   }
-  return simulated!;
 };
 
 export const findSimulatedByUserId = async (userId: string) => {
@@ -82,7 +93,7 @@ export const findSimulatedByUserId = async (userId: string) => {
   });
 };
 
-export const findQuestionsBySimulationId = async (simulatedId: number) => {
+export const findQuestionsBySimulationId = async (simulatedId: string) => {
   return await prisma.simulatedQuestion.findMany({
     where: {
       simulatedId: simulatedId,
@@ -91,7 +102,7 @@ export const findQuestionsBySimulationId = async (simulatedId: number) => {
 };
 
 export const updateAnswerBySilulation = async (
-  simulatedId: number,
+  simulatedId: string,
   questionId: number,
   hit: boolean,
   response: string
@@ -112,7 +123,7 @@ export const updateAnswerBySilulation = async (
 };
 
 interface UpdateSimulatedParams {
-  simulatedId: number;
+  simulatedId: string;
   status: string;
   essayScore?: number;
   hits?: number;
@@ -135,7 +146,7 @@ export const updateSimulated = async (params: UpdateSimulatedParams) => {
   });
 };
 
-export const findSimulatedById = async (id: number) => {
+export const findSimulatedById = async (id: string) => {
   return await prisma.simulated.findUnique({
     where: {
       id,
@@ -143,7 +154,7 @@ export const findSimulatedById = async (id: number) => {
   });
 };
 
-export const findResponse = async (simulatedId: number, questionId: number) => {
+export const findResponse = async (simulatedId: string, questionId: number) => {
   return await prisma.simulatedQuestion.findFirst({
     where: {
       simulatedId,
@@ -156,7 +167,7 @@ export const findResponse = async (simulatedId: number, questionId: number) => {
 };
 
 export const getCountCorrectAnswersBySimulatedId = async (
-  simulatedId: number
+  simulatedId: string
 ) => {
   const correctAnswersCount = await prisma.simulatedQuestion.count({
     where: {
@@ -199,7 +210,7 @@ export async function findUnseenEssayForUser(
   return result;
 }
 
-export const getEssayScores = async (simulatedId: number) => {
+export const getEssayScores = async (simulatedId: string) => {
   return await prisma.simulatedEssayScore.findMany({
     where: {
       simulatedId,

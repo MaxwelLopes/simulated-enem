@@ -50,7 +50,7 @@ export const createEssayScore = async (
   criterion: string,
   score: number,
   justification: string,
-  simulatedId: number
+  simulatedId: string
 ) => {
   return await prisma.simulatedEssayScore.create({
     data: {

@@ -1,5 +1,6 @@
 import { Discipline } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
+import { use } from "react";
 
 // Retorna a questão com as alternativas e categorias associadas.
 export const findQuestionById = async (questionId: number) => {
@@ -75,6 +76,7 @@ export const findSimulationQuestionsBySubject = async (
   unseen: boolean,
   review: boolean
 ): Promise<{ id: number }[]> => {
+  console.log(subjectName, questionCount, userId, unseen, review);
   if (unseen) {
     return await prisma.$queryRaw<{ id: number }[]>`
       SELECT "Question"."id" FROM "Question"
@@ -109,14 +111,15 @@ export const findSimulationQuestionsBySubject = async (
       LIMIT ${questionCount};
     `;
   }
-
-  return await prisma.$queryRaw<{ id: number }[]>`
+  const teste = await prisma.$queryRaw<{ id: number }[]>`
     SELECT "Question"."id" FROM "Question"
     JOIN "Subject" ON "Question"."subjectId" = "Subject"."id"
     WHERE "Subject"."name" = ${subjectName}
     ORDER BY RANDOM()
     LIMIT ${questionCount};
-  `;
+`;
+  console.log(teste, "chegou aqui :D");
+  return teste;
 };
 
 // Busca questões para simulação por categoria com ORDER BY RANDOM().
@@ -271,9 +274,7 @@ export const findAllQuestionsByIdUser = async (
 
 // Calcula a contagem de erros por categoria usando query raw para manter a lógica de joins.
 export const findIncorrectAnswersCountByCategory = async (userId: string) => {
-  return await prisma.$queryRaw<
-    { category: string; incorrectCount: number }[]
-  >`
+  return await prisma.$queryRaw<{ category: string; incorrectCount: number }[]>`
     SELECT c."name" AS category, COUNT(*)::int AS "incorrectCount"
     FROM "SimulatedQuestion" AS sq
     JOIN "Question" AS q ON sq."questionId" = q."id"
@@ -289,9 +290,7 @@ export const findIncorrectAnswersCountByCategory = async (userId: string) => {
 
 // Calcula a contagem de acertos por categoria usando query raw.
 export const findCorrectAnswersCountByCategory = async (userId: string) => {
-  return await prisma.$queryRaw<
-    { category: string; correctCount: number }[]
-  >`
+  return await prisma.$queryRaw<{ category: string; correctCount: number }[]>`
     SELECT c."name" AS category, COUNT(*)::int AS "correctCount"
     FROM "SimulatedQuestion" AS sq
     JOIN "Question" AS q ON sq."questionId" = q."id"

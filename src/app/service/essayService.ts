@@ -136,7 +136,7 @@ export const createEssay = async (
 };
 
 export const evalueEssay = async (
-  simulatedId: number,
+  simulatedId: string,
   essay: string,
   theme: string
 ) => {
@@ -205,7 +205,7 @@ export const evalueEssay = async (
   updateSimulated({ simulatedId, status: SimulatedStatus.COMPLETED, essayScore });
 };
 
-export const getTheme = async (simulatedId: number) => {
+export const getTheme = async (simulatedId: string) => {
   const simulated = await getSimulatedById(simulatedId);
   const essay = await getEssayById(simulated?.essayId as number);
   return essay?.theme;

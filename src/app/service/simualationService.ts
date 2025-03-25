@@ -124,6 +124,7 @@ export const createSimulated = async ({
           if (questionsId) questions.push(...questionsId);
         })
       );
+      console.log(questions);
       if (questions.length < 1) {
         return false;
       }
@@ -231,12 +232,12 @@ export const getSimulations = async (userId: string) => {
   return simulations;
 };
 
-export const getQuestionOfSimulated = async (simulatedId: number) => {
+export const getQuestionOfSimulated = async (simulatedId: string) => {
   return await findQuestionsBySimulationId(simulatedId);
 };
 
 export const answerQuestion = async (
-  simulatedId: number,
+  simulatedId: string,
   questionId: number,
   rightAnswer: string,
   response: string
@@ -247,26 +248,26 @@ export const answerQuestion = async (
     await updateAnswerBySilulation(simulatedId, questionId, hit, response);
 };
 
-export const finishSimulation = async (simulatedId: number) => {
+export const finishSimulation = async (simulatedId: string) => {
   const hits = await getCountCorrectAnswersBySimulatedId(simulatedId);
   const status = SimulatedStatus.COMPLETED;
   await updateSimulated({ simulatedId, status, hits });
 };
 
-export const getSimulationStatus = async (id: number) => {
+export const getSimulationStatus = async (id: string) => {
   const simulation = await findSimulatedById(id);
   return simulation?.status || null;
 };
 
-export const getResponse = async (simulatedId: number, questionId: number) => {
+export const getResponse = async (simulatedId: string, questionId: number) => {
   return await findResponse(simulatedId, questionId);
 };
 
-export const getSimulatedById = async (id: number) => {
+export const getSimulatedById = async (id: string) => {
   return await findSimulatedById(id);
 };
 
-export const getCriteria = async (simulatedId: number) => {
+export const getCriteria = async (simulatedId: string) => {
   const scores = await getEssayScores(simulatedId);
   const criteria = scores.map((score) => {
     return {
@@ -278,7 +279,7 @@ export const getCriteria = async (simulatedId: number) => {
   return criteria;
 };
 
-export const getUserText = async (simulatedId: number) => {
+export const getUserText = async (simulatedId: string) => {
   const simulated = await findSimulatedById(simulatedId);
   return simulated?.userText || null;
 };
