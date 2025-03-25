@@ -27,7 +27,7 @@ export function getStatusBadge(status: string) {
 
 interface SimulatedItemProps {
   simulated: Simulated
-  onSelect: (id: number, simulated: Simulated) => void
+  onSelect: (id: string, simulated: Simulated) => void
 }
 
 export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {

@@ -6,9 +6,8 @@ import { useQuestion } from "../hook/Question";
 import TextFormatter from "../utils/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Separator } from "@radix-ui/react-select";
+import { Separator } from "@radix-ui/react-separator";
 
-// Atualizamos a interface para refletir a nova estrutura:
 interface QuestionWithCategories
   extends Omit<
     Question,
@@ -20,20 +19,19 @@ interface QuestionWithCategories
       name: string;
     };
   }[];
-  // Agora as alternativas vêm como um array:
   alternatives: Alternative[];
 }
 
-type props = {
+type QuestionViewProps = {
   currentQuestion: {
     question: QuestionWithCategories;
-    selectedResponse: string;
+    // Alinhado com o hook, usamos "response" em vez de "selectedResponse"
+    response: string;
     index: number;
   };
-  setResponse: Function;
+  setResponse: (response: string) => void;
   simulationStatus: string | null;
-  setLoading: Function;
-  handleAnswerQuestion: Function;
+  handleAnswerQuestion: (response: string) => void;
 };
 
 export const QuestionView = ({
@@ -41,7 +39,7 @@ export const QuestionView = ({
   setResponse,
   simulationStatus,
   handleAnswerQuestion,
-}: props) => {
+}: QuestionViewProps) => {
   const {
     year,
     context,
@@ -52,9 +50,9 @@ export const QuestionView = ({
     alternatives,
   } = currentQuestion.question;
 
-  const response = currentQuestion.selectedResponse;
+  // Pegamos "response" do objeto passado pelo hook
+  const response = currentQuestion.response;
   const index = currentQuestion.index + 1;
-
   const { disciplineName, subjectName } = useQuestion(disciplineId, subjectId);
 
   return (
@@ -117,7 +115,6 @@ export const QuestionView = ({
               />
             ))}
         </div>
-
       </CardContent>
     </Card>
   );

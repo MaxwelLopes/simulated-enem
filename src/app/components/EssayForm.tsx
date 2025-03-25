@@ -9,7 +9,7 @@ import { evalueEssay } from "../service/essayService"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react";
 
-export default function ({ simulatedId, theme }: { simulatedId: number; theme: string }) {
+export default function ({ simulatedId, theme }: { simulatedId: string; theme: string }) {
   const [essay, setEssay] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();

@@ -1,38 +1,28 @@
 import { useState } from "react";
-import { Question } from "@prisma/client";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ProgressProps {
   totalQuestions: number;
-  questionsCache: Record<
-    number,
-    {
-      question: Question;
-      selectedResponse: string;
-      index: number;
-      response: boolean;
-    }
-  >;
+  questionOrder: { id: number; index: number; response: string | null }[];
   currentIndex: number;
   onQuestionSelect: (index: number) => void;
-  essay: boolean
-  showEssay: boolean,
+  essay: boolean;
+  showEssay: boolean;
   setShowEssay: (show: boolean) => void;
 }
 
 function Progress({
   totalQuestions,
-  questionsCache,
+  questionOrder,
   currentIndex,
   onQuestionSelect,
   essay,
   showEssay,
-  setShowEssay
+  setShowEssay,
 }: ProgressProps) {
   return (
     <ScrollArea className="h-[calc(100vh-4rem)] w-full">
@@ -41,17 +31,14 @@ function Progress({
           <Button
             key="essay"
             onClick={() => setShowEssay(true)}
-            variant={
-              showEssay ? "default" : "outline"
-            }
+            variant={showEssay ? "default" : "outline"}
             className="w-20 h-10 p-0 font-semibold transition-opacity bg-blue-200 text-black"
           >
             Redação
           </Button>
         )}
-        {[...Array(totalQuestions)].map((_, index) => {
-          const question = questionsCache[index] || {}; // Obtém a questão do cache
-          const isAnswered = question.response;
+        {questionOrder.map((q, index) => {
+          const isAnswered = q.response !== null && q.response.trim() !== "";
           const isCurrent = index === currentIndex;
 
           return (
@@ -71,32 +58,24 @@ function Progress({
             </Button>
           );
         })}
-
       </div>
     </ScrollArea>
   );
 }
+
 interface ProgressBarProps {
   totalQuestions: number;
-  questionsCache: Record<
-    number,
-    {
-      question: Question;
-      selectedResponse: string;
-      index: number;
-      response: boolean;
-    }
-  >;
+  questionOrder: { id: number; index: number; response: string | null }[];
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
-  essay: boolean,
-  showEssay: boolean,
+  essay: boolean;
+  showEssay: boolean;
   setShowEssay: (show: boolean) => void;
 }
 
 export function ProgressBar({
   totalQuestions,
-  questionsCache,
+  questionOrder,
   currentIndex,
   setCurrentIndex,
   essay,
@@ -115,8 +94,9 @@ export function ProgressBar({
       <Button
         variant="outline"
         size="icon"
-        className={`fixed top-4 right-4 z-50 transition-all duration-300 transform ${open ? "translate-x-[-100px]" : ""
-          }`}
+        className={`fixed top-4 right-4 z-50 transition-all duration-300 transform ${
+          open ? "translate-x-[-100px]" : ""
+        }`}
         onClick={() => setOpen(!open)}
       >
         {open ? (
@@ -128,12 +108,13 @@ export function ProgressBar({
 
       {open && (
         <div
-          className={`fixed top-0 right-0 w-min h-full bg-white p-4 shadow-lg transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "translate-x-[100%]"
-            }`}
+          className={`fixed top-0 right-0 w-min h-full bg-white p-4 shadow-lg transition-transform duration-300 ease-in-out ${
+            open ? "translate-x-0" : "translate-x-[100%]"
+          }`}
         >
           <Progress
             totalQuestions={totalQuestions}
-            questionsCache={questionsCache}
+            questionOrder={questionOrder}
             currentIndex={currentIndex}
             onQuestionSelect={goToQuestion}
             essay={essay}
@@ -145,4 +126,5 @@ export function ProgressBar({
     </>
   );
 }
+
 export default ProgressBar;

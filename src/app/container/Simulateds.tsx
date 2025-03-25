@@ -13,7 +13,7 @@ const SimulatedList = () => {
   const router = useRouter();
   const { simulatedList, loading } = useSimulateds();
 
-  const handleSelectSimulated = (id: number, simulated: Simulated) => {
+  const handleSelectSimulated = (id: string, simulated: Simulated) => {
     if (simulated.type === SimulatedType.ESSAY && simulated.status !== SimulatedStatus.PENDING ) {
       router.push(`/simulationResult/${id}`);
 
