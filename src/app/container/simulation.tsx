@@ -51,11 +51,9 @@ export const Simulation = ({ id }: SimulationProps) => {
     totalQuestions,
     handleAnswerQuestion,
     essay,
-    setEssay,
     showEssayInstructions,
     setShowEssayInstructions,
     showEssay,
-    setShowEssay,
     showEssayForm,
     setShowEssayForm,
   } = useSimulation();
@@ -122,6 +120,7 @@ export const Simulation = ({ id }: SimulationProps) => {
           essay={!!essay}
           showEssay={showEssay}
           setShowEssay={setShowEssayInstructions}
+          simulatedStatus={simulationStatus}
         />)}
 
       {/* Seção de Questões */}
@@ -185,7 +184,7 @@ export const Simulation = ({ id }: SimulationProps) => {
               variant="ghost"
               size="icon"
               onClick={nextQuestion}
-              disabled={currentIndex + 1  === totalQuestions}
+              disabled={currentIndex + 1  === totalQuestions || showEssay}
               className={cn(
                 "h-7 w-7 md:h-8 md:w-8 rounded-full",
                 "hover:bg-gray-200 dark:hover:bg-gray-700",

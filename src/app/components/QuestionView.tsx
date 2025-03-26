@@ -25,7 +25,6 @@ interface QuestionWithCategories
 type QuestionViewProps = {
   currentQuestion: {
     question: QuestionWithCategories;
-    // Alinhado com o hook, usamos "response" em vez de "selectedResponse"
     response: string;
     index: number;
   };
@@ -48,9 +47,9 @@ export const QuestionView = ({
     alternativesIntroduction,
     questionCategories,
     alternatives,
+    correctAlternative,
   } = currentQuestion.question;
 
-  // Pegamos "response" do objeto passado pelo hook
   const response = currentQuestion.response;
   const index = currentQuestion.index + 1;
   const { disciplineName, subjectName } = useQuestion(disciplineId, subjectId);
@@ -112,6 +111,7 @@ export const QuestionView = ({
                 setResponse={setResponse}
                 simulationStatus={simulationStatus}
                 handleAnswerQuestion={handleAnswerQuestion}
+                correctAlternative={correctAlternative}
               />
             ))}
         </div>

@@ -5,11 +5,13 @@ import { Button } from "./ui/button"
 import { ChevronRight, Menu } from "lucide-react"
 import { ScrollArea } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { SimulatedStatus, SimulatedType } from "../enum/simulated"
 
 interface QuestionItem {
   id: number
   index: number
   response: string | null
+  hit?: boolean
 }
 
 interface ProgressProps {
@@ -20,9 +22,11 @@ interface ProgressProps {
   essay: boolean
   showEssay: boolean
   setShowEssay: (show: boolean) => void
+  simulatedStatus: string | null
 }
 
-function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEssay, setShowEssay }: ProgressProps) {
+function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEssay, setShowEssay, simulatedStatus }: ProgressProps) {
+  const isCompleted = simulatedStatus === SimulatedStatus.COMPLETED;
   return (
     <ScrollArea className="h-[calc(100vh-4rem)] w-full">
       <div className="flex flex-col gap-2 items-center p-4 mb-24">
@@ -42,24 +46,44 @@ function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEs
         )}
 
         {questionOrder.map((question, index) => {
-          const isAnswered = question.response !== null && question.response.trim() !== ""
-          const isCurrent = index === currentIndex
+          const isCurrent = index === currentIndex;
+          const isAnswered = question.response && question.response.trim() !== "";
+          const buttonClass = cn(
+            "w-10 h-10 p-0 font-semibold transition-all duration-200",
+
+            // Estilo base do current (será sobrescrito se necessário)
+            isCurrent && "ring-2 ring-offset-2 shadow-md transform scale-105",
+
+            // Lógica condicional completa
+            isCompleted
+              ? question.hit === true
+                ? "bg-gradient-to-br from-green-100 to-green-200 text-green-600 border border-green-300 hover:shadow-sm ring-green-300"
+                : question.hit === false
+                  ? "bg-gradient-to-br from-red-100 to-red-200 text-red-600 border border-red-300 hover:shadow-sm ring-red-300"
+                  : cn(
+                    "bg-white border border-slate-200 text-slate-700 opacity-70 hover:opacity-100 hover:border-slate-300",
+                    isCurrent && "ring-primary" // Mantém o ring padrão
+                  )
+              : isAnswered
+                ? "bg-gradient-to-br from-blue-400 to-blue-500 text-white border border-blue-300 hover:shadow-sm ring-blue-300"
+                : cn(
+                  "bg-white border border-slate-200 text-slate-700 opacity-70 hover:opacity-100 hover:border-slate-300",
+                  isCurrent && "ring-primary" // Mantém o ring padrão
+                )
+          );
 
           return (
             <Button
               key={question.id}
               onClick={() => onQuestionSelect(index)}
-              variant={isCurrent ? "default" : isAnswered ? "secondary" : "outline"}
-              className={cn(
-                "w-10 h-10 p-0 font-semibold transition-all",
-                isCurrent && "ring-2 ring-primary ring-offset-2",
-                isAnswered ? "bg-gray-200 text-black" : "opacity-50 hover:opacity-80",
-              )}
+              variant="outline"
+              className={buttonClass}
               aria-label={`Question ${index + 1}`}
               aria-current={isCurrent ? "true" : "false"}
             >
               {index + 1}
             </Button>
+
           )
         })}
       </div>
@@ -74,7 +98,8 @@ interface ProgressBarProps {
   setCurrentIndex: (index: number) => void
   essay: boolean
   showEssay: boolean
-  setShowEssay: (show: boolean) => void
+  setShowEssay: (show: boolean) => void,
+  simulatedStatus: string | null
 }
 
 export function ProgressBar({
@@ -85,6 +110,7 @@ export function ProgressBar({
   essay,
   showEssay,
   setShowEssay,
+  simulatedStatus
 }: ProgressBarProps) {
   const [open, setOpen] = useState(false)
 
@@ -142,6 +168,7 @@ export function ProgressBar({
           essay={essay}
           showEssay={showEssay}
           setShowEssay={setShowEssay}
+          simulatedStatus={simulatedStatus}
         />
       </div>
     </>

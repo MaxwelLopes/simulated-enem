@@ -264,6 +264,7 @@ export const answerQuestion = async (
   rightAnswer: string,
   response: string
 ) => {
+  console.log(rightAnswer, response);
   const hit = rightAnswer === response;
   const status = await getSimulationStatus(simulatedId);
   if (status !== SimulatedStatus.COMPLETED)

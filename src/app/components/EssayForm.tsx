@@ -17,13 +17,9 @@ export default function ({ simulatedId, theme }: { simulatedId: string; theme: s
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    try {
-      await evalueEssay(simulatedId, essay, theme);
-      router.push("/simulated");
-      setIsSubmitting(false);
-    } catch (error) {
-      console.error(error);
-    }
+    evalueEssay(simulatedId, essay, theme);
+    router.push("/simulated");
+    setIsSubmitting(false);
   }
 
   return (
@@ -31,13 +27,13 @@ export default function ({ simulatedId, theme }: { simulatedId: string; theme: s
       <form onSubmit={handleSubmit}>
         <Card className="w-full max-w-3xl mx-auto mt-20">
           <CardHeader>
-            <CardTitle>Escreva sua redação</CardTitle>
-            <CardDescription>Transcreva sua redação exatamente como está no papel. Isso garantirá que a simulação da nota seja fiel ao seu desempenho real, incluindo a caligrafia e a quantidade de linhas.</CardDescription>
+            <CardTitle>Transcrição da Redaçãoo</CardTitle>
+            <CardDescription>Transcreva aqui sua redação palavra por palavra, incluindo eventuais rasuras e correções, exatamente como está no papel...</CardDescription>
           </CardHeader>
           <CardContent>
             <textarea
               placeholder="Start writing your essay here..."
-              className="w-full min-h-[300px] max-h-[500px] resize-y p-4 text-lg leading-relaxed border rounded-md focus:ring-2 focus:ring-primary"
+              className="w-full min-h-[600px] resize-y p-4 text-lg leading-relaxed border rounded-md focus:ring-2 focus:ring-primary"
               value={essay}
               onChange={(e) => setEssay(e.target.value)}
             />

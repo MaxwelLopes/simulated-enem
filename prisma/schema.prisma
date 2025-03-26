@@ -32,6 +32,7 @@ model Question {
   subjectId                Int?                @map("subjectId")
   context                  String?
   alternativesIntroduction String?
+  correctAlternative       String              @db.VarChar(1)
   alternatives             Alternative[]
   discipline               Discipline?         @relation(fields: [disciplineId], references: [id])
   subject                  Subject?            @relation(fields: [subjectId], references: [id])

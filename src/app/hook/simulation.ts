@@ -2,20 +2,20 @@ import { useState, useEffect } from "react";
 import {
   answerQuestion,
   getQuestionOfSimulated,
-  // answerQuestion, // Caso necessário, adicione funções para enviar respostas.
 } from "../service/simualationService";
 import { getQuestion } from "../service/QuestionService";
-import { getEssayById } from "../repositories/essayRepository";
 import { getEssayBySimulatedId } from "../service/essayService";
+import { SimulatedStatus } from "../enum/simulated";
 
 interface QuestionOrderItem {
   id: number;
   index: number;
   response: string | null;
+  hit?: boolean;
 }
 
 interface QuestionCacheItem {
-  question: any; // Substitua "any" por uma tipagem mais específica, se disponível.
+  question: any;
   response: string;
 }
 
@@ -43,6 +43,14 @@ export const useSimulation = () => {
     setLoading(false);
   }, [simulatedId]);
 
+  useEffect(() => {
+    if (questionOrder[currentIndex]?.id) {
+      setLoading(true);
+      loadQuestion(questionOrder[currentIndex]?.id);
+      setLoading(false);
+    }
+  }, [currentIndex]);
+
   const fetchQuestionsOrder = async (simulatedId: string) => {
     try {
       const simulatedQuestions = await getQuestionOfSimulated(simulatedId);
@@ -50,6 +58,7 @@ export const useSimulation = () => {
         id: q.questionId,
         index,
         response: q.response,
+        hit: q.hit,
       }));
       setQuestionOrder(questionIds);
     } catch (error) {
@@ -68,10 +77,8 @@ export const useSimulation = () => {
 
   const loadQuestion = async (questionId: number) => {
     if (questionsCache[questionId]) return;
-    setLoading(true);
     try {
       const question = await getQuestion(questionId);
-      // Busca o item na ordem para obter o index e a resposta, se houver.
       const existing = questionOrder.find((q) => q.id === questionId);
       const existingResponse = existing?.response || "";
       const indexValue = existing?.index ?? 0;
@@ -103,8 +110,9 @@ export const useSimulation = () => {
   };
 
   const handleAnswerQuestion = (response: string) => {
-    if (response !== "") {
-      const { question } = questionsCache[questionOrder[currentIndex].id];
+    if (response !== "" && simulationStatus === SimulatedStatus.PENDING) {
+      const currentQuestionId = questionOrder[currentIndex].id;
+      const { question } = questionsCache[currentQuestionId];
 
       answerQuestion(
         simulatedId!,
@@ -113,14 +121,26 @@ export const useSimulation = () => {
         response
       )
         .then(() => {
+          const isHit = response === question.correctAlternative;
+
           setQuestionsCache((prevCache) => ({
             ...prevCache,
             [question.id]: {
-              ...prevCache[question.id],
+              ...(prevCache[question.id] || {}),
               response,
             },
           }));
+
+          setQuestionOrder((prevOrder) => {
+            return prevOrder.map((item) =>
+              item.id === currentQuestionId
+                ? { ...item, hit: isHit, response }
+                : item
+            );
+          });
+          console.log(questionOrder, "porra");
         })
+
         .catch((error) => {
           console.error("Erro ao enviar a resposta:", error);
         });
