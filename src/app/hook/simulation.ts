@@ -138,7 +138,6 @@ export const useSimulation = () => {
                 : item
             );
           });
-          console.log(questionOrder, "porra");
         })
 
         .catch((error) => {
