@@ -16,6 +16,7 @@ import {
   findResponse,
   findSimulatedById,
   findSimulatedByUserId,
+  findSimulationElapsedTimeById,
   findUnseenEssayForUser,
   getCountCorrectAnswersBySimulatedId,
   getEssayScores,
@@ -44,7 +45,11 @@ export const createSimulated = async ({
   userId,
   nonInepEssay = false,
 }: Input): Promise<string | boolean | undefined> => {
-  if (typeOfSimulated !== SimulatedType.ESSAY && typeOfSimulated !== SimulatedType.YEAR && (questionCount < 1 || questionCount > 180)) {
+  if (
+    typeOfSimulated !== SimulatedType.ESSAY &&
+    typeOfSimulated !== SimulatedType.YEAR &&
+    (questionCount < 1 || questionCount > 180)
+  ) {
     return false;
   }
   if (typeOfSimulated === SimulatedType.GENERAL) {
@@ -286,7 +291,9 @@ export const getResponse = async (simulatedId: string, questionId: number) => {
 };
 
 export const getSimulatedById = async (id: string) => {
-  return await findSimulatedById(id);
+  const simulated = await findSimulatedById(id);
+  console.log(simulated);
+  return simulated;
 };
 
 export const getCriteria = async (simulatedId: string) => {
@@ -304,4 +311,20 @@ export const getCriteria = async (simulatedId: string) => {
 export const getUserText = async (simulatedId: string) => {
   const simulated = await findSimulatedById(simulatedId);
   return simulated?.userText || null;
+};
+
+export const getTime = async (simulatedId: string) => {
+  const time = await findSimulationElapsedTimeById(simulatedId);
+  if (time) {
+    return time;
+  }
+  return 0;
+};
+
+export const saveTimeSpent = async (
+  simulatedId: string,
+  completionTimeSeconds: number,
+  status: string
+) => {
+  updateSimulated({ simulatedId, completionTimeSeconds, status });
 };

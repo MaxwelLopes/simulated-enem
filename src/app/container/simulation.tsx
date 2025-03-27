@@ -23,11 +23,11 @@ import {
   CardFooter,
 } from "../components/ui/card";
 import { SimulationFooter } from "../components/SimulationFooter";
-import TextFormatter from "../utils/utils";
 import EssayForm from "../components/EssayForm";
 import { IntroductionEssay } from "../components/IntroductionEssay";
 import { cn } from "@/lib/utils";
 import { EssayPresentation } from "../components/EssayPresentation";
+import { Timer } from "../components/ui/timer";
 
 interface SimulationProps {
   id: string;
@@ -42,7 +42,6 @@ export const Simulation = ({ id }: SimulationProps) => {
     previousQuestion,
     loading,
     setResponse,
-    questionsCache,
     questionOrder,
     currentIndex,
     setCurrentIndex,
@@ -56,9 +55,8 @@ export const Simulation = ({ id }: SimulationProps) => {
     showEssay,
     showEssayForm,
     setShowEssayForm,
+    timeSpent,
   } = useSimulation();
-
-  const [seconds, setSeconds] = useState(0);
 
   // Inicializa simulado e busca status
   useEffect(() => {
@@ -107,10 +105,11 @@ export const Simulation = ({ id }: SimulationProps) => {
     return <EssayForm simulatedId={id} theme={essay?.theme || ""} />;
   }
 
+  const showTimer = true;
+
   return (
     <>
       {showEssay && <EssayPresentation essay={essay} />}
-
       {questionOrder.length > 0 && (
         <ProgressBar
           totalQuestions={questionOrder.length}
@@ -140,6 +139,7 @@ export const Simulation = ({ id }: SimulationProps) => {
           </div>
         </div>
       )}
+      {timeSpent && < Timer initialTime={timeSpent} />}
 
       <SimulationFooter
         leftContent={
@@ -147,11 +147,11 @@ export const Simulation = ({ id }: SimulationProps) => {
             onClick={handleFinishSimulation}
             variant="default"
             size="sm"
-            className="rounded-full px-3 py-1.5 font-medium transition-all hover:shadow-md md:px-4 md:py-2"
+            className="rounded-lg px-4 py-2 font-medium transition-all hover:shadow-lg md:px-5 md:py-2.5"
           >
             {simulationStatus === SimulatedStatus.PENDING ? (
-              <span className="flex items-center">
-                <CheckCircle className="mr-1.5 h-3.5 w-3.5 md:mr-2 md:h-4 md:w-4" />
+              <span className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
                 <span className="text-sm md:text-base">Finalizar</span>
               </span>
             ) : (
@@ -160,23 +160,23 @@ export const Simulation = ({ id }: SimulationProps) => {
           </Button>
         }
         centerContent={
-          <div className="flex items-center justify-center space-x-1 md:space-x-2 bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-1 md:px-3 md:py-1.5">
+          <div className="flex items-center justify-center space-x-2 rounded-lg bg-gray-100 px-3 py-1.5 dark:bg-gray-800 md:space-x-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={previousQuestion}
               disabled={currentIndex === 0 || showEssay}
               className={cn(
-                "h-7 w-7 md:h-8 md:w-8 rounded-full",
+                "h-9 w-9 rounded-lg transition-all",
                 "hover:bg-gray-200 dark:hover:bg-gray-700",
-                "disabled:opacity-40",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
-              <ChevronLeft className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Anterior</span>
             </Button>
 
-            <span className="text-xs md:text-sm font-medium px-1 md:px-2 min-w-[90px] md:min-w-[120px] text-center">
+            <span className="min-w-[100px] text-center text-sm font-medium md:min-w-[140px] md:text-base">
               {showEssay ? "Redação" : `Questão ${currentIndex + 1} de ${totalQuestions}`}
             </span>
 
@@ -184,19 +184,25 @@ export const Simulation = ({ id }: SimulationProps) => {
               variant="ghost"
               size="icon"
               onClick={nextQuestion}
-              disabled={currentIndex + 1  === totalQuestions || showEssay}
+              disabled={currentIndex + 1 === totalQuestions || showEssay}
               className={cn(
-                "h-7 w-7 md:h-8 md:w-8 rounded-full",
+                "h-9 w-9 rounded-lg transition-all",
                 "hover:bg-gray-200 dark:hover:bg-gray-700",
-                "disabled:opacity-40",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
-              <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <ChevronRight className="h-4 w-4" />
               <span className="sr-only">Próxima</span>
             </Button>
           </div>
         }
+        rightContent={timeSpent &&
+          <div className="flex items-center justify-center rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300 md:text-base">
+            <Timer initialTime={timeSpent} />
+          </div>
+        }
       />
+
 
       {currentQuestion == null && essay === null && <GenericError />}
     </>

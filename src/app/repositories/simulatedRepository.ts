@@ -114,10 +114,11 @@ interface UpdateSimulatedParams {
   essayScore?: number;
   hits?: number;
   userText?: string;
+  completionTimeSeconds?: number;
 }
 
 export const updateSimulated = async (params: UpdateSimulatedParams) => {
-  const { simulatedId, status, essayScore, hits, userText } = params;
+  const { simulatedId, status, essayScore, hits, userText, completionTimeSeconds } = params;
   await prisma.simulated.update({
     where: {
       id: simulatedId,
@@ -128,6 +129,7 @@ export const updateSimulated = async (params: UpdateSimulatedParams) => {
       finishedAt: new Date(),
       userText,
       essayScore,
+      completionTimeSeconds
     },
   });
 };
@@ -212,3 +214,15 @@ export const findEssayBySimulatedId = async (simulatedId: string) => {
     },
   });
 };
+
+export const findSimulationElapsedTimeById = async (simulatedId: string) =>{
+  return await prisma.simulated.findUnique({
+    where: {
+      id: simulatedId
+    },
+    select: {
+      completionTimeSeconds: true 
+    }
+    
+  })
+}

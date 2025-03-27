@@ -1,11 +1,16 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import {
   answerQuestion,
   getQuestionOfSimulated,
+  getSimulatedById,
 } from "../service/simualationService";
 import { getQuestion } from "../service/QuestionService";
 import { getEssayBySimulatedId } from "../service/essayService";
 import { SimulatedStatus } from "../enum/simulated";
+import { Simulated } from "@prisma/client";
+import { calculateElapsedTime } from "../utils/utils";
 
 interface QuestionOrderItem {
   id: number;
@@ -33,12 +38,15 @@ export const useSimulation = () => {
     useState<boolean>(false);
   const [showEssay, setShowEssay] = useState<boolean>(false);
   const [showEssayForm, setShowEssayForm] = useState<boolean>(false);
+  const [simualted, setSimulated] = useState<Simulated>();
+  const [timeSpent, setTimeSpent] = useState<number>();
 
   useEffect(() => {
     setLoading(true);
     if (simulatedId) {
       fetchQuestionsOrder(simulatedId);
       fetchEssay(simulatedId);
+      fetchSimulated(simulatedId);
     }
     setLoading(false);
   }, [simulatedId]);
@@ -72,6 +80,15 @@ export const useSimulation = () => {
       setShowEssayInstructions(true);
       setEssay(essay);
       setShowEssay(true);
+    }
+  };
+
+  const fetchSimulated = async (simulatedId: string) => {
+    const simulatedData = await getSimulatedById(simulatedId);
+    if (simulatedData) {
+      setSimulated(simulatedData as Simulated);
+      console.log(simulatedData);
+      setTimeSpent(calculateElapsedTime(simulatedData?.createdAt));
     }
   };
 
@@ -198,5 +215,6 @@ export const useSimulation = () => {
     setShowEssayForm,
     totalQuestions: questionOrder.length,
     handleAnswerQuestion,
+    timeSpent,
   };
 };
