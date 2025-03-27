@@ -1,6 +1,6 @@
 import { Essay } from "@prisma/client"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import TextFormatter from "../utils/utils"
+import TextFormatter from "./ui/utils"
 
 export const EssayPresentation = ({ essay }: { essay: Essay }) => {
     return <>

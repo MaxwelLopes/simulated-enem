@@ -5,7 +5,7 @@ import { Button } from "./ui/button"
 import { ChevronRight, Menu } from "lucide-react"
 import { ScrollArea } from "./ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { SimulatedStatus, SimulatedType } from "../enum/simulated"
+import { SimulatedStatus } from "../enum/simulated"
 
 interface QuestionItem {
   id: number
@@ -25,8 +25,16 @@ interface ProgressProps {
   simulatedStatus: string | null
 }
 
-function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEssay, setShowEssay, simulatedStatus }: ProgressProps) {
-  const isCompleted = simulatedStatus === SimulatedStatus.COMPLETED;
+function Progress({
+  questionOrder,
+  currentIndex,
+  onQuestionSelect,
+  essay,
+  showEssay,
+  setShowEssay,
+  simulatedStatus,
+}: ProgressProps) {
+  const isCompleted = simulatedStatus === SimulatedStatus.COMPLETED
   return (
     <ScrollArea className="h-[calc(100vh-4rem)] w-full">
       <div className="flex flex-col gap-2 items-center p-4 mb-24">
@@ -46,8 +54,8 @@ function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEs
         )}
 
         {questionOrder.map((question, index) => {
-          const isCurrent = index === currentIndex;
-          const isAnswered = question.response && question.response.trim() !== "";
+          const isCurrent = index === currentIndex
+          const isAnswered = question.response && question.response.trim() !== ""
           const buttonClass = cn(
             "w-10 h-10 p-0 font-semibold transition-all duration-200",
 
@@ -62,15 +70,15 @@ function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEs
                   ? "bg-gradient-to-br from-red-100 to-red-200 text-red-600 border border-red-300 hover:shadow-sm ring-red-300"
                   : cn(
                     "bg-white border border-slate-200 text-slate-700 opacity-70 hover:opacity-100 hover:border-slate-300",
-                    isCurrent && "ring-primary" // Mantém o ring padrão
+                    isCurrent && "ring-primary", // Mantém o ring padrão
                   )
               : isAnswered
                 ? "bg-gradient-to-br from-blue-400 to-blue-500 text-white border border-blue-300 hover:shadow-sm ring-blue-300"
                 : cn(
                   "bg-white border border-slate-200 text-slate-700 opacity-70 hover:opacity-100 hover:border-slate-300",
-                  isCurrent && "ring-primary" // Mantém o ring padrão
-                )
-          );
+                  isCurrent && "ring-primary", // Mantém o ring padrão
+                ),
+          )
 
           return (
             <Button
@@ -83,7 +91,6 @@ function Progress({ questionOrder, currentIndex, onQuestionSelect, essay, showEs
             >
               {index + 1}
             </Button>
-
           )
         })}
       </div>
@@ -98,7 +105,7 @@ interface ProgressBarProps {
   setCurrentIndex: (index: number) => void
   essay: boolean
   showEssay: boolean
-  setShowEssay: (show: boolean) => void,
+  setShowEssay: (show: boolean) => void
   simulatedStatus: string | null
 }
 
@@ -110,7 +117,7 @@ export function ProgressBar({
   essay,
   showEssay,
   setShowEssay,
-  simulatedStatus
+  simulatedStatus,
 }: ProgressBarProps) {
   const [open, setOpen] = useState(false)
 
@@ -121,42 +128,41 @@ export function ProgressBar({
 
   return (
     <>
-      {/* Navigation button - now integrated in the top-right corner */}
+      {/* Navigation button - minimalist and elegant */}
       <Button
-        variant="secondary"
+        variant="ghost"
         size="sm"
         className={cn(
-          "fixed top-4 right-4 z-40 transition-all duration-300 shadow-md rounded-full px-4 flex items-center gap-2 mt-20",
+          "fixed top-4 right-4 z-40 transition-all duration-200 mt-20",
+          "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700",
+          "rounded-md px-3 py-2 h-9 shadow-sm",
           open && "translate-x-[-260px]",
         )}
         onClick={() => setOpen(!open)}
         aria-label={open ? "Close navigation panel" : "Open navigation panel"}
         aria-expanded={open}
       >
-        {open ? (
-          <>
-            <ChevronRight className="h-4 w-4" />
-            <span>Fechar</span>
-          </>
-        ) : (
-          <>
-            <Menu className="h-4 w-4" />
-            <span>Questões</span>
-          </>
-        )}
+        {open ? <ChevronRight className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </Button>
 
       {/* Progress sidebar */}
       <div
         className={cn(
-          "fixed top-0 right-0 w-min h-full bg-white dark:bg-gray-950 p-4 shadow-lg transition-transform duration-300 ease-in-out z-50 mt-24",
+          "fixed top-0 right-0 w-min h-full bg-white dark:bg-gray-950 p-4 shadow-md transition-transform duration-200 ease-out z-50 mt-24",
+          "border-l border-slate-100 dark:border-slate-800",
           open ? "translate-x-0" : "translate-x-[100%]",
         )}
         aria-hidden={!open}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-lg">Navegação</h2>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Fechar navegação">
+          <h2 className="font-medium text-base text-slate-700 dark:text-slate-200">Navegação</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setOpen(false)}
+            aria-label="Fechar navegação"
+            className="h-8 w-8 p-0 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -175,4 +181,5 @@ export function ProgressBar({
   )
 }
 
-export default ProgressBar;
+export default ProgressBar
+

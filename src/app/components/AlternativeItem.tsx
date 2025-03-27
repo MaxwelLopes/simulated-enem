@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SimulatedStatus } from "../enum/simulated";
-import TextFormatter from "../utils/utils";
+import TextFormatter from "./ui/utils";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
