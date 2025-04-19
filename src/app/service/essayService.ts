@@ -238,6 +238,9 @@ export const getTheme = async (simulatedId: string) => {
 };
 
 export const getEssayById = async (id: number) => {
+  if(!id) {
+    return null;
+  }
   return findEssayById(id);
 };
 

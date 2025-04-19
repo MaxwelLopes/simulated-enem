@@ -13,6 +13,7 @@ import {
 } from "../repositories/questionsRepository";
 import {
   createSimulated as createSimulatedInRepostitory,
+  findByUserAndId,
   findQuestionsBySimulationId,
   findResponse,
   findSimulatedById,
@@ -401,4 +402,10 @@ export const saveTimeSpent = async (
   status: string
 ) => {
   updateSimulated({ simulatedId, completionTimeSeconds, status });
+};
+
+export const verifyOwnership = async (simulationId: string, userId: string) => {
+  const simulation = await findByUserAndId(userId, simulationId);
+  console.log("simulation", simulation);
+  return !!simulation;
 };

@@ -54,7 +54,7 @@ export const createSimulated = async ({
     });
 
     // Criação das questões associadas (se houver)
-    console.log(simulated.id, 'simulated.id');
+    console.log(simulated.id, "simulated.id");
     if (questionsId && questionsId.length > 0) {
       await prisma.simulatedQuestion.createMany({
         data: questionsId.map((question) => ({
@@ -119,7 +119,14 @@ interface UpdateSimulatedParams {
 }
 
 export const updateSimulated = async (params: UpdateSimulatedParams) => {
-  const { simulatedId, status, essayScore, hits, userText, completionTimeSeconds } = params;
+  const {
+    simulatedId,
+    status,
+    essayScore,
+    hits,
+    userText,
+    completionTimeSeconds,
+  } = params;
   await prisma.simulated.update({
     where: {
       id: simulatedId,
@@ -130,7 +137,7 @@ export const updateSimulated = async (params: UpdateSimulatedParams) => {
       finishedAt: new Date(),
       userText,
       essayScore,
-      completionTimeSeconds
+      completionTimeSeconds,
     },
   });
 };
@@ -196,7 +203,6 @@ export async function findUnseenEssayForUser(
   });
   return result;
 }
- 
 
 export const getEssayScores = async (simulatedId: string) => {
   return await prisma.simulatedEssayScore.findMany({
@@ -218,14 +224,27 @@ export const findEssayBySimulatedId = async (simulatedId: string) => {
   });
 };
 
-export const findSimulationElapsedTimeById = async (simulatedId: string) =>{
+export const findSimulationElapsedTimeById = async (simulatedId: string) => {
   return await prisma.simulated.findUnique({
     where: {
-      id: simulatedId
+      id: simulatedId,
     },
     select: {
-      completionTimeSeconds: true 
-    }
-    
-  })
-}
+      completionTimeSeconds: true,
+    },
+  });
+};
+
+export const findByUserAndId = async (userId: string, simulationId: string): Promise<boolean> => {
+  const simulation = await prisma.simulated.findFirst({
+    where: {
+      id: simulationId,
+      userId,
+    },
+    select: {
+      id: true, 
+    },
+  });
+
+  return !!simulation;
+};

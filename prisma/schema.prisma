@@ -100,6 +100,7 @@ model User {
   password  String
   createdAt DateTime    @default(now()) @db.Timestamp(0)
   simulated Simulated[]
+  lastEssayDate  DateTime?   @db.Timestamp(0) 
 }
 
 model Essay {
