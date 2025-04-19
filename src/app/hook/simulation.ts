@@ -80,6 +80,7 @@ export const useSimulation = () => {
       setShowEssayInstructions(true);
       setEssay(essay);
       setShowEssay(true);
+      setCurrentIndex(-1);
     }
   };
 
@@ -87,13 +88,13 @@ export const useSimulation = () => {
     const simulatedData = await getSimulatedById(simulatedId);
     if (simulatedData) {
       setSimulated(simulatedData as Simulated);
-      console.log(simulatedData);
       setTimeSpent(calculateElapsedTime(simulatedData?.createdAt));
     }
   };
 
   const loadQuestion = async (questionId: number) => {
     if (questionsCache[questionId]) return;
+
     try {
       const question = await getQuestion(questionId);
       const existing = questionOrder.find((q) => q.id === questionId);
@@ -171,13 +172,14 @@ export const useSimulation = () => {
     } else if (currentIndex + 1 < questionOrder.length) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
-      loadQuestion(questionOrder[nextIndex].id);
+      //loadQuestion(questionOrder[nextIndex].id);
     }
   };
 
   const previousQuestion = () => {
-    if (currentIndex === 0) {
+    if (currentIndex === 0 && essay) {
       setShowEssay(true);
+      setCurrentIndex(-1);
     } else {
       const newIndex = currentIndex - 1;
       setCurrentIndex(newIndex);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GenericError } from "@/app/components/GenericError";
 import { Loading } from "@/app/components/Loading";
@@ -14,20 +14,12 @@ import {
 import { SimulatedStatus } from "../enum/simulated";
 import { Button } from "../components/ui/button";
 import { CheckCircle, ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { Badge } from "../components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "../components/ui/card";
 import { SimulationFooter } from "../components/SimulationFooter";
 import EssayForm from "../components/EssayForm";
 import { IntroductionEssay } from "../components/IntroductionEssay";
 import { cn } from "@/lib/utils";
 import { EssayPresentation } from "../components/EssayPresentation";
-import { Timer } from "../components/ui/timer";
+import SimulationResult from "./SimulationResult";
 
 interface SimulationProps {
   id: string;
@@ -53,6 +45,7 @@ export const Simulation = ({ id }: SimulationProps) => {
     showEssayInstructions,
     setShowEssayInstructions,
     showEssay,
+    setShowEssay,
     showEssayForm,
     setShowEssayForm,
     timeSpent,
@@ -73,20 +66,24 @@ export const Simulation = ({ id }: SimulationProps) => {
       setSimulatedId(id);
       fetchStatus();
     }
-  }, [id, setSimulatedId, setSimulationStatus]);
+  }, []);
 
   const handleFinishSimulation = async () => {
     if (simulationStatus !== SimulatedStatus.COMPLETED) {
       try {
-        await finishSimulation(id);
+        if (essay && simulationStatus === SimulatedStatus.PENDING) {
+          setShowEssayForm(true);
+        } else {
+          await finishSimulation(id);
+          router.push("/simulated");
+        }
       } catch (error) {
         console.error("Erro ao finalizar simulado:", error);
         return;
       }
+
     }
-    if (essay) {
-      setShowEssayForm(true);
-    } else {
+    else {
       router.push("/simulated");
     }
   };
@@ -97,30 +94,30 @@ export const Simulation = ({ id }: SimulationProps) => {
 
   // Se houver redação e as instruções devem ser exibidas, renderiza a tela de instruções.
   if (essay && showEssayInstructions && simulationStatus !== SimulatedStatus.COMPLETED) {
-    <IntroductionEssay handleClick={setShowEssayInstructions} />;
+    return <IntroductionEssay handleClick={setShowEssayInstructions} />;
   }
 
   // Se o formulário de redação estiver ativo, renderiza o componente de formulário.
   if (showEssayForm) {
-    return <EssayForm simulatedId={id} theme={essay?.theme || ""} />;
+    return <EssayForm simulatedId={id} simulationStatus={simulationStatus as string} theme={essay?.theme || ""} />;
   }
-
-  const showTimer = true;
+  console.log(showEssay, 'showEssay');
 
   return (
     <>
       {showEssay && <EssayPresentation essay={essay} />}
-      {questionOrder.length > 0 && (
-        <ProgressBar
-          totalQuestions={questionOrder.length}
-          questionOrder={questionOrder}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          essay={!!essay}
-          showEssay={showEssay}
-          setShowEssay={setShowEssayInstructions}
-          simulatedStatus={simulationStatus}
-        />)}
+      {showEssay && simulationStatus === SimulatedStatus.COMPLETED && <SimulationResult id={id} />}
+      <ProgressBar
+        totalQuestions={questionOrder.length}
+        questionOrder={questionOrder}
+        currentIndex={currentIndex}
+        setCurrentIndex={setCurrentIndex}
+        essay={!!essay}
+        showEssay={showEssay}
+        setShowEssay={setShowEssay}
+        simulatedStatus={simulationStatus}
+        initialTime={timeSpent}
+      />
 
       {/* Seção de Questões */}
       {questionOrder.length > 0 && !showEssay && (
@@ -139,7 +136,6 @@ export const Simulation = ({ id }: SimulationProps) => {
           </div>
         </div>
       )}
-      {timeSpent && < Timer initialTime={timeSpent} />}
 
       <SimulationFooter
         leftContent={
@@ -159,13 +155,14 @@ export const Simulation = ({ id }: SimulationProps) => {
             )}
           </Button>
         }
-        centerContent={
+
+        rightContent={
           <div className="flex items-center justify-center space-x-2 rounded-lg bg-gray-100 px-3 py-1.5 dark:bg-gray-800 md:space-x-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={previousQuestion}
-              disabled={currentIndex === 0 || showEssay}
+              disabled={currentIndex === -1 || showEssay || currentIndex === 0 && !essay}
               className={cn(
                 "h-9 w-9 rounded-lg transition-all",
                 "hover:bg-gray-200 dark:hover:bg-gray-700",
@@ -184,7 +181,7 @@ export const Simulation = ({ id }: SimulationProps) => {
               variant="ghost"
               size="icon"
               onClick={nextQuestion}
-              disabled={currentIndex + 1 === totalQuestions || showEssay}
+              disabled={currentIndex + 1 === totalQuestions}
               className={cn(
                 "h-9 w-9 rounded-lg transition-all",
                 "hover:bg-gray-200 dark:hover:bg-gray-700",
@@ -194,13 +191,7 @@ export const Simulation = ({ id }: SimulationProps) => {
               <ChevronRight className="h-4 w-4" />
               <span className="sr-only">Próxima</span>
             </Button>
-          </div>
-        }
-        rightContent={timeSpent &&
-          <div className="flex items-center justify-center rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300 md:text-base">
-            <Timer initialTime={timeSpent} />
-          </div>
-        }
+          </div>}
       />
 
 

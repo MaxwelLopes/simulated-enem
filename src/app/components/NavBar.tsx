@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { LogoutButton } from "../auth";
 import { Sheet, SheetTrigger, SheetContent } from "../components/ui/sheet";
 import { Button } from "../components/ui/button";
-import Link from "next/link";
 
 function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

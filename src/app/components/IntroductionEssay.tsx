@@ -7,7 +7,7 @@ interface IntroductionEssayProps {
 
 export const IntroductionEssay = ({ handleClick }: IntroductionEssayProps) => {
     return (
-        <div className="container mx-auto py-8 max-w-3xl">
+        <div className="container mx-auto py-8 max-w-3xl mt-20">
             <Card className="shadow-md">
                 <CardHeader>
                     <CardTitle className="text-center text-2xl">

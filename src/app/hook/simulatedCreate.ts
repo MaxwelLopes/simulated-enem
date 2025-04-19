@@ -11,6 +11,9 @@ export const useSimulatedCreate = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [essay, setEssay] = useState<"specific" | "random">("specific");
   const [nonInepEssay, setNonInepEssay] = useState<boolean>(false);
+  const [isDayOne, setIsDayOne] = useState<boolean>(false);
+  const [isDayTwo, setIsDayTwo] = useState<boolean>(false);
+  const [language, setLanguage] = useState<"english" | "spanish">("english");
 
   return {
     typeOfSimulated,
@@ -31,5 +34,11 @@ export const useSimulatedCreate = () => {
     setEssay,
     nonInepEssay,
     setNonInepEssay,
+    isDayOne,
+    setIsDayOne,
+    isDayTwo,
+    setIsDayTwo,
+    language,
+    setLanguage,
   };
 };

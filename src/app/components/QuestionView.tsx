@@ -42,17 +42,14 @@ export const QuestionView = ({
   const {
     year,
     context,
-    disciplineId,
-    subjectId,
     alternativesIntroduction,
-    questionCategories,
-    alternatives,
     correctAlternative,
+    alternatives,
   } = currentQuestion.question;
 
   const response = currentQuestion.response;
   const index = currentQuestion.index + 1;
-  const { disciplineName, subjectName } = useQuestion(disciplineId, subjectId);
+  const { disciplineName, subjectName, categoryNames } = useQuestion(currentQuestion.question);
 
   return (
     <Card className="w-full max-w-4xl mx-auto my-8 mt-24">
@@ -75,12 +72,12 @@ export const QuestionView = ({
             {subjectName}
           </h4>
         )}
-        {questionCategories && questionCategories.length > 0 && (
+        {categoryNames && categoryNames.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
-            {questionCategories.map(({ category }) => (
-              <Badge key={category.id} variant="outline">
-                {category.name}
-              </Badge>
+            {categoryNames.map((category ) => (
+            <Badge key={category} variant="outline">
+              {category}
+            </Badge>
             ))}
           </div>
         )}

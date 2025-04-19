@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: ({ session, token, user }) => {
+    session: ({ session, token }) => {
       return {
         ...session,
         user: {
@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
     },
     jwt: ({ token, user }) => {
       if (user) {
-        const u = user as unknown as any;
+        const u = user as any;
         return {
           ...token,
           id: u.id,

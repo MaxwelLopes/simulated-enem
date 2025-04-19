@@ -5,6 +5,7 @@ export enum SimulatedType {
   YEAR = "Ano",
   GENERAL = "Geral",
   ESSAY = "Redação",
+  ENEM = "ENEM",
 }
 
 export enum SimulatedCriterion {

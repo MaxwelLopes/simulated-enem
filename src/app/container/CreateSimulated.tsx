@@ -31,8 +31,8 @@ import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { ErrorMessage } from "../components/ui/error-message";
 import { Loading } from "../components/Loading";
-import { generateTheme } from "../service/essayService";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { dayOne, dayTwo } from "../constants/enem";
 
 const CreateSimulated = () => {
   const { data: session } = useSession();
@@ -58,6 +58,12 @@ const CreateSimulated = () => {
     setEssay,
     nonInepEssay,
     setNonInepEssay,
+    isDayOne,
+    setIsDayOne,
+    isDayTwo,
+    setIsDayTwo,
+    language,
+    setLanguage,
   } = useSimulatedCreate();
 
   const simulatedTypes = Object.values(SimulatedType);
@@ -74,7 +80,10 @@ const CreateSimulated = () => {
         review,
         subtypes,
         userId,
-        nonInepEssay
+        nonInepEssay,
+        isDayOne,
+        isDayTwo,
+        language,
       });
 
       setLoading(false);
@@ -98,19 +107,19 @@ const CreateSimulated = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-      <Card className="w-full max-w-3xl bg-white shadow-lg rounded-lg">
+    <div className="p-4 flex items-center justify-center min-h-screen">
+      <Card className="w-full max-w-lg bg-white shadow-lg rounded-lg">
         <CardHeader className="border-b pb-4">
-          <CardTitle className="text-3xl font-semibold text-gray-800 text-center">
+          <CardTitle className="text-2xl font-semibold text-gray-800 text-center">
             Criar Simulado
           </CardTitle>
         </CardHeader>
         {loading ? (
           <Loading />
         ) : (
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-4 space-y-4">
             {/* Filtro */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label
                 htmlFor="simulatedType"
                 className="text-gray-700 font-medium"
@@ -136,9 +145,9 @@ const CreateSimulated = () => {
               </Select>
             </div>
 
-            {/* Area de estudo */}
+            {/* Área de estudo */}
             {typeOfSimulated === SimulatedType.DISCIPLINE && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Label htmlFor="year" className="text-gray-700 font-medium">
                   Área de estudo
                 </Label>
@@ -159,7 +168,7 @@ const CreateSimulated = () => {
 
             {/* Ano */}
             {typeOfSimulated === SimulatedType.YEAR && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Label htmlFor="year" className="text-gray-700 font-medium">
                   Ano
                 </Label>
@@ -177,10 +186,12 @@ const CreateSimulated = () => {
                 </Select>
               </div>
             )}
+
+            {/* Redação */}
             {typeOfSimulated === SimulatedType.ESSAY && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <Label className="text-base font-medium mb-3 block">
+                  <Label className="text-base font-medium mb-2 block">
                     Como você deseja selecionar o tema?
                   </Label>
                   <RadioGroup
@@ -189,16 +200,24 @@ const CreateSimulated = () => {
                       setEssay(value as "specific" | "random");
                       setSubtype([value]);
                     }}
-                    className="space-y-3"
+                    className="space-y-2"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="specific" id="specific" onClick={() => setNonInepEssay(false)} />
+                      <RadioGroupItem
+                        value="specific"
+                        id="specific"
+                        onClick={() => setNonInepEssay(false)}
+                      />
                       <Label htmlFor="specific" className="cursor-pointer">
                         Escolher um ano específico
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="random" id="random" onClick={() => setNonInepEssay(true)} />
+                      <RadioGroupItem
+                        value="random"
+                        id="random"
+                        onClick={() => setNonInepEssay(true)}
+                      />
                       <Label htmlFor="random" className="cursor-pointer">
                         Opção aleatória gerada por IA
                       </Label>
@@ -207,7 +226,7 @@ const CreateSimulated = () => {
                 </div>
 
                 {essay === "specific" ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <Label htmlFor="year" className="text-gray-700 font-medium">
                       Ano
                     </Label>
@@ -225,7 +244,7 @@ const CreateSimulated = () => {
                     </Select>
                   </div>
                 ) : (
-                  <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
+                  <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
                     <p className="text-blue-800 text-sm">
                       O tema será gerado de forma aleatória por inteligência
                       artificial.
@@ -238,7 +257,7 @@ const CreateSimulated = () => {
             {/* Matéria ou Tópico */}
             {(typeOfSimulated === "Matéria" ||
               typeOfSimulated === "Tópico") && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <Label
                     htmlFor="subjectOrTopic"
                     className="text-gray-700 font-medium"
@@ -288,58 +307,129 @@ const CreateSimulated = () => {
                 </div>
               )}
 
-            {/* Quantidade de Questões */}
-            {typeOfSimulated !== SimulatedType.ESSAY && (
+            {/* ENEM */}
+            {typeOfSimulated === SimulatedType.ENEM && (
               <>
-                <div className="space-y-4">
-                  <Label
-                    htmlFor="questionCount"
-                    className="text-gray-700 font-medium"
-                  >
-                    Quantidade de Questões
-                  </Label>
-                  <Input
-                    id="questionCount"
-                    type="number"
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(Number(e.target.value))}
-                    min={1}
-                    max={180}
-                    className="w-full"
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="day-one"
+                    checked={isDayOne}
+                    onCheckedChange={(checked) => {
+                      setIsDayOne(checked as boolean)
+                      if (checked) setIsDayTwo(false)
+                    }}
                   />
+                  <Label htmlFor="day-one" className="text-gray-700 font-medium cursor-pointer">
+                    Primeiro dia
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="day-two"
+                    checked={isDayTwo}
+                    onCheckedChange={(checked) => {
+                      setIsDayTwo(checked as boolean)
+                      if (checked) setIsDayOne(false)
+                    }}
+                  />
+                  <Label htmlFor="day-two" className="text-gray-700 font-medium cursor-pointer">
+                    Segundo dia
+                  </Label>
                 </div>
 
-                {/* Opções de Questões */}
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      id="unseen"
-                      checked={unseen}
-                      onCheckedChange={(checked) => {
-                        setUnseen(checked as boolean);
-                        if (checked) setReview(false);
-                      }}
-                    />
-                    <Label htmlFor="unseen" className="text-gray-600">
-                      Questões Inéditas
+                <SelectedItems
+                  subtypes={isDayOne ? dayOne : isDayTwo ? dayTwo : []}
+                />
+
+                {isDayOne && (
+                  <>
+                    <Label htmlFor="language" className="text-gray-700 font-medium block mb-3">
+                      Escolha o idioma
                     </Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      id="review"
-                      checked={review}
-                      onCheckedChange={(checked) => {
-                        setReview(checked as boolean);
-                        if (checked) setUnseen(false);
-                      }}
-                    />
-                    <Label htmlFor="review" className="text-gray-600">
-                      Revisar Questões que Errou
-                    </Label>
-                  </div>
-                </div>
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="language"
+                        className="text-gray-700 font-medium"
+                      >
+                        Idioma
+                      </Label>
+                      <RadioGroup
+                        value={language}
+                        onValueChange={(value) => setLanguage(value as 'english' | 'spanish')}
+                        className="flex space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="english" id="english" />
+                          <Label htmlFor="english" className="cursor-pointer">
+                            Inglês
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="spanish" id="spanish" />
+                          <Label htmlFor="spanish" className="cursor-pointer">
+                            Espanhol
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  </>
+
+                )}
               </>
             )}
+
+            {/* Quantidade de Questões */}
+            {typeOfSimulated !== SimulatedType.ESSAY &&
+              typeOfSimulated !== SimulatedType.ENEM && (
+                <>
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="questionCount"
+                      className="text-gray-700 font-medium"
+                    >
+                      Quantidade de Questões
+                    </Label>
+                    <Input
+                      id="questionCount"
+                      type="number"
+                      value={questionCount}
+                      onChange={(e) => setQuestionCount(Number(e.target.value))}
+                      min={1}
+                      max={180}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="unseen"
+                        checked={unseen}
+                        onCheckedChange={(checked) => {
+                          setUnseen(checked as boolean);
+                          if (checked) setReview(false);
+                        }}
+                      />
+                      <Label htmlFor="unseen" className="text-gray-600">
+                        Questões Inéditas
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="review"
+                        checked={review}
+                        onCheckedChange={(checked) => {
+                          setReview(checked as boolean);
+                          if (checked) setUnseen(false);
+                        }}
+                      />
+                      <Label htmlFor="review" className="text-gray-600">
+                        Revisar Questões que Errou
+                      </Label>
+                    </div>
+                  </div>
+                </>
+              )}
 
             {/* Mensagem de Erro */}
             {error && <ErrorMessage title="Erro!" message={error} />}
@@ -351,7 +441,7 @@ const CreateSimulated = () => {
           </CardContent>
         )}
       </Card>
-    </div>
+    </div >
   );
 };
 

@@ -34,7 +34,7 @@ export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {
   const [essayTheme, setEssayTheme] = useState<string | null>(null);
 
   useEffect(() => {
-    if (simulated && simulated.type === SimulatedType.ESSAY) {
+    if (simulated && (simulated.type === SimulatedType.ESSAY || simulated.type === SimulatedType.ENEM)) {
       const fetchTheme = async () => {
         const theme = await getTheme(simulated.id);
         setEssayTheme(theme ?? null);
@@ -68,12 +68,27 @@ export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {
           {getStatusBadge(simulated.status)}
         </div>
 
-        {simulated.type === SimulatedType.ESSAY ? (
+        {simulated.type === SimulatedType.ENEM || simulated.type === SimulatedType.ESSAY ? (
           <div className="space-y-2">
             {simulated.status === SimulatedStatus.COMPLETED && simulated.essayScore !== undefined && (
               <div className="flex items-center gap-2 mt-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span>Nota da redação: {simulated.essayScore}</span>
+              </div>
+            )}
+            {/* Apenas ENEM mostra também total/acertos */}
+            {simulated.type === SimulatedType.ENEM && (
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Circle className="h-4 w-4" />
+                  <span>Total: {simulated.totalQuestions}</span>
+                </div>
+                {simulated.status === SimulatedStatus.COMPLETED && (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Acertos: {simulated.correctAnswers}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -97,7 +112,7 @@ export function SimulatedItem({ simulated, onSelect }: SimulatedItemProps) {
         {simulated.finishedAt && (
           <p className="text-sm text-muted-foreground">Concluído em: {simulated.finishedAt.toLocaleDateString()}</p>
         )}
-        <Button className="w-full mt-2" onClick={() => onSelect(simulated.id, simulated)}>
+        <Button className="w-full mt-2" onClick={() => onSelect(simulated.id, simulated)} disabled={simulated.status === SimulatedStatus.CORRECTING_ESSAY}>
           {simulated.status === SimulatedStatus.COMPLETED ? "Ver Resultado" : "Continuar"}
         </Button>
       </CardFooter>

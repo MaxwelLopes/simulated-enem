@@ -1,27 +1,28 @@
 import { useEffect, useState } from "react";
-import { getDisciplineName } from "../service/disciplineService";
-import { getSubjectName } from "../service/subjectService";
 
-export const useQuestion = (disciplineId: number | null, subjectId: number | null) => {
+export const useQuestion = (question: any) => {
   const [disciplineName, setDisciplineName] = useState<string | null>(null);
-  const [subjectName, setSubjectName] = useState<string | null>(null); 
-
+  const [subjectName, setSubjectName] = useState<string | null>(null);
+  const [categoryNames, setCategoryNames] = useState<string[]>([]);
+  const [alternatives, setAlternatives] = useState<any[]>([]);
+  const [correctAlternative, setCorrectAlternative] = useState<string | null>(null);
+  
   useEffect(() => {
-    const fetchDisciplineName = async () => {
-      if (disciplineId) {
-        const name = await getDisciplineName(disciplineId);
-        setDisciplineName(name);
-      }
-      if(subjectId) {
-        const name = await getSubjectName(subjectId);
-        setSubjectName(name)
-      }
-    };
+    if (question?.discipline) {
+      setDisciplineName(question.discipline?.name || null);
+    }
+    
+    if (question?.subject) {
+      setSubjectName(question.subject?.name || null);
+    }
 
-    fetchDisciplineName();
-  }, [disciplineId]);
+    if (question?.questionCategories) {
+      const categories = question.questionCategories.map(
+        (category: { category: { name: string } }) => category.category.name
+      );
+      setCategoryNames(categories);
+    }
+  }, [question]);
 
-
-
-  return { disciplineName, subjectName };
+  return { disciplineName, subjectName, categoryNames };
 };

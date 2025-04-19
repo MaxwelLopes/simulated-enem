@@ -11,11 +11,21 @@ import {
   findEssayBySimulatedId,
   updateSimulated,
 } from "../repositories/simulatedRepository";
-import { getSimulatedById } from "./simualationService";
+import { finishSimulation, getSimulatedById } from "./simualationService";
 
 export const generateTheme = async () => {
   const role = "INEP";
-  const prompt = `Você é o INEP e sua tarefa é criar um tema de redação para o ENEM. O tema deve ser **criativo**, **inovador** e **desafiador**, estimulando a reflexão crítica profunda sobre temas complexos e relevantes da sociedade. O tema precisa ser **atual** e **provocar diferentes pontos de vista**, incentivando os candidatos a construir argumentos sólidos, considerando diferentes dimensões (social, ética, política, cultural, tecnológica, ambiental etc.).
+  const prompt = `
+Você é o INEP e sua tarefa é criar um tema de redação para o ENEM. O tema deve ser **original, relevante e instigante**, voltado para o contexto brasileiro contemporâneo. Ele deve **exigir reflexão crítica**, com múltiplas dimensões de análise (social, cultural, política, ética, ambiental, econômica etc.).
+
+**Restrições importantes:**
+- NÃO repita temas comuns a menos que tragam uma abordagem realmente inusitada e provocadora.
+- NÃO utilize variações superficiais de temas anteriores.
+- Evite repetir estrutura nos textos motivadores (varie os estilos: narração de caso, citação, dado estatístico, reflexão filosófica, opinião de especialista, etc.).
+
+**Critérios obrigatórios do tema:**
+- Originalidade e inovação.
+- Capacidade de gerar debate entre diferentes pontos de vista.
 
 Além disso, elabore **três textos motivadores** que:
 1. Contextualizem o tema de maneira clara e envolvente, tocando em questões relevantes do cenário atual.
@@ -44,6 +54,7 @@ Exemplo:
     const text = await generateText({ role, prompt, temperature });
     const cleanedText = text.replace(/```json|```/g, "").trim();
     const parsedTheme = JSON.parse(cleanedText);
+    console.log("Tema gerado:", parsedTheme.theme);
     return parsedTheme as { theme: string; motivationalTexts: string[] };
   } catch (error) {
     console.error("Erro ao gerar tema:", error);
@@ -138,12 +149,16 @@ export const createEssay = async (
 
 export const evalueEssay = async (
   simulatedId: string,
+  simulationStatus: string,
   essay: string,
   theme: string
 ) => {
+  if (simulationStatus !== SimulatedStatus.PENDING) {
+    throw new Error("Redação não pode ser avaliada nesse status.");
+  }
   updateSimulated({
     simulatedId,
-    status: SimulatedStatus.CORRECTING_ESSAY, // Define como null explicitamente
+    status: SimulatedStatus.CORRECTING_ESSAY,
     userText: essay,
   });
   const zeroEvaluation = await checkEssayZero(essay, theme);
@@ -159,6 +174,7 @@ export const evalueEssay = async (
       status: SimulatedStatus.COMPLETED,
       essayScore: 0,
     });
+    finishSimulation(simulatedId);
     return { message: "Redação anulada", motivo: zeroEvaluation.motivo };
   }
 
@@ -212,6 +228,7 @@ export const evalueEssay = async (
     status: SimulatedStatus.COMPLETED,
     essayScore,
   });
+  finishSimulation(simulatedId);
 };
 
 export const getTheme = async (simulatedId: string) => {

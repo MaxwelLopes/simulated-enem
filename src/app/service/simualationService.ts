@@ -6,6 +6,7 @@ import { createEssay, getEssayByYear } from "../repositories/essayRepository";
 import {
   findQuestionByYear,
   findQuestionRandom,
+  findRandomQuestionsByDiscipline,
   findSimulationQuestionsByCategory,
   findSimulationQuestionsByDiscipline,
   findSimulationQuestionsBySubject,
@@ -24,6 +25,8 @@ import {
   updateSimulated,
 } from "../repositories/simulatedRepository";
 import { generateTheme } from "./essayService";
+import { dayOne, dayTwo } from "../constants/enem";
+import { disciplines } from "../constants/disciplines";
 
 type Input = {
   typeOfSimulated: string;
@@ -34,6 +37,9 @@ type Input = {
   subtypes: string[];
   userId: string;
   nonInepEssay?: boolean;
+  isDayOne?: boolean;
+  isDayTwo?: boolean;
+  language?: "english" | "spanish";
 };
 
 export const createSimulated = async ({
@@ -44,17 +50,86 @@ export const createSimulated = async ({
   subtypes,
   userId,
   nonInepEssay = false,
+  isDayOne,
+  isDayTwo,
+  language,
 }: Input): Promise<string | boolean | undefined> => {
   if (
     typeOfSimulated !== SimulatedType.ESSAY &&
     typeOfSimulated !== SimulatedType.YEAR &&
+    typeOfSimulated !== SimulatedType.ENEM &&
     (questionCount < 1 || questionCount > 180)
   ) {
     return false;
   }
+  if (typeOfSimulated === SimulatedType.ENEM) {
+    try {
+      if (!isDayOne && !isDayTwo) {
+        return false;
+      }
+
+      if (isDayOne && !language) {
+        return false;
+      }
+      let essay;
+      const questions: { id: number }[] = [];
+      if (isDayOne) {
+        const questionLanguage = await findSimulationQuestionsBySubject(
+          language === "english" ? "Inglês" : "Espanhol",
+          5,
+          userId,
+          false,
+          false
+        );
+        questions.push(...questionLanguage);
+        await Promise.all(
+          dayOne.map(async (type) => {
+            if (disciplines.includes(type)) {
+              const questionsId = await findRandomQuestionsByDiscipline(
+                type,
+                type === "Linguagens, Códigos e suas Tecnologias" ? 40 : 45
+              );
+              questions.push(...questionsId);
+            }
+          })
+        );
+        essay = await findUnseenEssayForUser(userId, true);
+        if (!essay) {
+          const generatedEssay = await generateTheme();
+          essay = await createEssay(
+            generatedEssay.theme,
+            generatedEssay.motivationalTexts
+          );
+        }
+      }
+      if (isDayTwo) {
+        await Promise.all(
+          dayTwo.map(async (type) => {
+            if (disciplines.includes(type)) {
+              const questionsId = await findRandomQuestionsByDiscipline(type);
+              questions.push(...questionsId);
+            }
+          })
+        );
+      }
+      const simulated: Simulated = await createSimulatedInRepostitory({
+        type: typeOfSimulated,
+        userId,
+        subtype: isDayOne ? dayOne : dayTwo,
+        essayId: essay?.id,
+        questionsId: questions,
+      });
+      if (simulated) {
+        return simulated.id;
+      }
+      return false;
+    } catch (error) {
+      console.log(error);
+    }
+  }
   if (typeOfSimulated === SimulatedType.GENERAL) {
     try {
-      let questions: { id: number }[] = await findQuestionRandom(
+      const questions: { id: number }[] = await findQuestionRandom(
         questionCount,
         userId,
         unseen,
@@ -82,7 +157,7 @@ export const createSimulated = async ({
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
-      let questions: { id: number }[] = [];
+      const questions: { id: number }[] = [];
 
       await Promise.all(
         subtypes.map(async (subType: string) => {
@@ -121,7 +196,7 @@ export const createSimulated = async ({
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
-      let questions: { id: number }[] = [];
+      const questions: { id: number }[] = [];
       await Promise.all(
         subtypes.map(async (subType: string) => {
           const questionsId: { id: number }[] | null = subType
@@ -158,7 +233,7 @@ export const createSimulated = async ({
       const questionsPerSubtype = questionCount
         ? Math.floor(questionCount / subtypes.length)
         : subtypes.length;
-      let questions: { id: number }[] = [];
+      const questions: { id: number }[] = [];
       await Promise.all(
         subtypes.map(async (subType: string) => {
           const questionsId: { id: number }[] | null = subType
@@ -292,7 +367,6 @@ export const getResponse = async (simulatedId: string, questionId: number) => {
 
 export const getSimulatedById = async (id: string) => {
   const simulated = await findSimulatedById(id);
-  console.log(simulated);
   return simulated;
 };
 

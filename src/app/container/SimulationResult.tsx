@@ -9,7 +9,7 @@ import { getTheme } from "../service/essayService"
 import { SimulatedStatus } from "../enum/simulated"
 import { Progress } from "../components/ui/progress"
 import { Info } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/toolTip"
+import { Tooltip, TooltipContent, TooltipProvider } from "../components/ui/toolTip"
 
 
 export default function SimulationResult({ id }: { id: string }) {
@@ -73,7 +73,6 @@ export default function SimulationResult({ id }: { id: string }) {
     return (
         <div className="container mx-auto px-4 py-8 h-screen flex flex-col">
             <h1 className="text-2xl font-bold mb-6 text-center">Correção de Redação</h1>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
                 {/* Lado esquerdo - Redação */}
                 <div className="flex flex-col h-full">
@@ -130,9 +129,6 @@ export default function SimulationResult({ id }: { id: string }) {
                                                                 <h3 className="font-semibold">{criterion.criterion}</h3>
                                                                 <TooltipProvider>
                                                                     <Tooltip>
-                                                                        <TooltipTrigger asChild>
-                                                                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                                                                        </TooltipTrigger>
                                                                         <TooltipContent className="max-w-xs">
                                                                             <p>{getCriterionDescription(criterion.criterion)}</p>
                                                                         </TooltipContent>

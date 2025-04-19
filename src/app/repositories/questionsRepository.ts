@@ -1,14 +1,26 @@
 import { Discipline } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 import { use } from "react";
+import { Select } from "@radix-ui/react-select";
 
 // Retorna a questão com as alternativas e categorias associadas.
 export const findQuestionById = async (questionId: number) => {
+  console.log(questionId);
   return await prisma.question.findUnique({
     where: { id: questionId },
     include: {
       categories: {
-        include: { category: true },
+        include: {
+          category: {
+            select: { name: true },
+          },
+        },
+      },
+      subject: {
+        select: { name: true },
+      },
+      discipline: {
+        select: { name: true },
       },
       alternatives: true,
     },
@@ -110,14 +122,13 @@ export const findSimulationQuestionsBySubject = async (
       LIMIT ${questionCount};
     `;
   }
-  const teste = await prisma.$queryRaw<{ id: number }[]>`
+  return await prisma.$queryRaw<{ id: number }[]>`
     SELECT "Question"."id" FROM "Question"
     JOIN "Subject" ON "Question"."subjectId" = "Subject"."id"
     WHERE "Subject"."name" = ${subjectName}
     ORDER BY RANDOM()
     LIMIT ${questionCount};
-`;
-  return teste;
+  `;
 };
 
 // Busca questões para simulação por categoria com ORDER BY RANDOM().
@@ -324,4 +335,20 @@ export const findQuestionsByUser = async (userId: string) => {
       },
     },
   });
+};
+
+// Busca questões aleatórias por assunto, mantendo ORDER BY RANDOM() com $queryRaw.
+export const findRandomQuestionsByDiscipline = async (
+  disciplineName: string,
+  questionCount = 45
+): Promise<{ id: number }[]> => {
+  return await prisma.$queryRaw<{ id: number }[]>`
+    SELECT "Question"."id"
+    FROM "Question"
+
+    JOIN "Discipline" ON "Question"."disciplineId" = "Discipline"."id"
+    WHERE "Discipline"."name" = ${disciplineName}
+    ORDER BY RANDOM()
+    LIMIT ${questionCount};
+  `;
 };

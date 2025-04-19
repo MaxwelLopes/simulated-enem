@@ -22,7 +22,7 @@ export const generateText = async ({
         { role: "system", content: `Você é ${role}.` },
         { role: "user", content: prompt },
       ],
-      max_tokens: 2000,
+      max_tokens: 1000,
       temperature: temperature,
     });
 

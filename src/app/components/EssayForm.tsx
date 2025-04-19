@@ -9,7 +9,7 @@ import { evalueEssay } from "../service/essayService"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react";
 
-export default function ({ simulatedId, theme }: { simulatedId: string; theme: string }) {
+export default function ({ simulatedId, simulationStatus, theme }: { simulatedId: string; simulationStatus:string; theme: string }) {
   const [essay, setEssay] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function ({ simulatedId, theme }: { simulatedId: string; theme: s
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    evalueEssay(simulatedId, essay, theme);
+    evalueEssay(simulatedId, simulationStatus, essay, theme);
     router.push("/simulated");
     setIsSubmitting(false);
   }

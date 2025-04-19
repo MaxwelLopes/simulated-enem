@@ -4,7 +4,7 @@ import TextFormatter from "./ui/utils"
 
 export const EssayPresentation = ({ essay }: { essay: Essay }) => {
     return <>
-        <div className="max-w-4xl mx-auto p-4 space-y-6 mb-8 mt-20 mb-20">
+        <div className="max-w-4xl mx-auto p-4 space-y-6 mb-8 mt-20">
             <Card className="border-2 border-primary/20">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-center text-xl text-primary">
@@ -32,7 +32,7 @@ export const EssayPresentation = ({ essay }: { essay: Essay }) => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-5">
-                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                    <div className="space-y-4 pr-2">
                         {essay?.motivationalTexts.map((text: string, index: number) => (
                             <div
                                 key={index}

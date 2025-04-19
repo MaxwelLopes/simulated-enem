@@ -54,6 +54,7 @@ export const createSimulated = async ({
     });
 
     // Criação das questões associadas (se houver)
+    console.log(simulated.id, 'simulated.id');
     if (questionsId && questionsId.length > 0) {
       await prisma.simulatedQuestion.createMany({
         data: questionsId.map((question) => ({
@@ -178,11 +179,12 @@ export async function aggregateSimulated() {
 }
 
 export async function findUnseenEssayForUser(
-  userId: string
+  userId: string,
+  includeInep: boolean = false
 ): Promise<Essay | null> {
   const result = await prisma.essay.findFirst({
     where: {
-      isFromInep: false,
+      ...(includeInep ? {} : { isFromInep: false }),
       NOT: {
         simulated: {
           some: {
@@ -194,6 +196,7 @@ export async function findUnseenEssayForUser(
   });
   return result;
 }
+ 
 
 export const getEssayScores = async (simulatedId: string) => {
   return await prisma.simulatedEssayScore.findMany({
