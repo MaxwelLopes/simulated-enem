@@ -1,4 +1,5 @@
 import React from 'react';
+import { CldImage } from 'next-cloudinary';
 
 type TextSegment = {
   type: 'text' | 'italic' | 'bold' | 'img';
@@ -7,25 +8,25 @@ type TextSegment = {
 
 function parseLine(line: string): TextSegment[] {
   const segments: TextSegment[] = [];
-  
+
   const regex = /!\[\]\(([^)]+)\)|\*\*([^\*]+)\*\*|\*([^\*]+)\*|_([^_]+)_|([^\*_!\n]+)/g;
 
   let match;
   while ((match = regex.exec(line)) !== null) {
     if (match[1]) {
-      
+
       segments.push({ type: 'img', content: match[1] });
     } else if (match[2]) {
-    
+
       segments.push({ type: 'bold', content: match[2] });
     } else if (match[3]) {
-   
+
       segments.push({ type: 'italic', content: match[3] });
     } else if (match[4]) {
-      
+
       segments.push({ type: 'italic', content: match[4] });
     } else if (match[5]?.trim() !== '') {
-     
+
       segments.push({ type: 'text', content: match[5] });
     }
   }
@@ -34,7 +35,7 @@ function parseLine(line: string): TextSegment[] {
 }
 
 function formatText(text: string) {
-  const lines = text.split('\n'); 
+  const lines = text.split('\n');
   return lines.flatMap((line, lineIndex) => {
     const segments = parseLine(line);
     const formattedLine = segments.map((segment, index) => {
@@ -44,7 +45,12 @@ function formatText(text: string) {
         case 'italic':
           return <em key={`${lineIndex}-${index}`}>{segment.content}</em>;
         case 'img':
-          return <img key={`${lineIndex}-${index}`} src={`/imgs/${segment.content}`} alt="Imagem" />;
+          return <CldImage
+            src={segment.content.split("_")[0]}
+            width={500}
+            height={500}
+            alt="img"
+          />
         default:
           return <span key={`${lineIndex}-${index}`}>{segment.content}</span>;
       }
