@@ -489,6 +489,5 @@ export const saveTimeSpent = async (
 
 export const verifyOwnership = async (simulationId: string, userId: string) => {
   const simulation = await findByUserAndId(userId, simulationId);
-  console.log("simulation", simulation);
   return !!simulation;
 };
