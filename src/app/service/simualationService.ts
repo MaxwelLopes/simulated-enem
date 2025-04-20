@@ -28,6 +28,7 @@ import {
 import { generateTheme } from "./essayService";
 import { dayOne, dayTwo } from "../constants/enem";
 import { disciplines } from "../constants/disciplines";
+import { canUserWriteEssay, updateUserLastEssayDate } from "./userService";
 
 type Input = {
   typeOfSimulated: string;
@@ -54,23 +55,47 @@ export const createSimulated = async ({
   isDayOne,
   isDayTwo,
   language,
-}: Input): Promise<string | boolean | undefined> => {
+}: Input): Promise<
+  { success: boolean; message?: string; id?: string } | undefined
+> => {
   if (
     typeOfSimulated !== SimulatedType.ESSAY &&
     typeOfSimulated !== SimulatedType.YEAR &&
     typeOfSimulated !== SimulatedType.ENEM &&
     (questionCount < 1 || questionCount > 180)
   ) {
-    return false;
+    return {
+      success: false,
+      message: "O número de questões deve estar entre 1 e 180.",
+    };
+  }
+
+  if (
+    (typeOfSimulated === SimulatedType.ENEM && isDayOne) ||
+    typeOfSimulated === SimulatedType.ESSAY
+  ) {
+    const userCanWriteEssay = await canUserWriteEssay(userId);
+    const { canWrite, message } = userCanWriteEssay;
+    if (!canWrite) {
+      return { success: false, message };
+    }
   }
   if (typeOfSimulated === SimulatedType.ENEM) {
     try {
       if (!isDayOne && !isDayTwo) {
-        return false;
+        return {
+          success: false,
+          message:
+            "É necessário especificar se é o primeiro ou segundo dia do ENEM.",
+        };
       }
 
       if (isDayOne && !language) {
-        return false;
+        return {
+          success: false,
+          message:
+            "É necessário especificar o idioma para o primeiro dia do ENEM.",
+        };
       }
       let essay;
       const questions: { id: number }[] = [];
@@ -121,11 +146,16 @@ export const createSimulated = async ({
         questionsId: questions,
       });
       if (simulated) {
-        return simulated.id;
+        updateUserLastEssayDate(userId, new Date());
+        return { success: true, id: simulated.id };
       }
-      return false;
+      return { success: false, message: "Falha ao criar o simulado." };
     } catch (error) {
-      console.log(error);
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
     }
   }
   if (typeOfSimulated === SimulatedType.GENERAL) {
@@ -138,7 +168,10 @@ export const createSimulated = async ({
       );
 
       if (questions.length < 1) {
-        return false;
+        return {
+          success: false,
+          message: "Nenhuma questão encontrada para essa combinação!",
+        };
       }
       const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
@@ -147,10 +180,16 @@ export const createSimulated = async ({
         questionsId: questions,
       });
       if (simulated) {
-        return simulated.id;
+        return { success: true, id: simulated.id };
       }
-      return false;
-    } catch {}
+      return { success: false, message: "Falha ao criar o simulado." };
+    } catch (error) {
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
+    }
   }
 
   if (typeOfSimulated === SimulatedType.DISCIPLINE) {
@@ -177,7 +216,10 @@ export const createSimulated = async ({
       );
 
       if (questions.length < 1) {
-        return false;
+        return {
+          success: false,
+          message: "Nenhuma questão encontrada para essa combinação!",
+        };
       }
       const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
@@ -186,10 +228,16 @@ export const createSimulated = async ({
         questionsId: questions,
       });
       if (simulated) {
-        return simulated.id;
+        return { success: true, id: simulated.id };
       }
-      return false;
-    } catch {}
+      return { success: false, message: "Falha ao criar o simulado." };
+    } catch (error) {
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
+    }
   }
 
   if (typeOfSimulated === SimulatedType.SUBJECT) {
@@ -214,7 +262,10 @@ export const createSimulated = async ({
         })
       );
       if (questions.length < 1) {
-        return false;
+        return {
+          success: false,
+          message: "Nenhuma questão encontrada para essa combinação!",
+        };
       }
       const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
@@ -223,10 +274,16 @@ export const createSimulated = async ({
         questionsId: questions,
       });
       if (simulated) {
-        return simulated.id;
+        return { success: true, id: simulated.id };
       }
-      return false;
-    } catch {}
+      return { success: false, message: "Falha ao criar o simulado." };
+    } catch (error) {
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
+    }
   }
 
   if (typeOfSimulated === SimulatedType.CATEGOTY) {
@@ -251,7 +308,10 @@ export const createSimulated = async ({
         })
       );
       if (questions.length < 1) {
-        return false;
+        return {
+          success: false,
+          message: "Nenhuma questão encontrada para essa combinação!",
+        };
       }
       const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
@@ -260,17 +320,26 @@ export const createSimulated = async ({
         questionsId: questions,
       });
       if (simulated) {
-        return simulated.id;
+        return { success: true, id: simulated.id };
       }
-      return false;
-    } catch {}
+      return { success: false, message: "Falha ao criar o simulado." };
+    } catch (error) {
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
+    }
   }
 
   if (typeOfSimulated === SimulatedType.YEAR) {
     try {
       const questions = await findQuestionByYear(subtypes[0]);
       if (questions.length < 1) {
-        return false;
+        return {
+          success: false,
+          message: "Nenhuma questão encontrada para essa combinação!",
+        };
       }
       const simulated: Simulated = await createSimulatedInRepostitory({
         type: typeOfSimulated,
@@ -279,10 +348,16 @@ export const createSimulated = async ({
         questionsId: questions,
       });
       if (simulated) {
-        return simulated.id;
+        return { success: true, id: simulated.id };
       }
-      return false;
-    } catch {}
+      return { success: false, message: "Falha ao criar o simulado." };
+    } catch (error) {
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
+    }
   }
 
   if (typeOfSimulated === SimulatedType.ESSAY) {
@@ -298,7 +373,7 @@ export const createSimulated = async ({
         }
 
         if (!essay || !essay.id) {
-          throw new Error("Falha ao criar.");
+          return { success: false, message: "Erro ao obter redação." };
         }
 
         const simulated: Simulated = await createSimulatedInRepostitory({
@@ -308,12 +383,13 @@ export const createSimulated = async ({
           essayId: essay.id,
         });
         if (simulated) {
-          return simulated.id;
+          updateUserLastEssayDate(userId, new Date());
+          return { success: true, id: simulated.id };
         }
       } else {
         const essay = await getEssayByYear(subtypes[0]);
         if (!essay || !essay.id) {
-          throw new Error("Falha ao obter a redação.");
+          return { success: false, message: "Erro ao obter redação." };
         }
         const simulated: Simulated = await createSimulatedInRepostitory({
           type: typeOfSimulated,
@@ -322,11 +398,18 @@ export const createSimulated = async ({
           essayId: essay.id,
         });
         if (simulated) {
-          return simulated.id;
+          updateUserLastEssayDate(userId, new Date());
+          return { success: true, id: simulated.id };
         }
       }
-      return false;
-    } catch {}
+      return { success: false, message: "Falha ao criar o simulado." };
+    } catch (error) {
+      console.error("Erro ao criar simulado do tipo redação:", error);
+      return {
+        success: false,
+        message: "Ocorreu um erro ao criar o simulado.",
+      };
+    }
   }
 };
 
