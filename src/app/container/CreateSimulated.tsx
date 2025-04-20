@@ -72,7 +72,7 @@ const CreateSimulated = () => {
     const userId = user ? user.id : null;
     if (userId) {
       setLoading(true);
-      const simulatedId = await createSimulated({
+      const createdSimulated = await createSimulated({
         typeOfSimulated,
         questionCount,
         error,
@@ -86,14 +86,19 @@ const CreateSimulated = () => {
         language,
       });
 
-      setLoading(false);
-      if (simulatedId) {
-        router.push(`/simulated/${simulatedId}`)
+      if (createdSimulated) {
+        if (createdSimulated.success) {
+          router.push(`/simulated/${createdSimulated.id}`);
+        }
+        else {
+          setError(createdSimulated.message as string);
+        }
       }
       else {
         setError("Não foi possível criar um simulado com essa combinação!");
       }
     }
+    setLoading(false);
   };
 
   const handleSelectChange = (value: string) => {
@@ -114,332 +119,330 @@ const CreateSimulated = () => {
             Criar Simulado
           </CardTitle>
         </CardHeader>
-        {loading ? (
-          <Loading />
-        ) : (
-          <CardContent className="p-4 space-y-4">
-            {/* Filtro */}
+
+        <CardContent className="p-4 space-y-4">
+          {/* Filtro */}
+          <div className="space-y-3">
+            <Label
+              htmlFor="simulatedType"
+              className="text-gray-700 font-medium"
+            >
+              Filtro
+            </Label>
+            <Select
+              onValueChange={(value) => {
+                setTypeOfSimulated(value);
+                setSubtype([]);
+              }}
+            >
+              <SelectTrigger id="simulatedType" className="w-full">
+                <SelectValue placeholder="Selecione o tipo de simulado" />
+              </SelectTrigger>
+              <SelectContent>
+                {simulatedTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Área de estudo */}
+          {typeOfSimulated === SimulatedType.DISCIPLINE && (
             <div className="space-y-3">
-              <Label
-                htmlFor="simulatedType"
-                className="text-gray-700 font-medium"
-              >
-                Filtro
+              <Label htmlFor="year" className="text-gray-700 font-medium">
+                Área de estudo
               </Label>
-              <Select
-                onValueChange={(value) => {
-                  setTypeOfSimulated(value);
-                  setSubtype([]);
-                }}
-              >
-                <SelectTrigger id="simulatedType" className="w-full">
-                  <SelectValue placeholder="Selecione o tipo de simulado" />
+              <Select onValueChange={(value) => setSubtype([value])}>
+                <SelectTrigger id="year" className="w-full">
+                  <SelectValue placeholder="Selecione a área de estudo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {simulatedTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
+                  {disciplines.map((discipline) => (
+                    <SelectItem key={discipline} value={discipline}>
+                      {discipline}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+          )}
 
-            {/* Área de estudo */}
-            {typeOfSimulated === SimulatedType.DISCIPLINE && (
-              <div className="space-y-3">
-                <Label htmlFor="year" className="text-gray-700 font-medium">
-                  Área de estudo
+          {/* Ano */}
+          {typeOfSimulated === SimulatedType.YEAR && (
+            <div className="space-y-3">
+              <Label htmlFor="year" className="text-gray-700 font-medium">
+                Ano
+              </Label>
+              <Select onValueChange={(value) => setSubtype([value])}>
+                <SelectTrigger id="year" className="w-full">
+                  <SelectValue placeholder="Selecione o ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Redação */}
+          {typeOfSimulated === SimulatedType.ESSAY && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-medium mb-2 block">
+                  Como você deseja selecionar o tema?
                 </Label>
-                <Select onValueChange={(value) => setSubtype([value])}>
-                  <SelectTrigger id="year" className="w-full">
-                    <SelectValue placeholder="Selecione a área de estudo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {disciplines.map((discipline) => (
-                      <SelectItem key={discipline} value={discipline}>
-                        {discipline}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Ano */}
-            {typeOfSimulated === SimulatedType.YEAR && (
-              <div className="space-y-3">
-                <Label htmlFor="year" className="text-gray-700 font-medium">
-                  Ano
-                </Label>
-                <Select onValueChange={(value) => setSubtype([value])}>
-                  <SelectTrigger id="year" className="w-full">
-                    <SelectValue placeholder="Selecione o ano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Redação */}
-            {typeOfSimulated === SimulatedType.ESSAY && (
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-base font-medium mb-2 block">
-                    Como você deseja selecionar o tema?
-                  </Label>
-                  <RadioGroup
-                    value={essay}
-                    onValueChange={(value) => {
-                      setEssay(value as "specific" | "random");
-                      setSubtype([value]);
-                    }}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value="specific"
-                        id="specific"
-                        onClick={() => setNonInepEssay(false)}
-                      />
-                      <Label htmlFor="specific" className="cursor-pointer">
-                        Escolher um ano específico
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value="random"
-                        id="random"
-                        onClick={() => setNonInepEssay(true)}
-                      />
-                      <Label htmlFor="random" className="cursor-pointer">
-                        Opção aleatória gerada por IA
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {essay === "specific" ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="year" className="text-gray-700 font-medium">
-                      Ano
+                <RadioGroup
+                  value={essay}
+                  onValueChange={(value) => {
+                    setEssay(value as "specific" | "random");
+                    setSubtype([value]);
+                  }}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="specific"
+                      id="specific"
+                      onClick={() => setNonInepEssay(false)}
+                    />
+                    <Label htmlFor="specific" className="cursor-pointer">
+                      Escolher um ano específico
                     </Label>
-                    <Select onValueChange={(value) => setSubtype([value])}>
-                      <SelectTrigger id="year" className="w-full">
-                        <SelectValue placeholder="Selecione o ano" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {years.map((year) => (
-                          <SelectItem key={year} value={year}>
-                            {year}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
-                ) : (
-                  <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
-                    <p className="text-blue-800 text-sm">
-                      O tema será gerado de forma aleatória por inteligência
-                      artificial.
-                    </p>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="random"
+                      id="random"
+                      onClick={() => setNonInepEssay(true)}
+                    />
+                    <Label htmlFor="random" className="cursor-pointer">
+                      Opção aleatória gerada por IA
+                    </Label>
                   </div>
-                )}
+                </RadioGroup>
               </div>
-            )}
 
-            {/* Matéria ou Tópico */}
-            {(typeOfSimulated === "Matéria" ||
-              typeOfSimulated === "Tópico") && (
-                <div className="space-y-3">
-                  <Label
-                    htmlFor="subjectOrTopic"
-                    className="text-gray-700 font-medium"
-                  >
-                    {typeOfSimulated}
+              {essay === "specific" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="year" className="text-gray-700 font-medium">
+                    Ano
                   </Label>
-                  <Select onValueChange={handleSelectChange}>
-                    <SelectTrigger id="subjectOrTopic" className="w-full">
-                      <SelectValue
-                        placeholder={`Selecione ${typeOfSimulated === "Matéria" ? "a matéria" : "o tópico"
-                          }`}
-                      />
+                  <Select onValueChange={(value) => setSubtype([value])}>
+                    <SelectTrigger id="year" className="w-full">
+                      <SelectValue placeholder="Selecione o ano" />
                     </SelectTrigger>
                     <SelectContent>
-                      {typeOfSimulated === SimulatedType.CATEGOTY && (
-                        <SelectGroup>
-                          {Object.keys(categoriesBySubject).map((subject) => (
-                            <SelectGroup>
-                              <SelectLabel>{subject}</SelectLabel>
-                              {categoriesBySubject[subject].map((category) => (
-                                <SelectItem value={category}>
-                                  {category}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          ))}
-                        </SelectGroup>
-                      )}
-                      {typeOfSimulated === SimulatedType.SUBJECT && (
-                        <SelectGroup>
-                          {Object.keys(subjectsByDiscipline).map((discipline) => (
-                            <SelectGroup>
-                              <SelectLabel>{discipline}</SelectLabel>
-                              {subjectsByDiscipline[discipline].map((subject) => (
-                                <SelectItem value={subject}>{subject}</SelectItem>
-                              ))}
-                            </SelectGroup>
-                          ))}
-                        </SelectGroup>
-                      )}
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <SelectedItems
-                    subtypes={subtypes}
-                    handleRemoveSubType={handleRemoveSubType}
-                  />
+                </div>
+              ) : (
+                <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
+                  <p className="text-blue-800 text-sm">
+                    O tema será gerado de forma aleatória por inteligência
+                    artificial.
+                  </p>
                 </div>
               )}
+            </div>
+          )}
 
-            {/* ENEM */}
-            {typeOfSimulated === SimulatedType.ENEM && (
-              <>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="day-one"
-                    checked={isDayOne}
-                    onCheckedChange={(checked) => {
-                      setIsDayOne(checked as boolean)
-                      if (checked) setIsDayTwo(false)
-                    }}
-                  />
-                  <Label htmlFor="day-one" className="text-gray-700 font-medium cursor-pointer">
-                    Primeiro dia
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="day-two"
-                    checked={isDayTwo}
-                    onCheckedChange={(checked) => {
-                      setIsDayTwo(checked as boolean)
-                      if (checked) setIsDayOne(false)
-                    }}
-                  />
-                  <Label htmlFor="day-two" className="text-gray-700 font-medium cursor-pointer">
-                    Segundo dia
-                  </Label>
-                </div>
-
+          {/* Matéria ou Tópico */}
+          {(typeOfSimulated === "Matéria" ||
+            typeOfSimulated === "Tópico") && (
+              <div className="space-y-3">
+                <Label
+                  htmlFor="subjectOrTopic"
+                  className="text-gray-700 font-medium"
+                >
+                  {typeOfSimulated}
+                </Label>
+                <Select onValueChange={handleSelectChange}>
+                  <SelectTrigger id="subjectOrTopic" className="w-full">
+                    <SelectValue
+                      placeholder={`Selecione ${typeOfSimulated === "Matéria" ? "a matéria" : "o tópico"
+                        }`}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {typeOfSimulated === SimulatedType.CATEGOTY && (
+                      <SelectGroup>
+                        {Object.keys(categoriesBySubject).map((subject) => (
+                          <SelectGroup>
+                            <SelectLabel>{subject}</SelectLabel>
+                            {categoriesBySubject[subject].map((category) => (
+                              <SelectItem value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectGroup>
+                    )}
+                    {typeOfSimulated === SimulatedType.SUBJECT && (
+                      <SelectGroup>
+                        {Object.keys(subjectsByDiscipline).map((discipline) => (
+                          <SelectGroup>
+                            <SelectLabel>{discipline}</SelectLabel>
+                            {subjectsByDiscipline[discipline].map((subject) => (
+                              <SelectItem value={subject}>{subject}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectGroup>
+                    )}
+                  </SelectContent>
+                </Select>
                 <SelectedItems
-                  subtypes={isDayOne ? dayOne : isDayTwo ? dayTwo : []}
+                  subtypes={subtypes}
+                  handleRemoveSubType={handleRemoveSubType}
                 />
+              </div>
+            )}
 
-                {isDayOne && (
-                  <>
-                    <Label htmlFor="language" className="text-gray-700 font-medium block mb-3">
-                      Escolha o idioma
+          {/* ENEM */}
+          {typeOfSimulated === SimulatedType.ENEM && (
+            <>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="day-one"
+                  checked={isDayOne}
+                  onCheckedChange={(checked) => {
+                    setIsDayOne(checked as boolean)
+                    if (checked) setIsDayTwo(false)
+                  }}
+                />
+                <Label htmlFor="day-one" className="text-gray-700 font-medium cursor-pointer">
+                  Primeiro dia
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="day-two"
+                  checked={isDayTwo}
+                  onCheckedChange={(checked) => {
+                    setIsDayTwo(checked as boolean)
+                    if (checked) setIsDayOne(false)
+                  }}
+                />
+                <Label htmlFor="day-two" className="text-gray-700 font-medium cursor-pointer">
+                  Segundo dia
+                </Label>
+              </div>
+
+              <SelectedItems
+                subtypes={isDayOne ? dayOne : isDayTwo ? dayTwo : []}
+              />
+
+              {isDayOne && (
+                <>
+                  <Label htmlFor="language" className="text-gray-700 font-medium block mb-3">
+                    Escolha o idioma
+                  </Label>
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="language"
+                      className="text-gray-700 font-medium"
+                    >
+                      Idioma
                     </Label>
-                    <div className="space-y-3">
-                      <Label
-                        htmlFor="language"
-                        className="text-gray-700 font-medium"
-                      >
-                        Idioma
-                      </Label>
-                      <RadioGroup
-                        value={language}
-                        onValueChange={(value) => setLanguage(value as 'english' | 'spanish')}
-                        className="flex space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="english" id="english" />
-                          <Label htmlFor="english" className="cursor-pointer">
-                            Inglês
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="spanish" id="spanish" />
-                          <Label htmlFor="spanish" className="cursor-pointer">
-                            Espanhol
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  </>
+                    <RadioGroup
+                      value={language}
+                      onValueChange={(value) => setLanguage(value as 'english' | 'spanish')}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="english" id="english" />
+                        <Label htmlFor="english" className="cursor-pointer">
+                          Inglês
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="spanish" id="spanish" />
+                        <Label htmlFor="spanish" className="cursor-pointer">
+                          Espanhol
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </>
 
-                )}
+              )}
+            </>
+          )}
+
+          {/* Quantidade de Questões */}
+          {typeOfSimulated !== SimulatedType.ESSAY &&
+            typeOfSimulated !== SimulatedType.ENEM && (
+              <>
+                <div className="space-y-3">
+                  <Label
+                    htmlFor="questionCount"
+                    className="text-gray-700 font-medium"
+                  >
+                    Quantidade de Questões
+                  </Label>
+                  <Input
+                    id="questionCount"
+                    type="number"
+                    value={questionCount}
+                    onChange={(e) => setQuestionCount(Number(e.target.value))}
+                    min={1}
+                    max={180}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="unseen"
+                      checked={unseen}
+                      onCheckedChange={(checked) => {
+                        setUnseen(checked as boolean);
+                        if (checked) setReview(false);
+                      }}
+                    />
+                    <Label htmlFor="unseen" className="text-gray-600">
+                      Questões Inéditas
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="review"
+                      checked={review}
+                      onCheckedChange={(checked) => {
+                        setReview(checked as boolean);
+                        if (checked) setUnseen(false);
+                      }}
+                    />
+                    <Label htmlFor="review" className="text-gray-600">
+                      Revisar Questões que Errou
+                    </Label>
+                  </div>
+                </div>
               </>
             )}
 
-            {/* Quantidade de Questões */}
-            {typeOfSimulated !== SimulatedType.ESSAY &&
-              typeOfSimulated !== SimulatedType.ENEM && (
-                <>
-                  <div className="space-y-3">
-                    <Label
-                      htmlFor="questionCount"
-                      className="text-gray-700 font-medium"
-                    >
-                      Quantidade de Questões
-                    </Label>
-                    <Input
-                      id="questionCount"
-                      type="number"
-                      value={questionCount}
-                      onChange={(e) => setQuestionCount(Number(e.target.value))}
-                      min={1}
-                      max={180}
-                      className="w-full"
-                    />
-                  </div>
+          {/* Mensagem de Erro */}
+          {error && <ErrorMessage title="Erro!" message={error} />}
 
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="unseen"
-                        checked={unseen}
-                        onCheckedChange={(checked) => {
-                          setUnseen(checked as boolean);
-                          if (checked) setReview(false);
-                        }}
-                      />
-                      <Label htmlFor="unseen" className="text-gray-600">
-                        Questões Inéditas
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="review"
-                        checked={review}
-                        onCheckedChange={(checked) => {
-                          setReview(checked as boolean);
-                          if (checked) setUnseen(false);
-                        }}
-                      />
-                      <Label htmlFor="review" className="text-gray-600">
-                        Revisar Questões que Errou
-                      </Label>
-                    </div>
-                  </div>
-                </>
-              )}
-
-            {/* Mensagem de Erro */}
-            {error && <ErrorMessage title="Erro!" message={error} />}
-
-            {/* Botão */}
-            <Button onClick={handleClick} className="w-full">
-              Criar Simulado
-            </Button>
-          </CardContent>
-        )}
+          {/* Botão */}
+          <Button onClick={handleClick} className="w-full">
+            Criar Simulado
+          </Button>
+        </CardContent>
+        {loading && <Loading />}
       </Card>
     </div >
   );
