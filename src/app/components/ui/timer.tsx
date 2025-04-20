@@ -9,16 +9,19 @@ import { cn } from "@/lib/utils"
 type TimerProps = {
   initialTime?: number
   className?: string
+  stop?: boolean
 }
 
-export function Timer({ initialTime = 0, className }: TimerProps) {
+export function Timer({ initialTime = 0, className, stop }: TimerProps) {
   const [time, setTime] = useState<number>(0)
-  
+
   useEffect(() => {
     setTime(initialTime)
   }, [initialTime])
 
   useEffect(() => {
+    if (stop) return;
+
     const interval = setInterval(() => {
       setTime((prevTime) => prevTime + 1)
     }, 1000)

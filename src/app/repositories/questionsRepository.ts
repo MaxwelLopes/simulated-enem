@@ -1,11 +1,8 @@
 import { Discipline } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
-import { use } from "react";
-import { Select } from "@radix-ui/react-select";
 
 // Retorna a questão com as alternativas e categorias associadas.
 export const findQuestionById = async (questionId: number) => {
-  console.log(questionId);
   return await prisma.question.findUnique({
     where: { id: questionId },
     include: {

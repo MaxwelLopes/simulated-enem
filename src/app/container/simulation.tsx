@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GenericError } from "@/app/components/GenericError";
 import { Loading } from "@/app/components/Loading";
@@ -49,10 +49,12 @@ export const Simulation = ({ id }: SimulationProps) => {
     showEssayForm,
     setShowEssayForm,
     timeSpent,
+    setLoading,
   } = useSimulation();
 
   // Inicializa simulado e busca status
   useEffect(() => {
+    setLoading(true);
     const fetchStatus = async () => {
       try {
         const status = await getSimulationStatus(id);
@@ -66,7 +68,14 @@ export const Simulation = ({ id }: SimulationProps) => {
       setSimulatedId(id);
       fetchStatus();
     }
-  }, []);
+    setLoading(false);
+  }, [id]);
+
+  useEffect(() => {
+    if (!currentQuestion) {
+      setLoading(true);
+    }
+  }, [currentQuestion]);
 
   const handleFinishSimulation = async () => {
     if (simulationStatus !== SimulatedStatus.COMPLETED) {
@@ -92,21 +101,17 @@ export const Simulation = ({ id }: SimulationProps) => {
     return <Loading />;
   }
 
-  // Se houver redação e as instruções devem ser exibidas, renderiza a tela de instruções.
-  if (essay && showEssayInstructions && simulationStatus !== SimulatedStatus.COMPLETED) {
-    return <IntroductionEssay handleClick={setShowEssayInstructions} />;
-  }
-
-  // Se o formulário de redação estiver ativo, renderiza o componente de formulário.
-  if (showEssayForm) {
-    return <EssayForm simulatedId={id} simulationStatus={simulationStatus as string} theme={essay?.theme || ""} />;
-  }
-  console.log(showEssay, 'showEssay');
-
   return (
     <>
       {showEssay && <EssayPresentation essay={essay} />}
       {showEssay && simulationStatus === SimulatedStatus.COMPLETED && <SimulationResult id={id} />}
+
+      {essay && showEssayInstructions && simulationStatus !== SimulatedStatus.COMPLETED && (
+        <IntroductionEssay handleClick={setShowEssayInstructions} />
+      )}
+
+      {showEssayForm && <EssayForm simulatedId={id} simulationStatus={simulationStatus as string} theme={essay?.theme || ""} />}
+
       <ProgressBar
         totalQuestions={questionOrder.length}
         questionOrder={questionOrder}

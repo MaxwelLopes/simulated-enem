@@ -54,7 +54,7 @@ Exemplo:
     const text = await generateText({ role, prompt, temperature });
     const cleanedText = text.replace(/```json|```/g, "").trim();
     const parsedTheme = JSON.parse(cleanedText);
-    console.log("Tema gerado:", parsedTheme.theme);
+
     return parsedTheme as { theme: string; motivationalTexts: string[] };
   } catch (error) {
     console.error("Erro ao gerar tema:", error);

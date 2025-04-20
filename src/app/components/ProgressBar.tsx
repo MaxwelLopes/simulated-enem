@@ -176,7 +176,7 @@ export function ProgressBar({
               </Button>
             </div>
 
-            <Timer initialTime={initialTime} />
+            <Timer initialTime={initialTime} stop={simulatedStatus === SimulatedStatus.COMPLETED} />
           </div>
 
           <div className="p-4 overflow-y-auto">

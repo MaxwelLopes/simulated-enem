@@ -4,8 +4,6 @@ export const useQuestion = (question: any) => {
   const [disciplineName, setDisciplineName] = useState<string | null>(null);
   const [subjectName, setSubjectName] = useState<string | null>(null);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
-  const [alternatives, setAlternatives] = useState<any[]>([]);
-  const [correctAlternative, setCorrectAlternative] = useState<string | null>(null);
   
   useEffect(() => {
     if (question?.discipline) {

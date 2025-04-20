@@ -54,7 +54,6 @@ export const createSimulated = async ({
     });
 
     // Criação das questões associadas (se houver)
-    console.log(simulated.id, "simulated.id");
     if (questionsId && questionsId.length > 0) {
       await prisma.simulatedQuestion.createMany({
         data: questionsId.map((question) => ({

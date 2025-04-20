@@ -42,24 +42,23 @@ export const useSimulation = () => {
   const [timeSpent, setTimeSpent] = useState<number>();
 
   useEffect(() => {
-    setLoading(true);
     if (simulatedId) {
       fetchQuestionsOrder(simulatedId);
       fetchEssay(simulatedId);
       fetchSimulated(simulatedId);
     }
-    setLoading(false);
   }, [simulatedId]);
 
   useEffect(() => {
+    setLoading(true);
     if (questionOrder[currentIndex]?.id) {
-      setLoading(true);
       loadQuestion(questionOrder[currentIndex]?.id);
-      setLoading(false);
     }
+    setLoading(false);
   }, [currentIndex]);
 
   const fetchQuestionsOrder = async (simulatedId: string) => {
+    setLoading(true);
     try {
       const simulatedQuestions = await getQuestionOfSimulated(simulatedId);
       const questionIds = simulatedQuestions.map((q: any, index: number) => ({
@@ -72,9 +71,11 @@ export const useSimulation = () => {
     } catch (error) {
       console.error("Erro ao buscar questões do simulado:", error);
     }
+    setLoading(false);
   };
 
   const fetchEssay = async (simulatedId: string) => {
+    setLoading(true);
     const essay = await getEssayBySimulatedId(simulatedId);
     if (essay) {
       setShowEssayInstructions(true);
@@ -82,19 +83,22 @@ export const useSimulation = () => {
       setShowEssay(true);
       setCurrentIndex(-1);
     }
+    setLoading(false);
   };
 
   const fetchSimulated = async (simulatedId: string) => {
+    setLoading(true);
     const simulatedData = await getSimulatedById(simulatedId);
     if (simulatedData) {
       setSimulated(simulatedData as Simulated);
       setTimeSpent(calculateElapsedTime(simulatedData?.createdAt));
     }
+    setLoading(false);
   };
 
   const loadQuestion = async (questionId: number) => {
     if (questionsCache[questionId]) return;
-
+    setLoading(true);
     try {
       const question = await getQuestion(questionId);
       const existing = questionOrder.find((q) => q.id === questionId);
@@ -188,9 +192,11 @@ export const useSimulation = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     if (questionOrder.length > 0 && !questionsCache[questionOrder[0].id]) {
       loadQuestion(questionOrder[0].id);
     }
+    setLoading(false);
   }, [questionOrder]);
 
   return {
@@ -218,5 +224,6 @@ export const useSimulation = () => {
     totalQuestions: questionOrder.length,
     handleAnswerQuestion,
     timeSpent,
+    setLoading,
   };
 };
