@@ -3,7 +3,7 @@
 import NavBar from "@/app/components/NavBar";
 import DashBoard from "@/app/container/DashBoard";
 
-export const CreatSimulatedPage = () => {
+const CreatSimulatedPage = ({}) => {
   return (
     <div>
       <NavBar />

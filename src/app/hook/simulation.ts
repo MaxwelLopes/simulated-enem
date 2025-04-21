@@ -56,7 +56,7 @@ export const useSimulation = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     setLoading(false);
-    }, [currentIndex, questionOrder]);
+  }, [currentIndex, questionOrder]);
 
   const fetchQuestionsOrder = async (simulatedId: string) => {
     setLoading(true);
@@ -177,7 +177,6 @@ export const useSimulation = () => {
     } else if (currentIndex + 1 < questionOrder.length) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
-      //loadQuestion(questionOrder[nextIndex].id);
     }
   };
 
@@ -198,6 +197,7 @@ export const useSimulation = () => {
       loadQuestion(questionOrder[0].id);
     }
     setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionOrder]);
 
   return {

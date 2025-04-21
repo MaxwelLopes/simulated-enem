@@ -3,7 +3,7 @@
 import NavBar from "@/app/components/NavBar";
 import Home from "../container/home";
 
-export const SimulationsPage = () => {
+const SimulationsPage = ({}) => {
   return (
     <>
       <NavBar />

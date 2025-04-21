@@ -3,7 +3,7 @@
 import NavBar from "@/app/components/NavBar";
 import CreateSimulated from "@/app/container/CreateSimulated";
 
-export const CreateSimulatedPage = ({}) => {
+const CreateSimulatedPage = ({}) => {
   return (
     <div>
       <NavBar />

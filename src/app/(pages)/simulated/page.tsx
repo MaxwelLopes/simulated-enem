@@ -3,7 +3,7 @@
 import NavBar from "@/app/components/NavBar";
 import SimulatedList from "@/app/container/Simulateds";
 
-export const SimulationsPage = () => {
+const SimulationsPage = ({ }) => {
   return (
     <>
       <NavBar />
