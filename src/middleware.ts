@@ -2,9 +2,27 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export default function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const isPublicPath = ['/login', '/signup'].includes(path);
 
-  if (!request.cookies.get("next-auth.session-token")) {
+  // Verifica TODOS os cookies possíveis do NextAuth
+  const hasAuthCookie = [
+    '__Secure-next-auth.session-token',
+    'next-auth.session-token',
+    '__Host-next-auth.csrf-token'
+  ].some(cookie => request.cookies.has(cookie));
+
+  // Debug: Mostra cookies no log (remova após resolver)
+  console.log('Cookies encontrados:', 
+    Object.keys(request.cookies)
+  );
+
+  if (!hasAuthCookie && !isPublicPath) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (hasAuthCookie && isPublicPath) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
