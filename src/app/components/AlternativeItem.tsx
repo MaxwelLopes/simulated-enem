@@ -8,9 +8,9 @@ type AlternativeItemProps = {
   letter: string;
   text: string;
   response: string;
-  setResponse: Function;
+  setResponse: (value: string) => void;
   simulationStatus: string | null;
-  handleAnswerQuestion: Function;
+  handleAnswerQuestion: (value: string) => void;
   correctAlternative: string;
 };
 
@@ -31,7 +31,6 @@ const AlternativeItem = ({
   
   const handleClick = () => {
     if (simulationStatus !== SimulatedStatus.COMPLETED) {
-      isSelected;
       setResponse(letter);
     }
     handleAnswerQuestion(letter);

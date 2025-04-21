@@ -278,10 +278,10 @@ const CreateSimulated = () => {
                     {typeOfSimulated === SimulatedType.CATEGOTY && (
                       <SelectGroup>
                         {Object.keys(categoriesBySubject).map((subject) => (
-                          <SelectGroup>
+                          <SelectGroup key={subject}>
                             <SelectLabel>{subject}</SelectLabel>
                             {categoriesBySubject[subject].map((category) => (
-                              <SelectItem value={category}>
+                              <SelectItem value={category} key={category}>
                                 {category}
                               </SelectItem>
                             ))}
@@ -292,10 +292,10 @@ const CreateSimulated = () => {
                     {typeOfSimulated === SimulatedType.SUBJECT && (
                       <SelectGroup>
                         {Object.keys(subjectsByDiscipline).map((discipline) => (
-                          <SelectGroup>
+                          <SelectGroup key={discipline}>
                             <SelectLabel>{discipline}</SelectLabel>
                             {subjectsByDiscipline[discipline].map((subject) => (
-                              <SelectItem value={subject}>{subject}</SelectItem>
+                              <SelectItem value={subject} key={subject}>{subject}</SelectItem>
                             ))}
                           </SelectGroup>
                         ))}

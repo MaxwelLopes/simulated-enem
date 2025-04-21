@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { 
-  getAllQuestionsByUserId, 
   getUserCorrectAnswersCount, 
   getUserIncorrectAnswersCount, 
   getIncorrectAnswersCountByCategory,
@@ -14,7 +13,7 @@ import {
 import { getSimulations } from "../service/simualationService";
 
 import { TrendingUp, ChevronLeft, ChevronRight, FileQuestion, BarChart2, ArrowUp, ArrowDown,Minus } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Tooltip, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
 
 import {
   Card,
@@ -29,8 +28,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "../components/ui/chart"
 import { Button } from "../components/ui/button"
 import { ScrollArea, ScrollBar } from "../components/ui/scroll-area"
@@ -82,8 +79,7 @@ export default function DashBoard() {
   const [correctsByCategory, setCorrectsByCategory] = useState<{ category: string; correctCount: number }[]>([]);
   const [averageScore, setAverageScore] = useState(0);
   const [totalSimulations, setTotalSimulations] = useState(0);
-  const [averageDuration, setAverageDuration] = useState(0);
-  const [simulationsData, setSimulationsData] = useState<any[]>([]);
+  const [simulationsData, setSimulationsData] = useState<{ id: string; name: string; correct: number; incorrect: number; status: string; date: string; }[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const simulationsPerPage = 5;
   const [overallAverageScore, setOverallAverageScore] = useState(0);
@@ -93,7 +89,6 @@ export default function DashBoard() {
     const fetchData = async () => {
       if (userId) {
         const simulationsData = await getSimulations(userId);
-        const allQuestions = await getAllQuestionsByUserId(userId);
         const correct = await getUserCorrectAnswersCount(userId);
         const incorrect = await getUserIncorrectAnswersCount(userId);
         const incorrectByCategory = await getIncorrectAnswersCountByCategory(userId);
@@ -112,19 +107,6 @@ export default function DashBoard() {
         const totalAnswers = correct + incorrect;
         const average = totalAnswers > 0 ? (correct / totalAnswers) * 100 : 0;
         setAverageScore(average);
-
-        const totalDuration = simulationsData.reduce((total, sim) => {
-          if (sim.createdAt && sim.finishedAt) {
-            const start = new Date(sim.createdAt).getTime();
-            const end = new Date(sim.finishedAt).getTime();
-            const durationInMinutes = (end - start) / (1000 * 60);
-            return total + durationInMinutes;
-          }
-          return total;
-        }, 0);
-
-        const avgDuration = simulationsData.length > 0 ? totalDuration / simulationsData.length : 0;
-        setAverageDuration(avgDuration);
 
         const processedSimulations = simulationsData.map((sim, index) => ({
           id: sim.id,

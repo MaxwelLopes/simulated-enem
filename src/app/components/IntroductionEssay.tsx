@@ -38,7 +38,7 @@ export const IntroductionEssay = ({ handleClick }: IntroductionEssayProps) => {
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg">Transcreva o Texto</h3>
                         <p>
-                            Ao concluir a redação, clique em "Finalizar" para avançar para a próxima etapa. Nessa fase, você deverá digitar o texto exatamente como foi escrito à mão, sem alterações ou correções.
+                            Ao concluir a redação, clique em &ldquo;Finalizar&rdquo; para avançar para a próxima etapa. Nessa fase, você deverá digitar o texto exatamente como foi escrito à mão, sem alterações ou correções.
                         </p>
                     </div>
                     <div className="space-y-2">

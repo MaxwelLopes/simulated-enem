@@ -1,6 +1,6 @@
 "use server";
 
-import { Essay, Simulated } from "@prisma/client";
+import { Simulated } from "@prisma/client";
 import { SimulatedStatus, SimulatedType } from "../enum/simulated";
 import { createEssay, getEssayByYear } from "../repositories/essayRepository";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GenericError } from "@/app/components/GenericError";
 import { Loading } from "@/app/components/Loading";
@@ -13,13 +13,13 @@ import {
 } from "@/app/service/simualationService";
 import { SimulatedStatus } from "../enum/simulated";
 import { Button } from "../components/ui/button";
-import { CheckCircle, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { SimulationFooter } from "../components/SimulationFooter";
-import EssayForm from "../components/EssayForm";
 import { IntroductionEssay } from "../components/IntroductionEssay";
 import { cn } from "@/lib/utils";
 import { EssayPresentation } from "../components/EssayPresentation";
 import SimulationResult from "./SimulationResult";
+import { EssayForm } from "../components/EssayForm";
 
 interface SimulationProps {
   id: string;
@@ -69,13 +69,13 @@ export const Simulation = ({ id }: SimulationProps) => {
       fetchStatus();
     }
     setLoading(false);
-  }, [id]);
+  }, [id, setSimulatedId, setSimulationStatus, setLoading]);
 
   useEffect(() => {
     if (!currentQuestion) {
       setLoading(true);
     }
-  }, [currentQuestion]);
+  }, [currentQuestion, setLoading, setSimulatedId]);
 
   const handleFinishSimulation = async () => {
     if (simulationStatus !== SimulatedStatus.COMPLETED) {
@@ -101,17 +101,21 @@ export const Simulation = ({ id }: SimulationProps) => {
     return <Loading />;
   }
 
+  if (showEssay && simulationStatus === SimulatedStatus.COMPLETED) {
+    return <SimulationResult id={id} />;
+  }
+
+  if (essay && showEssayInstructions && simulationStatus !== SimulatedStatus.COMPLETED) {
+    return <IntroductionEssay handleClick={setShowEssayInstructions} />;
+  }
+
+  if (showEssayForm) {
+    return <EssayForm simulatedId={id} simulationStatus={simulationStatus as string} theme={essay?.theme || ""} />;
+  }
+
   return (
     <>
-      {showEssay && <EssayPresentation essay={essay} />}
-      {showEssay && simulationStatus === SimulatedStatus.COMPLETED && <SimulationResult id={id} />}
-
-      {essay && showEssayInstructions && simulationStatus !== SimulatedStatus.COMPLETED && (
-        <IntroductionEssay handleClick={setShowEssayInstructions} />
-      )}
-
-      {showEssayForm && <EssayForm simulatedId={id} simulationStatus={simulationStatus as string} theme={essay?.theme || ""} />}
-
+      {showEssay && essay && !showEssayInstructions && <EssayPresentation essay={essay} />}
       <ProgressBar
         totalQuestions={questionOrder.length}
         questionOrder={questionOrder}

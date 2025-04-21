@@ -1,6 +1,6 @@
 "use server";
 
-import { SimulatedStatus, SimulatedType } from "../enum/simulated";
+import { SimulatedStatus } from "../enum/simulated";
 import { generateText } from "../integrations/openAi";
 import {
   createEssay as createEssayInRepository,

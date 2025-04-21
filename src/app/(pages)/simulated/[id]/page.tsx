@@ -2,16 +2,10 @@ import NavBar from "@/app/components/NavBar";
 import { Simulation } from "@/app/container/simulation";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // se estiver usando next-auth
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { verifyOwnership } from "@/app/service/simualationService";
 
-type ParamsType = {
-  params: {
-    id: string;
-  };
-};
-
-export default async function SimulationPage({ params } ) {
+export default async function SimulationPage({ params }) {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 

@@ -30,8 +30,8 @@ export const generateText = async ({
     if (!response) throw new Error("Resposta vazia da API.");
 
     return response;
-  } catch (error: any) {
-    console.error("Erro ao chamar a API da OpenAI:", error?.message || error);
+  } catch (error) {
+    console.error("Erro ao chamar a API da OpenAI:", error);
     throw new Error("Falha ao gerar texto. Tente novamente.");
   }
 };

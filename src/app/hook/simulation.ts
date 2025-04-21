@@ -9,7 +9,7 @@ import {
 import { getQuestion } from "../service/QuestionService";
 import { getEssayBySimulatedId } from "../service/essayService";
 import { SimulatedStatus } from "../enum/simulated";
-import { Simulated } from "@prisma/client";
+import { Essay } from "@prisma/client";
 import { calculateElapsedTime } from "../utils/utils";
 
 interface QuestionOrderItem {
@@ -20,6 +20,7 @@ interface QuestionOrderItem {
 }
 
 interface QuestionCacheItem {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   question: any;
   response: string;
 }
@@ -33,12 +34,11 @@ export const useSimulation = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [simulationStatus, setSimulationStatus] = useState<string | null>(null);
-  const [essay, setEssay] = useState<any>(null);
+  const [essay, setEssay] = useState<Essay>();
   const [showEssayInstructions, setShowEssayInstructions] =
     useState<boolean>(false);
   const [showEssay, setShowEssay] = useState<boolean>(false);
   const [showEssayForm, setShowEssayForm] = useState<boolean>(false);
-  const [simualted, setSimulated] = useState<Simulated>();
   const [timeSpent, setTimeSpent] = useState<number>();
 
   useEffect(() => {
@@ -54,13 +54,15 @@ export const useSimulation = () => {
     if (questionOrder[currentIndex]?.id) {
       loadQuestion(questionOrder[currentIndex]?.id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setLoading(false);
-  }, [currentIndex]);
+    }, [currentIndex, questionOrder]);
 
   const fetchQuestionsOrder = async (simulatedId: string) => {
     setLoading(true);
     try {
       const simulatedQuestions = await getQuestionOfSimulated(simulatedId);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const questionIds = simulatedQuestions.map((q: any, index: number) => ({
         id: q.questionId,
         index,
@@ -90,7 +92,6 @@ export const useSimulation = () => {
     setLoading(true);
     const simulatedData = await getSimulatedById(simulatedId);
     if (simulatedData) {
-      setSimulated(simulatedData as Simulated);
       setTimeSpent(calculateElapsedTime(simulatedData?.createdAt));
     }
     setLoading(false);

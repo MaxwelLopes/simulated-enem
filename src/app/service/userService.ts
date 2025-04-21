@@ -8,7 +8,6 @@ import {
   findUserById,
   updateUser,
 } from "../repositories/userRepository";
-import { UserPen } from "lucide-react";
 
 export const createUser = async (
   name: string,

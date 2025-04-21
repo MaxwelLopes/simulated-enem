@@ -8,7 +8,6 @@ import { getCriteria, getSimulatedById } from "../service/simualationService"
 import { getTheme } from "../service/essayService"
 import { SimulatedStatus } from "../enum/simulated"
 import { Progress } from "../components/ui/progress"
-import { Info } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider } from "../components/ui/toolTip"
 
 

@@ -27,7 +27,7 @@ export function Timer({ initialTime = 0, className, stop }: TimerProps) {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [stop])
 
   const days = Math.floor(time / (24 * 60 * 60))
   const hours = Math.floor((time % (24 * 60 * 60)) / (60 * 60))

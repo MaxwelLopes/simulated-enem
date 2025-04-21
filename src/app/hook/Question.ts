@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
-export const useQuestion = (question: any) => {
+interface Question {
+  discipline?: { name: string | null };
+  subject?: { name: string | null };
+  questionCategories?: { category: { name: string } }[];
+}
+
+export const useQuestion = (question: Question) => {
   const [disciplineName, setDisciplineName] = useState<string | null>(null);
   const [subjectName, setSubjectName] = useState<string | null>(null);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);

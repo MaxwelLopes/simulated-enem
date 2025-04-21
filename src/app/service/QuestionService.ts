@@ -1,6 +1,5 @@
 "use server";
 
-import { Question } from "@prisma/client";
 import { getAnswersCountByUserIdAndCategory } from "../repositories/categoryRepository";
 import {
   findAllQuestionsByIdUser,

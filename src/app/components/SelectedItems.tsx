@@ -1,6 +1,6 @@
 type props = {
   subtypes: string[];
-  handleRemoveSubType?: Function;
+  handleRemoveSubType?: (subtype: string) => void;
 };
 
 export const SelectedItems = ({ subtypes, handleRemoveSubType }: props) => {

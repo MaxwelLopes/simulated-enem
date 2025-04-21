@@ -9,7 +9,7 @@ import { evalueEssay } from "../service/essayService"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react";
 
-export default function ({ simulatedId, simulationStatus, theme }: { simulatedId: string; simulationStatus:string; theme: string }) {
+export const EssayForm = ({ simulatedId, simulationStatus, theme }: { simulatedId: string; simulationStatus: string; theme: string }) => {
   const [essay, setEssay] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function ({ simulatedId, simulationStatus, theme }: { simulatedId
       <form onSubmit={handleSubmit}>
         <Card className="w-full max-w-3xl mx-auto mt-20">
           <CardHeader>
-            <CardTitle>Transcrição da Redaçãoo</CardTitle>
+            <CardTitle>Transcrição da Redação</CardTitle>
             <CardDescription>Transcreva aqui sua redação palavra por palavra, incluindo eventuais rasuras e correções, exatamente como está no papel...</CardDescription>
           </CardHeader>
           <CardContent>
