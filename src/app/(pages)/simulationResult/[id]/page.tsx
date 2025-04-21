@@ -5,7 +5,7 @@ import { verifyOwnership } from "@/app/service/simualationService";
 import SimulationResult from "@/app/container/SimulationResult";
 import { authOptions } from "@/lib/authOptions";
 
-export default async function SimulationPage({ params }) {
+export default async function SimulationPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
