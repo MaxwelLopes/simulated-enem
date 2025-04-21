@@ -12,7 +12,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["next-auth", "./src/types/next-auth"],
+    "types": ["next-auth"],
     "plugins": [
       {
         "name": "next"
