@@ -28,6 +28,8 @@ export function LoginForm() {
       password,
     });
 
+    console.log('Login response:', res);
+
     if (res?.error) {
       if (res.error === "CredentialsSignin") {
         setError("Email ou senha incorretos.");
