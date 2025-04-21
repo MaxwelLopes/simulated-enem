@@ -3,7 +3,7 @@
 import NavBar from "@/app/components/NavBar";
 import CreateSimulated from "@/app/container/CreateSimulated";
 
-export const CreatSimulatedPage = () => {
+export const CreateSimulatedPage = ({}) => {
   return (
     <div>
       <NavBar />
@@ -14,4 +14,4 @@ export const CreatSimulatedPage = () => {
   );
 };
 
-export default CreatSimulatedPage;
+export default CreateSimulatedPage;
