@@ -72,7 +72,7 @@ const CustomLegend = ({ data }: { data: { name: string; value: number; color: st
 
 export default function DashBoard() {
   const { data: session } = useSession();
-  const userId = session?.user.id;
+  const userId = session?.user?.id ?? null;
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
   const [errorsByCategory, setErrorsByCategory] = useState<{ category: string; incorrectCount: number }[]>([]);
