@@ -1,6 +1,7 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authenticateUser } from "@/app/service/authService";
+import { NextAuthOptions } from "next-auth";
 
 declare module "next-auth" {
   interface User {
@@ -14,7 +15,7 @@ declare module "next-auth" {
   }
 }
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",
   },
@@ -24,11 +25,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Sign in",
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "hello@example.com",
-        },
+        email: { label: "Email", type: "email", placeholder: "hello@example.com" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -56,8 +53,8 @@ export const authOptions: NextAuthOptions = {
     },
     jwt: ({ token, user }) => {
       if (user) {
-        const u = user && "id" in user && "randomKey" in user 
-          ? (user as { id: string; randomKey: string }) 
+        const u = user && "id" in user && "randomKey" in user
+          ? (user as { id: string; randomKey: string })
           : { id: "", randomKey: "" };
         return {
           ...token,
@@ -75,4 +72,5 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
+
 export { handler as GET, handler as POST };
