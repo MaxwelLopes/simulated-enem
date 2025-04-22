@@ -39,10 +39,10 @@ const NavBar = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Logout Button */}
-          <div className="ml-auto lg:ml-0 lg:mr-6">
-          <LogoutButton />
-        </div>
+          {/* Logout Button - Visível apenas em desktop */}
+          <div className="hidden lg:block">
+            <LogoutButton />
+          </div>
 
           {/* Mobile Navigation */}
           <Sheet>
@@ -53,7 +53,7 @@ const NavBar = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-              <div className="flex flex-col gap-6 py-6">
+              <div className="flex flex-col gap-6 py-6 h-full">
                 <div className="flex items-center gap-3 mb-6">
                   <ClipboardCheck className="h-8 w-8 text-indigo-600" />
                   <span className="text-xl font-bold text-gray-800">Simulador ENEM</span>
@@ -77,7 +77,16 @@ const NavBar = () => {
                   ))}
                 </div>
 
-                <div className="mt-auto pt-6 border-t"></div>
+                {/* Logout Button dentro do menu mobile */}
+                <div className="mt-auto pt-6 border-t border-gray-200">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-gray-500 px-4">Conta</p>
+                    {/* Logout Button */}
+                    <div className="ml-auto lg:ml-0 lg:mr-6">
+                      <LogoutButton />
+                    </div>
+                  </div>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
