@@ -9,7 +9,7 @@ const NavBar = () => {
   const router = useRouter()
 
   const navigationLinks = [
-    { label: "Home", path: "/" },
+    { label: "Página Inicial", path: "/" },
     { label: "Meus Simulados", path: "/simulated" },
     { label: "Novo Simulado", path: "/createSimulated" },
     { label: "Desempenho", path: "/desempenho" },
