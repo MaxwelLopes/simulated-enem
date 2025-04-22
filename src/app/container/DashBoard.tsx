@@ -109,7 +109,7 @@ export default function DashBoard() {
         setAverageScore(average);
 
         const processedSimulations = simulationsData.map((sim, index) => ({
-          id: sim.id,
+          id: String(sim.id), // Convertendo para string explicitamente
           name: `Simulado ${index + 1}`,
           correct: sim.correctAnswers,
           incorrect: sim.totalQuestions - sim.correctAnswers,
