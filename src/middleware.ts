@@ -9,7 +9,6 @@ export default function middleware(request: NextRequest) {
   const hasAuthCookie = [
     '__Secure-next-auth.session-token',
     'next-auth.session-token',
-    '__Host-next-auth.csrf-token'
   ].some(cookie => request.cookies.has(cookie));
 
   // Debug: Mostra cookies no log (remova após resolver)

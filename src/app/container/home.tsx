@@ -219,7 +219,7 @@ export default function Home() {
               )}
 
               {recentSimulations.length > 0 && (
-                <Button variant="link" className="mt-2 text-indigo-400 w-full">
+                <Button variant="link" className="mt-2 text-indigo-400 w-full" onClick={() => router.push("/simulated")}>
                   Ver Todos os Simulados <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               )}
