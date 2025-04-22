@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { Loading } from "@/app/components/Loading"
 import {
-  getOverallAverageScore,
   getUserCorrectAnswersCount,
   getUserIncorrectAnswersCount,
 } from "@/app/service/QuestionService"
@@ -41,7 +40,6 @@ export default function Home() {
         const simulationsData = await getSimulations(userId)
         const correct = await getUserCorrectAnswersCount(userId)
         const incorrect = await getUserIncorrectAnswersCount(userId)
-        const overallAverage = await getOverallAverageScore()
 
         setCorrectCount(correct)
         setIncorrectCount(incorrect)
