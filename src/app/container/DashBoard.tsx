@@ -209,15 +209,6 @@ export default function DashBoard() {
   const isHigher = difference > 0
   const isEqual = difference === 0
 
-  // Prepare data for bar chart
-  const barChartData = simulationsData
-    .map((sim, index) => ({
-      name: `Simulado ${index + 1}`,
-      acertos: sim.correct,
-      erros: sim.incorrect,
-    }))
-    .slice(0, 5)
-
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-indigo-50 to-gray-100">
       <div className="container mx-auto px-4 py-8">
