@@ -1,44 +1,53 @@
-"use client";
+"use client"
 
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { 
-  getUserCorrectAnswersCount, 
-  getUserIncorrectAnswersCount, 
+import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
+import {
   getIncorrectAnswersCountByCategory,
   getCorrectAnswersCountByCategory,
   getOverallAverageScore,
-  getDisciplineAffinity
-} from "../service/QuestionService";
-import { getSimulations } from "../service/simualationService";
-
-import { TrendingUp, ChevronLeft, ChevronRight, FileQuestion, BarChart2, ArrowUp, ArrowDown,Minus } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
+  getDisciplineAffinity,
+} from "../service/QuestionService"
+import { getSimulations } from "../service/simualationService"
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card"
+  ChevronLeft,
+  ChevronRight,
+  FileQuestion,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  BookOpen,
+  Award,
+  Clock,
+  PieChartIcon,
+  Activity,
+} from "lucide-react"
 import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "../components/ui/chart"
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Pie,
+  PieChart,
+  Cell,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Tooltip,
+} from "recharts"
+
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "../components/ui/chart"
 import { Button } from "../components/ui/button"
 import { ScrollArea, ScrollBar } from "../components/ui/scroll-area"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
+import { Badge } from "../components/ui/badge"
 
 const chartConfig = {
   correct: {
@@ -57,460 +66,792 @@ const COLORS = [
   "hsl(var(--chart-3))",
   "hsl(var(--chart-4))",
   "hsl(var(--chart-5))",
-];
+]
 
-const CustomLegend = ({ data }: { data: { name: string; value: number; color: string; totalQuestions: number }[] }) => (
+const CustomLegend = ({
+  data,
+  darkMode = false,
+}: {
+  data: { name: string; value: number; color: string; totalQuestions: number }[]
+  darkMode?: boolean
+}) => (
   <div className="flex flex-col space-y-2">
     {data.map((entry, index) => (
       <div key={`legend-${index}`} className="flex items-center">
-        <div className="w-4 h-4 mr-2" style={{ backgroundColor: entry.color }}></div>
-        <span className="text-sm">{entry.name}: {entry.value.toFixed(2)}% <br /> ({entry.totalQuestions} questões)</span>
+        <div className="w-4 h-4 mr-2 rounded-sm" style={{ backgroundColor: entry.color }}></div>
+        <span className={`text-sm ${darkMode ? "text-muted-foreground" : ""}`}>
+          {entry.name}: {entry.value.toFixed(2)}% <br /> ({entry.totalQuestions} questões)
+        </span>
       </div>
     ))}
   </div>
-);
+)
 
 export default function DashBoard() {
-  const { data: session } = useSession();
-  const userId = session?.user?.id ?? null;
-  const [correctCount, setCorrectCount] = useState(0);
-  const [incorrectCount, setIncorrectCount] = useState(0);
-  const [errorsByCategory, setErrorsByCategory] = useState<{ category: string; incorrectCount: number }[]>([]);
-  const [correctsByCategory, setCorrectsByCategory] = useState<{ category: string; correctCount: number }[]>([]);
-  const [averageScore, setAverageScore] = useState(0);
-  const [totalSimulations, setTotalSimulations] = useState(0);
-  const [simulationsData, setSimulationsData] = useState<{ id: string; name: string; correct: number; incorrect: number; status: string; date: string; }[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const simulationsPerPage = 5;
-  const [overallAverageScore, setOverallAverageScore] = useState(0);
+  const { data: session } = useSession()
+  const userId = session?.user?.id ?? null
+  const [correctCount, setCorrectCount] = useState(0)
+  const [incorrectCount, setIncorrectCount] = useState(0)
+  const [errorsByCategory, setErrorsByCategory] = useState<{ category: string; incorrectCount: number }[]>([])
+  const [correctsByCategory, setCorrectsByCategory] = useState<{ category: string; correctCount: number }[]>([])
+  const [averageScore, setAverageScore] = useState(0)
+  const [totalSimulations, setTotalSimulations] = useState(0)
+  const [simulationsData, setSimulationsData] = useState<
+    { id: string; name: string; correct: number; incorrect: number; status: string; date: string }[]
+  >([])
+  const [currentPage, setCurrentPage] = useState(0)
+  const simulationsPerPage = 5
+  const [overallAverageScore, setOverallAverageScore] = useState(0)
   const [disciplineAffinity, setDisciplineAffinity] = useState<{ name: string; affinity: number }[]>([])
+  const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
     const fetchData = async () => {
       if (userId) {
-        const simulationsData = await getSimulations(userId);
-        const correct = await getUserCorrectAnswersCount(userId);
-        const incorrect = await getUserIncorrectAnswersCount(userId);
-        const incorrectByCategory = await getIncorrectAnswersCountByCategory(userId);
-        const correctByCategory = await getCorrectAnswersCountByCategory(userId);
-        const overallAverage = await getOverallAverageScore();
+        const simulationsData = await getSimulations(userId)
+        const incorrectByCategory = await getIncorrectAnswersCountByCategory(userId)
+        const correctByCategory = await getCorrectAnswersCountByCategory(userId)
+        const overallAverage = await getOverallAverageScore()
         const affinityData = await getDisciplineAffinity(userId)
 
+        // Calcular o total de acertos e erros a partir dos dados dos simulados
+        let totalCorrect = 0
+        let totalIncorrect = 0
+
+        // Processar dados dos simulados
+        simulationsData.forEach((sim) => {
+          // Acumular totais gerais
+          totalCorrect += sim.correctAnswers
+          totalIncorrect += sim.totalQuestions - sim.correctAnswers
+        })
+
         setDisciplineAffinity(affinityData)
-        setOverallAverageScore(overallAverage);
-        setCorrectCount(correct);
-        setIncorrectCount(incorrect);
-        setErrorsByCategory(incorrectByCategory);
-        setCorrectsByCategory(correctByCategory);
-        setTotalSimulations(simulationsData.length);
+        setOverallAverageScore(overallAverage)
+        setCorrectCount(totalCorrect)
+        setIncorrectCount(totalIncorrect)
+        setErrorsByCategory(incorrectByCategory)
+        setCorrectsByCategory(correctByCategory)
+        setTotalSimulations(simulationsData.length)
 
-        const totalAnswers = correct + incorrect;
-        const average = totalAnswers > 0 ? (correct / totalAnswers) * 100 : 0;
-        setAverageScore(average);
+        const totalAnswers = totalCorrect + totalIncorrect
+        const average = totalAnswers > 0 ? (totalCorrect / totalAnswers) * 100 : 0
+        setAverageScore(average)
 
+        // Processar dados dos simulados para exibição
         const processedSimulations = simulationsData.map((sim, index) => ({
-          id: String(sim.id), // Convertendo para string explicitamente
+          id: String(sim.id),
           name: `Simulado ${index + 1}`,
           correct: sim.correctAnswers,
           incorrect: sim.totalQuestions - sim.correctAnswers,
-          status: 'Concluído',
-          date: new Date(sim.createdAt).toLocaleDateString()
-        }));
-        setSimulationsData(processedSimulations);
+          status: "Concluído",
+          date: new Date(sim.createdAt).toLocaleDateString(),
+        }))
+        setSimulationsData(processedSimulations)
       }
-    };
+    }
 
-    fetchData();
-  }, [userId]);
+    if (userId) {
+      fetchData()
+    }
+  }, [userId])
 
-  const pageCount = Math.ceil(simulationsData.length / simulationsPerPage);
-  const invertedPageIndex = pageCount - 1 - currentPage; // Inverte a lógica de páginas
+  const pageCount = Math.ceil(simulationsData.length / simulationsPerPage)
+  const invertedPageIndex = pageCount - 1 - currentPage // Inverte a lógica de páginas
 
-  const displayedSimulations = [...Array(simulationsPerPage)].map((_, index) => {
-    const simIndex = invertedPageIndex * simulationsPerPage + index;
-    return simIndex < simulationsData.length
-      ? simulationsData[simIndex]
-      : {
-          id: `empty-${index}`,
-          name: `Simulado ${simIndex + 1}`,
-          correct: 0,
-          incorrect: 0,
-          status: "Não realizado",
-          date: "-",
-        };
-  })
-  .reverse();
+  const displayedSimulations = [...Array(simulationsPerPage)]
+    .map((_, index) => {
+      const simIndex = invertedPageIndex * simulationsPerPage + index
+      return simIndex < simulationsData.length
+        ? simulationsData[simIndex]
+        : {
+            id: `empty-${index}`,
+            name: `Simulado ${simIndex + 1}`,
+            correct: 0,
+            incorrect: 0,
+            status: "Não realizado",
+            date: "-",
+          }
+    })
+    .reverse()
 
-  const categoryData = correctsByCategory.map(correct => {
-    const incorrect = errorsByCategory.find(err => err.category === correct.category);
+  const categoryData = correctsByCategory.map((correct) => {
+    const incorrect = errorsByCategory.find((err) => err.category === correct.category)
     return {
       category: correct.category,
       correctCount: correct.correctCount,
       incorrectCount: incorrect ? incorrect.incorrectCount : 0,
-      totalCount: correct.correctCount + (incorrect ? incorrect.incorrectCount : 0)
-    };
-  });
+      totalCount: correct.correctCount + (incorrect ? incorrect.incorrectCount : 0),
+    }
+  })
 
-  const prepareChartData = (type: 'correct' | 'incorrect') => {
+  const prepareChartData = (type: "correct" | "incorrect") => {
     return categoryData
-      .map(item => {
-        const percentage = (item.correctCount / item.totalCount) * 100;
+      .map((item) => {
+        const percentage = (item.correctCount / item.totalCount) * 100
         return {
           name: item.category,
           value: percentage,
-          totalQuestions: item.totalCount
-        };
+          totalQuestions: item.totalCount,
+        }
       })
-      .sort((a, b) => type === 'correct' ? b.value - a.value : a.value - b.value)
+      .sort((a, b) => (type === "correct" ? b.value - a.value : a.value - b.value))
       .slice(0, 5)
       .map((item, index) => ({
         ...item,
-        color: COLORS[index % COLORS.length]
-      }));
-  };
+        color: COLORS[index % COLORS.length],
+      }))
+  }
 
-  const topCorrectCategories = prepareChartData('correct');
-  const topIncorrectCategories = prepareChartData('incorrect');
+  const topCorrectCategories = prepareChartData("correct")
+  const topIncorrectCategories = prepareChartData("incorrect")
 
-  const difference = averageScore - overallAverageScore;
-  const isHigher = difference > 0;
-  const isEqual = difference === 0;
+  const difference = averageScore - overallAverageScore
+  const isHigher = difference > 0
+  const isEqual = difference === 0
 
-  return ( 
-    <div className="flex flex-col items-center bg-gray-100 min-h-screen w-full p-4">
-      <h1 className="text-3xl font-bold text-gray-700 mb-6">Desempenho</h1>
-      <div className="w-full bg-white rounded-lg shadow-md p-6 overflow-y-auto flex-grow">
-      <div className="grid gap-4 md:grid-cols-3 w-full mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Simulados Realizados
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalSimulations}</div>
-            <p className="text-xs text-muted-foreground">
-              Total de simulados completados
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Questões Respondidas
-            </CardTitle>
-            <FileQuestion className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{correctCount + incorrectCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Total de questões respondidas
-            </p>
-          </CardContent>
-        </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Comparação de Médias
-              </CardTitle>
-              <BarChart2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Sua Média</p>
-                  <p className="text-2xl font-bold">{averageScore.toFixed(2)}%</p>
+  // Prepare data for bar chart
+  const barChartData = simulationsData
+    .map((sim, index) => ({
+      name: `Simulado ${index + 1}`,
+      acertos: sim.correct,
+      erros: sim.incorrect,
+    }))
+    .slice(0, 5)
+
+  return (
+    <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-indigo-50 to-gray-100">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col space-y-8">
+          {/* Header with stats summary */}
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white py-8 px-6 rounded-xl shadow-lg mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard de Desempenho</h1>
+            <p className="text-white/80">Acompanhe seu progresso e desempenho nos simulados</p>
+          </div>
+
+          {/* Stats Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Simulados</CardTitle>
+                <div className="bg-indigo-100 p-2 rounded-full">
+                  <BookOpen className="h-4 w-4 text-indigo-600" />
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-muted-foreground">Média Geral</p>
-                  <p className="text-2xl font-bold">{overallAverageScore.toFixed(2)}%</p>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalSimulations}</div>
+                <p className="text-xs text-muted-foreground">Total de simulados realizados</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Questões</CardTitle>
+                <div className="bg-indigo-100 p-2 rounded-full">
+                  <FileQuestion className="h-4 w-4 text-indigo-600" />
                 </div>
-              </div>
-              <div className="flex items-center justify-center mt-2">
-                {isEqual ? (
-                  <Minus className="h-4 w-4 text-yellow-500 mr-1" />
-                ) : isHigher ? (
-                  <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
-                ) : (
-                  <ArrowDown className="h-4 w-4 text-red-500 mr-1" />
-                )}
-                <span className={`text-lg font-semibold ${isEqual ? 'text-yellow-500' : isHigher ? 'text-green-500' : 'text-red-500'}`}>
-                  {isHigher ? '+' : ''}{difference.toFixed(2)}%
-                </span>
-              </div>
-              <p className="text-xs text-center text-muted-foreground mt-1">
-                {isEqual
-                  ? "Sua média está igual à média geral"
-                  : isHigher
-                  ? "Sua média está acima da média geral"
-                  : "Sua média está abaixo da média geral"}
-              </p>
-            </CardContent>
-          </Card>
-      </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>Desempenho dos Simulados</CardTitle>
-            <CardDescription>Visualização dos resultados (5 por página)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="w-full">
-              <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height={"100%"}>
-                    <BarChart data={displayedSimulations}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 13 }} />
-                      <YAxis tick={{ fontSize: 13 }} />
-                      <ChartTooltip
-                        cursor={false}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div className="flex flex-col">
-                                    <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                      Corretas
-                                    </span>
-                                    <span className="font-bold text-green-500">{data.correct}</span>
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                      Incorretas
-                                    </span>
-                                    <span className="font-bold text-red-500">{data.incorrect}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Bar dataKey="correct" fill="var(--color-incorrect)" stackId="a" barSize={30} />
-                      <Bar dataKey="incorrect" fill="var(--color-correct)" stackId="a" barSize={30} radius={[3, 3, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </CardContent>
-          <CardFooter className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-              disabled={currentPage === 0}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span>{`Página ${currentPage + 1} de ${pageCount}`}</span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage(prev => Math.min(pageCount - 1, prev + 1))}
-              disabled={currentPage === pageCount - 1}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>Afinidade por Disciplina</CardTitle>
-            <CardDescription>Baseado na média de acertos</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={{
-              affinity: {
-                label: "Afinidade",
-                color: "hsl(var(--chart-1))",
-              },
-            }} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={disciplineAffinity}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="name" />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                  <Radar name="Afinidade" dataKey="affinity" stroke="var(--color-affinity)" fill="var(--color-affinity)" fillOpacity={0.6} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <Card className="flex flex-col">
-            <CardHeader className="items-center pb-0">
-              <CardTitle>Top 5 Categorias com Melhor Desempenho</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 pb-0">
-              <div className="flex items-center justify-between">
-                <div className="w-2/3">
-                  <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={topCorrectCategories}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                        >
-                          {topCorrectCategories.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{correctCount + incorrectCount}</div>
+                <p className="text-xs text-muted-foreground">Total de questões respondidas</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Sua Média</CardTitle>
+                <div className="bg-indigo-100 p-2 rounded-full">
+                  <Award className="h-4 w-4 text-indigo-600" />
                 </div>
-                <div className="w-1/3">
-                  <CustomLegend data={topCorrectCategories} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{averageScore.toFixed(1)}%</div>
+                <div className="flex items-center mt-1">
+                  {isEqual ? (
+                    <Minus className="h-3 w-3 text-yellow-500 mr-1" />
+                  ) : isHigher ? (
+                    <ArrowUp className="h-3 w-3 text-green-600 mr-1" />
+                  ) : (
+                    <ArrowDown className="h-3 w-3 text-red-600 mr-1" />
+                  )}
+                  <p
+                    className={`text-xs ${isEqual ? "text-yellow-500" : isHigher ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {isHigher ? "+" : ""}
+                    {difference.toFixed(1)}% vs média geral
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <p className="text-sm text-muted-foreground">Top 5 categorias com maior média de acertos</p>
-            </CardFooter>
-          </Card>
-          <Card className="flex flex-col">
-            <CardHeader className="items-center pb-0">
-              <CardTitle>Top 5 Categorias com Pior Desempenho</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 pb-0">
-              <div className="flex items-center justify-between">
-                <div className="w-2/3">
-                  <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={topIncorrectCategories}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                        >
-                          {topIncorrectCategories.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Taxa de Acerto</CardTitle>
+                <div className="bg-indigo-100 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-indigo-600" />
                 </div>
-                <div className="w-1/3">
-                  <CustomLegend data={topIncorrectCategories} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {correctCount > 0 ? ((correctCount / (correctCount + incorrectCount)) * 100).toFixed(1) : "0"}%
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <p className="text-sm text-muted-foreground">Top 5 categorias com menor média de acertos</p>
-            </CardFooter>
-          </Card>
-        </div>
-        <Card className="w-full mb-6">
-          <CardHeader>
-            <CardTitle>Detalhes dos Simulados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px] w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Simulado</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Acertos</TableHead>
-                    <TableHead>Erros</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {simulationsData.map((sim) => (
-                    <TableRow key={sim.id}>
-                      <TableCell>{sim.name}</TableCell>
-                      <TableCell>{sim.date}</TableCell>
-                      <TableCell>{sim.status}</TableCell>
-                      <TableCell>{sim.correct}</TableCell>
-                      <TableCell>{sim.incorrect}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-        {/*
-        <Card className="flex flex-col">
-          <CardHeader className="items-center pb-0">
-            <CardTitle>Sugestões de Estudo</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1">
-            {topIncorrectCategories.length > 0 ? (
-              <div>
-                <p className="text-sm mb-2 text-muted-foreground">
-                  Aqui estão suas categorias com menor desempenho. Recomendamos que você revise esses tópicos para melhorar seus resultados:
+                <p className="text-xs text-muted-foreground">
+                  {correctCount} acertos / {incorrectCount} erros
                 </p>
-                <ul className="list-disc pl-4">
-                  {topIncorrectCategories.map((category, index) => (
-                    <li key={index} className="text-sm">
-                      <span className="font-bold">{category.name}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Parabéns! Você não possui categorias com baixo desempenho no momento.
-              </p>
-            )}
-          </CardContent>
-          <CardFooter>
-            {topIncorrectCategories.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Dica: Revise suas categorias de baixo desempenho e pratique questões relacionadas a esses tópicos.
-              </p>
-            )}
-          </CardFooter>
-        </Card>*/}
-        {/*
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold text-gray-700">Desempenho Geral</h3>
-          <p className="mt-2 text-gray-600">Acertos: <span className="font-bold text-green-600">{correctCount}</span></p>
-          <p className="mt-1 text-gray-600">Erros: <span className="font-bold text-red-600">{incorrectCount}</span></p>
-          <p className="mt-1 text-gray-600">Total de Simulados: <span className="font-bold text-gray-800">{totalSimulations}</span></p>
-          <p className="mt-1 text-gray-600">Média de Acertos: <span className="font-bold text-blue-600">{averageScore.toFixed(2)}%</span></p>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        <div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Desempenho por Categoria</h3>
-          {categoryData.length > 0 ? (
-            <ul className="space-y-2">
-              {categoryData.map((category) => (
-                <li key={category.category} className="text-gray-600">
-                  <span className="font-semibold text-gray-800">{category.category}</span>:
-                  <span className="ml-2 text-green-600">{category.correctCount} acerto(s)</span> |
-                  <span className="ml-2 text-red-600">{category.incorrectCount} erro(s)</span> |
-                  <span className="ml-2 text-blue-600">
-                    {((category.correctCount / category.totalCount) * 100).toFixed(2)}% de acertos
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500">Nenhum dado registrado por categoria.</p>
-          )}
-        </div>*/}
+          {/* Main Content Tabs */}
+          <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab} value={activeTab}>
+            <TabsList className="grid grid-cols-4 mb-8 bg-white shadow-md p-1 rounded-lg">
+              <TabsTrigger
+                value="overview"
+                className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              >
+                Visão Geral
+              </TabsTrigger>
+              <TabsTrigger
+                value="performance"
+                className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              >
+                Desempenho
+              </TabsTrigger>
+              <TabsTrigger
+                value="categories"
+                className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+              >
+                Categorias
+              </TabsTrigger>
+              <TabsTrigger value="history" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+                Histórico
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Performance Trend - Using the exact bar chart implementation provided */}
+                <Card className="flex flex-col bg-white shadow-md">
+                  <CardHeader className="border-b border-gray-200">
+                    <CardTitle className="text-gray-800">Desempenho dos Simulados</CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Visualização dos resultados (5 por página)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ScrollArea className="w-full">
+                      <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
+                        <ChartContainer config={chartConfig}>
+                          <ResponsiveContainer width="100%" height={"100%"}>
+                            <BarChart data={displayedSimulations}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis dataKey="name" tick={{ fontSize: 13, fill: "#4b5563" }} />
+                              <YAxis tick={{ fontSize: 13, fill: "#4b5563" }} />
+                              <ChartTooltip
+                                cursor={false}
+                                content={({ active, payload }) => {
+                                  if (active && payload && payload.length) {
+                                    const data = payload[0].payload
+                                    return (
+                                      <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <div className="flex flex-col">
+                                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                              Corretas
+                                            </span>
+                                            <span className="font-bold text-green-600">{data.correct}</span>
+                                          </div>
+                                          <div className="flex flex-col">
+                                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                              Incorretas
+                                            </span>
+                                            <span className="font-bold text-red-600">{data.incorrect}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  }
+                                  return null
+                                }}
+                              />
+                              <Bar dataKey="correct" fill="#4f46e5" stackId="a" barSize={30} />
+                              <Bar dataKey="incorrect" fill="#ef4444" stackId="a" barSize={30} radius={[3, 3, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </CardContent>
+                  <CardFooter className="flex justify-between items-center border-t border-gray-200 pt-4">
+                    <Button
+                      variant="outline"
+                      className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                      disabled={currentPage === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-gray-800">{`Página ${currentPage + 1} de ${pageCount}`}</span>
+                    <Button
+                      variant="outline"
+                      className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.min(pageCount - 1, prev + 1))}
+                      disabled={currentPage === pageCount - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                {/* Discipline Affinity */}
+                <Card className="flex flex-col bg-white shadow-md">
+                  <CardHeader className="border-b border-gray-200">
+                    <CardTitle className="text-gray-800">Afinidade por Disciplina</CardTitle>
+                    <CardDescription className="text-muted-foreground">Baseado na média de acertos</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ChartContainer
+                      config={{
+                        affinity: {
+                          label: "Afinidade",
+                          color: "hsl(var(--primary))",
+                        },
+                      }}
+                      className="h-[300px]"
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={disciplineAffinity}>
+                          <PolarGrid stroke="#e5e7eb" />
+                          <PolarAngleAxis dataKey="name" tick={{ fill: "#4b5563" }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#4b5563" }} />
+                          <Radar
+                            name="Afinidade"
+                            dataKey="affinity"
+                            stroke="#4f46e5"
+                            fill="#4f46e5"
+                            fillOpacity={0.6}
+                          />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Recent Simulations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Simulados Recentes</CardTitle>
+                  <CardDescription>Últimos simulados realizados</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Simulado</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Acertos</TableHead>
+                        <TableHead>Erros</TableHead>
+                        <TableHead>Taxa</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {simulationsData.slice(0, 5).map((sim) => (
+                        <TableRow key={sim.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{sim.name}</TableCell>
+                          <TableCell>{sim.date}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-indigo-100 text-indigo-600 border-indigo-20">
+                              {sim.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-green-600">{sim.correct}</TableCell>
+                          <TableCell className="text-red-600">{sim.incorrect}</TableCell>
+                          <TableCell>{((sim.correct / (sim.correct + sim.incorrect)) * 100).toFixed(1)}%</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                    size="sm"
+                    onClick={() => setActiveTab("history")}
+                  >
+                    Ver todos os simulados
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+
+            {/* Performance Tab */}
+            <TabsContent value="performance" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="col-span-1 lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle>Comparação com a Média Geral</CardTitle>
+                    <CardDescription>Seu desempenho comparado com a média de todos os usuários</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8 py-6">
+                      <div className="flex flex-col items-center">
+                        <div className="text-sm font-medium text-muted-foreground mb-2">Sua Média</div>
+                        <div className="text-5xl font-bold text-indigo-600">{averageScore.toFixed(1)}%</div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <div className="w-16 h-1 bg-border rounded-full md:w-1 md:h-16"></div>
+                      </div>
+
+                      <div className="flex flex-col items-center">
+                        <div className="text-sm font-medium text-muted-foreground mb-2">Média Geral</div>
+                        <div className="text-5xl font-bold">{overallAverageScore.toFixed(1)}%</div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <div className="w-16 h-1 bg-border rounded-full md:w-1 md:h-16"></div>
+                      </div>
+
+                      <div className="flex flex-col items-center">
+                        <div className="text-sm font-medium text-muted-foreground mb-2">Diferença</div>
+                        <div
+                          className={`text-5xl font-bold ${isEqual ? "text-yellow-500" : isHigher ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {isHigher ? "+" : ""}
+                          {difference.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center mt-4">
+                      <Badge
+                        variant={isHigher ? "secondary" : isEqual ? "outline" : "destructive"}
+                        className={`text-sm py-1 ${isHigher ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}`}
+                      >
+                        {isEqual
+                          ? "Sua média está igual à média geral"
+                          : isHigher
+                            ? "Sua média está acima da média geral"
+                            : "Sua média está abaixo da média geral"}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Using the exact bar chart implementation provided */}
+                <Card className="flex flex-col bg-white shadow-md">
+                  <CardHeader className="border-b border-gray-200">
+                    <CardTitle className="text-gray-800">Desempenho dos Simulados</CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Visualização dos resultados (5 por página)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ScrollArea className="w-full">
+                      <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
+                        <ChartContainer config={chartConfig}>
+                          <ResponsiveContainer width="100%" height={"100%"}>
+                            <BarChart data={displayedSimulations}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis dataKey="name" tick={{ fontSize: 13, fill: "#4b5563" }} />
+                              <YAxis tick={{ fontSize: 13, fill: "#4b5563" }} />
+                              <ChartTooltip
+                                cursor={false}
+                                content={({ active, payload }) => {
+                                  if (active && payload && payload.length) {
+                                    const data = payload[0].payload
+                                    return (
+                                      <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <div className="flex flex-col">
+                                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                              Corretas
+                                            </span>
+                                            <span className="font-bold text-green-600">{data.correct}</span>
+                                          </div>
+                                          <div className="flex flex-col">
+                                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                              Incorretas
+                                            </span>
+                                            <span className="font-bold text-red-600">{data.incorrect}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  }
+                                  return null
+                                }}
+                              />
+                              <Bar dataKey="correct" fill="#4f46e5" stackId="a" barSize={30} />
+                              <Bar dataKey="incorrect" fill="#ef4444" stackId="a" barSize={30} radius={[3, 3, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </CardContent>
+                  <CardFooter className="flex justify-between items-center border-t border-gray-200 pt-4">
+                    <Button
+                      variant="outline"
+                      className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                      disabled={currentPage === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-gray-800">{`Página ${currentPage + 1} de ${pageCount}`}</span>
+                    <Button
+                      variant="outline"
+                      className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                      size="icon"
+                      onClick={() => setCurrentPage((prev) => Math.min(pageCount - 1, prev + 1))}
+                      disabled={currentPage === pageCount - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card className="flex flex-col bg-white shadow-md">
+                  <CardHeader className="border-b border-gray-200">
+                    <CardTitle className="text-gray-800">Afinidade por Disciplina</CardTitle>
+                    <CardDescription className="text-muted-foreground">Baseado na média de acertos</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ChartContainer
+                      config={{
+                        affinity: {
+                          label: "Afinidade",
+                          color: "hsl(var(--primary))",
+                        },
+                      }}
+                      className="h-[300px]"
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={disciplineAffinity}>
+                          <PolarGrid stroke="#e5e7eb" />
+                          <PolarAngleAxis dataKey="name" tick={{ fill: "#4b5563" }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#4b5563" }} />
+                          <Radar
+                            name="Afinidade"
+                            dataKey="affinity"
+                            stroke="#4f46e5"
+                            fill="#4f46e5"
+                            fillOpacity={0.6}
+                          />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Categories Tab */}
+            <TabsContent value="categories" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Melhores Categorias</CardTitle>
+                      <PieChartIcon className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <CardDescription>Top 5 categorias com maior média de acertos</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row items-center justify-between">
+                      <div className="w-full md:w-2/3">
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={topCorrectCategories}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                labelLine={false}
+                              >
+                                {topCorrectCategories.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(value) => [
+                                  `${typeof value === "number" ? value.toFixed(2) : value}%`,
+                                  "Média de Acertos",
+                                ]}
+                                contentStyle={{
+                                  backgroundColor: "hsl(var(--card))",
+                                  border: "1px solid hsl(var(--border))",
+                                }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/3 mt-4 md:mt-0">
+                        <CustomLegend data={topCorrectCategories} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Categorias para Melhorar</CardTitle>
+                      <PieChartIcon className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <CardDescription>Top 5 categorias com menor média de acertos</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row items-center justify-between">
+                      <div className="w-full md:w-2/3">
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={topIncorrectCategories}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                labelLine={false}
+                              >
+                                {topIncorrectCategories.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(value) => [
+                                  `${typeof value === "number" ? value.toFixed(2) : value}%`,
+                                  "Média de Acertos",
+                                ]}
+                                contentStyle={{
+                                  backgroundColor: "hsl(var(--card))",
+                                  border: "1px solid hsl(var(--border))",
+                                }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/3 mt-4 md:mt-0">
+                        <CustomLegend data={topIncorrectCategories} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="col-span-1 lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle>Recomendações de Estudo</CardTitle>
+                    <CardDescription>Baseado no seu desempenho por categoria</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {topIncorrectCategories.slice(0, 3).map((category, index) => (
+                        <div key={index} className="flex items-start space-x-4 p-4 rounded-lg border bg-card">
+                          <div className="bg-indigo-100 p-2 rounded-full">
+                            <BookOpen className="h-5 w-5 text-indigo-600" />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="font-medium">{category.name}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Sua média de acertos nesta categoria é de {category.value.toFixed(1)}%. Recomendamos
+                              dedicar mais tempo de estudo para melhorar seu desempenho nesta área.
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      variant="outline"
+                      className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                    >
+                      Ver todas as categorias
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* History Tab */}
+            <TabsContent value="history" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico Completo de Simulados</CardTitle>
+                  <CardDescription>Todos os simulados realizados</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] w-full">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Simulado</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Acertos</TableHead>
+                          <TableHead>Erros</TableHead>
+                          <TableHead>Taxa de Acerto</TableHead>
+                          <TableHead>Tempo</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {simulationsData.map((sim) => (
+                          <TableRow key={sim.id} className="hover:bg-muted/50">
+                            <TableCell className="font-medium">{sim.name}</TableCell>
+                            <TableCell>{sim.date}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-indigo-100 text-indigo-600 border-indigo-20">
+                                {sim.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-green-600 font-medium">{sim.correct}</TableCell>
+                            <TableCell className="text-red-600 font-medium">{sim.incorrect}</TableCell>
+                            <TableCell>{((sim.correct / (sim.correct + sim.incorrect)) * 100).toFixed(1)}%</TableCell>
+                            <TableCell className="text-muted-foreground">
+                              <div className="flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                <span>30 min</span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
+                    Exportar dados
+                  </Button>
+                  <Button variant="default" className="bg-indigo-600 hover:bg-indigo-700">
+                    Novo simulado
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
-  );
+  )
 }
-

@@ -3,19 +3,15 @@
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { Loading } from "@/app/components/Loading"
-import {
-  getUserCorrectAnswersCount,
-  getUserIncorrectAnswersCount,
-} from "@/app/service/QuestionService"
 import { getSimulations } from "@/app/service/simualationService"
 import { BookOpen, BarChart2, Award, Clock, ChevronRight } from "lucide-react"
 import { Card, CardContent } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { Progress } from "../components/ui/progress"
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 
 export default function Home() {
-  const router = useRouter();
+  const router = useRouter()
   const { data: session, status } = useSession()
   const userId = session?.user?.id ?? null
 
@@ -38,27 +34,57 @@ export default function Home() {
     const fetchData = async () => {
       if (userId) {
         const simulationsData = await getSimulations(userId)
-        const correct = await getUserCorrectAnswersCount(userId)
-        const incorrect = await getUserIncorrectAnswersCount(userId)
-
-        setCorrectCount(correct)
-        setIncorrectCount(incorrect)
         setTotalSimulations(simulationsData.length)
 
-        const totalAnswers = correct + incorrect
-        const average = totalAnswers > 0 ? (correct / totalAnswers) * 100 : 0
+        // Calcular o total de acertos e erros a partir dos dados dos simulados
+        let totalCorrect = 0
+        let totalIncorrect = 0
+
+        simulationsData.forEach((sim) => {
+          totalCorrect += sim.correctAnswers
+          totalIncorrect += sim.totalQuestions - sim.correctAnswers
+        })
+
+        setCorrectCount(totalCorrect)
+        setIncorrectCount(totalIncorrect)
+
+        const totalAnswers = totalCorrect + totalIncorrect
+        console.log("Correct:", totalCorrect)
+        console.log("Incorrect:", totalIncorrect)
+        console.log("Total Answers:", totalAnswers)
+
+        // Garantir que o cálculo seja feito corretamente mesmo quando não há acertos
+        let average = 0
+        if (totalAnswers > 0) {
+          average = (totalCorrect / totalAnswers) * 100
+        }
+        console.log("Average calculation:", average)
         setAverageScore(average)
 
         // Processar os simulados e pegar os 3 mais recentes
         const processedSimulations = simulationsData
-          .map((sim, index) => ({
-            id: String(sim.id), // Convertendo para string explicitamente
-            name: `Simulado ${index + 1}`,
-            correct: sim.correctAnswers,
-            incorrect: sim.totalQuestions - sim.correctAnswers,
-            date: new Date(sim.createdAt).toLocaleDateString(),
-            percentage: (sim.correctAnswers / sim.totalQuestions) * 100,
-          }))
+          .map((sim, index) => {
+            const totalQuestions = sim.totalQuestions
+            const correctAnswers = sim.correctAnswers
+
+            // Garantir que a porcentagem seja calculada corretamente
+            let percentage = 0
+            if (totalQuestions > 0) {
+              percentage = (correctAnswers / totalQuestions) * 100
+            }
+            console.log("Simulated ID:", sim.id)
+            console.log("Correct Answers:", correctAnswers)
+            console.log("Total Questions:", totalQuestions)
+
+            return {
+              id: String(sim.id),
+              name: `Simulado ${index + 1}`,
+              correct: correctAnswers,
+              incorrect: totalQuestions - correctAnswers,
+              date: new Date(sim.createdAt).toLocaleDateString(),
+              percentage: percentage,
+            }
+          })
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 3)
 
@@ -162,10 +188,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <Button
-                onClick={() => router.push("/desempenho")}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
-                >
+              <Button onClick={() => router.push("/desempenho")} className="w-full bg-indigo-600 hover:bg-indigo-700">
                 Ver Estatísticas Completas
               </Button>
             </div>
@@ -208,18 +231,22 @@ export default function Home() {
               ) : (
                 <div className="bg-gray-800 rounded-lg p-6 text-center">
                   <p className="text-gray-400 mb-4">Você ainda não realizou nenhum simulado</p>
-                    <Button
-                      variant="outline"
-                      className="border-indigo-500 text-indigo-400 hover:bg-indigo-950"
-                      onClick={() => router.push("/createSimulated")}
-                      >
-                      Iniciar Primeiro Simulado
+                  <Button
+                    variant="outline"
+                    className="border-indigo-500 text-indigo-400 hover:bg-indigo-950"
+                    onClick={() => router.push("/createSimulated")}
+                  >
+                    Iniciar Primeiro Simulado
                   </Button>
                 </div>
               )}
 
               {recentSimulations.length > 0 && (
-                <Button variant="link" className="mt-2 text-indigo-400 w-full" onClick={() => router.push("/simulated")}>
+                <Button
+                  variant="link"
+                  className="mt-2 text-indigo-400 w-full"
+                  onClick={() => router.push("/simulated")}
+                >
                   Ver Todos os Simulados <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               )}
@@ -229,19 +256,19 @@ export default function Home() {
 
         {/* Botões de ação */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              size="lg"
-              className="bg-indigo-600 hover:bg-indigo-700 h-16 text-lg"
-              onClick={() => router.push("/createSimulated")}
-              >
-              Iniciar Novo Simulado
+          <Button
+            size="lg"
+            className="bg-indigo-600 hover:bg-indigo-700 h-16 text-lg"
+            onClick={() => router.push("/createSimulated")}
+          >
+            Iniciar Novo Simulado
           </Button>
           <Button
             size="lg"
             variant="outline"
             className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 h-16 text-lg"
             onClick={() => router.push("/createSimulated")}
-            >
+          >
             Praticar por Matéria
           </Button>
         </div>
