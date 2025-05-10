@@ -397,13 +397,13 @@ export default function DashBoard() {
                   </CardFooter>
                 </Card>
 
-                {/* Discipline Affinity */}
+                {/* Discipline Affinity - Fixed with proper Card structure */}
                 <Card className="flex flex-col bg-white shadow-md">
                   <CardHeader className="border-b border-gray-200">
                     <CardTitle className="text-gray-800">Afinidade por Disciplina</CardTitle>
                     <CardDescription className="text-muted-foreground">Baseado na média de acertos</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-6">
+                  <CardContent className="pt-6 flex justify-center items-center">
                     <ChartContainer
                       config={{
                         affinity: {
@@ -411,7 +411,7 @@ export default function DashBoard() {
                           color: "hsl(var(--primary))",
                         },
                       }}
-                      className="h-[300px]"
+                      className="w-full max-w-md h-[300px]"
                     >
                       <ResponsiveContainer width="100%" height="100%">
                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={disciplineAffinity}>
@@ -773,10 +773,7 @@ export default function DashBoard() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button
-                      variant="outline"
-                      className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
-                    >
+                    <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
                       Ver todas as categorias
                     </Button>
                   </CardFooter>
