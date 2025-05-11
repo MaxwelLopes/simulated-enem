@@ -1066,11 +1066,6 @@ export default function DashBoard() {
                       ))}
                     </div>
                   </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
-                      Ver todas as categorias
-                    </Button>
-                  </CardFooter>
                 </Card>
               </div>
             </TabsContent>
@@ -1126,14 +1121,6 @@ export default function DashBoard() {
                     </Table>
                   </ScrollArea>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
-                    Exportar dados
-                  </Button>
-                  <Button variant="default" className="bg-indigo-600 hover:bg-indigo-700">
-                    Novo simulado
-                  </Button>
-                </CardFooter>
               </Card>
             </TabsContent>
           </Tabs>
