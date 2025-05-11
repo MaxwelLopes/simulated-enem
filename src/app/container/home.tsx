@@ -23,8 +23,11 @@ export default function Home() {
     {
       id: string
       name: string
+      type?: string
+      isEssay?: boolean
       correct: number
       incorrect: number
+      essayScore?: number | null
       date: string
       percentage: number
     }[]
@@ -41,8 +44,11 @@ export default function Home() {
         let totalIncorrect = 0
 
         simulationsData.forEach((sim) => {
-          totalCorrect += sim.correctAnswers
-          totalIncorrect += sim.totalQuestions - sim.correctAnswers
+          // Verificar se não é um simulado de redação
+          if (sim.type !== "essay" && sim.type !== "redação" && sim.type !== "Redação") {
+            totalCorrect += sim.correctAnswers
+            totalIncorrect += sim.totalQuestions - sim.correctAnswers
+          }
         })
 
         setCorrectCount(totalCorrect)
@@ -66,21 +72,27 @@ export default function Home() {
           .map((sim, index) => {
             const totalQuestions = sim.totalQuestions
             const correctAnswers = sim.correctAnswers
+            const isEssay = sim.type === "essay" || sim.type === "redação" || sim.type === "Redação"
 
             // Garantir que a porcentagem seja calculada corretamente
             let percentage = 0
-            if (totalQuestions > 0) {
+            if (!isEssay && totalQuestions > 0) {
               percentage = (correctAnswers / totalQuestions) * 100
             }
             console.log("Simulated ID:", sim.id)
             console.log("Correct Answers:", correctAnswers)
             console.log("Total Questions:", totalQuestions)
+            console.log("Is Essay:", isEssay)
+            console.log("Essay Score:", sim.essayScore)
 
             return {
               id: String(sim.id),
               name: `Simulado ${index + 1}`,
+              type: sim.type,
+              isEssay: isEssay,
               correct: correctAnswers,
               incorrect: totalQuestions - correctAnswers,
+              essayScore: sim.essayScore || null,
               date: new Date(sim.createdAt).toLocaleDateString(),
               percentage: percentage,
             }
@@ -209,21 +221,31 @@ export default function Home() {
                         <span className="text-sm text-gray-400">{sim.date}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div>
-                          <span className="text-green-400 mr-2">{sim.correct} acertos</span>
-                          <span className="text-red-400">{sim.incorrect} erros</span>
-                        </div>
-                        <span
-                          className={`font-bold ${
-                            sim.percentage >= 70
-                              ? "text-green-400"
-                              : sim.percentage >= 50
-                                ? "text-yellow-400"
-                                : "text-red-400"
-                          }`}
-                        >
-                          {sim.percentage.toFixed(1)}%
-                        </span>
+                        {sim.isEssay ? (
+                          <div className="w-full text-center">
+                            <span className="text-indigo-400 font-medium">
+                              Nota da Redação: <span className="font-bold">{sim.essayScore || 0}/1000</span>
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <span className="text-green-400 mr-2">{sim.correct} acertos</span>
+                              <span className="text-red-400">{sim.incorrect} erros</span>
+                            </div>
+                            <span
+                              className={`font-bold ${
+                                sim.percentage >= 70
+                                  ? "text-green-400"
+                                  : sim.percentage >= 50
+                                    ? "text-yellow-400"
+                                    : "text-red-400"
+                              }`}
+                            >
+                              {sim.percentage.toFixed(1)}%
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

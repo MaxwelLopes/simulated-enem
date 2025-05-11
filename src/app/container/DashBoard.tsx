@@ -19,7 +19,6 @@ import {
   Minus,
   BookOpen,
   Award,
-  Clock,
   PieChartIcon,
   Activity,
 } from "lucide-react"
@@ -60,6 +59,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const essayChartConfig = {
+  essayScore: {
+    label: "Nota da Redação",
+    color: "hsl(var(--chart-3))",
+  },
+} satisfies ChartConfig
+
 const COLORS = [
   "hsl(var(--chart-1))",
   "hsl(var(--chart-2))",
@@ -97,7 +103,17 @@ export default function DashBoard() {
   const [averageScore, setAverageScore] = useState(0)
   const [totalSimulations, setTotalSimulations] = useState(0)
   const [simulationsData, setSimulationsData] = useState<
-    { id: string; name: string; correct: number; incorrect: number; status: string; date: string }[]
+    {
+      id: string
+      name: string
+      type?: string
+      isEssay?: boolean
+      correct: number
+      incorrect: number
+      essayScore?: number | null
+      status: string
+      date: string
+    }[]
   >([])
   const [currentPage, setCurrentPage] = useState(0)
   const simulationsPerPage = 5
@@ -141,11 +157,21 @@ export default function DashBoard() {
         const processedSimulations = simulationsData.map((sim, index) => ({
           id: String(sim.id),
           name: `Simulado ${index + 1}`,
+          type: sim.type,
+          isEssay: sim.type === "essay" || sim.type === "redação" || sim.type === "Redação",
           correct: sim.correctAnswers,
           incorrect: sim.totalQuestions - sim.correctAnswers,
+          essayScore: sim.essayScore || null,
           status: "Concluído",
           date: new Date(sim.createdAt).toLocaleDateString(),
         }))
+
+        // Also, let's add some debugging to check the simulation types
+        console.log(
+          "Simulation types:",
+          simulationsData.map((sim) => ({ id: sim.id, type: sim.type, essayScore: sim.essayScore })),
+        )
+
         setSimulationsData(processedSimulations)
       }
     }
@@ -168,6 +194,7 @@ export default function DashBoard() {
             name: `Simulado ${simIndex + 1}`,
             correct: 0,
             incorrect: 0,
+            isEssay: false, // Add this line to ensure isEssay is always defined
             status: "Não realizado",
             date: "-",
           }
@@ -326,7 +353,7 @@ export default function DashBoard() {
                   <CardHeader className="border-b border-gray-200">
                     <CardTitle className="text-gray-800">Desempenho dos Simulados</CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Visualização dos resultados (5 por página)
+                      Visualização dos resultados de questões (5 por página)
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6">
@@ -334,7 +361,10 @@ export default function DashBoard() {
                       <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
                         <ChartContainer config={chartConfig}>
                           <ResponsiveContainer width="100%" height={"100%"}>
-                            <BarChart data={displayedSimulations}>
+                            <BarChart
+                              data={displayedSimulations.filter((sim) => sim && sim.isEssay === false)}
+                              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                            >
                               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                               <XAxis dataKey="name" tick={{ fontSize: 13, fill: "#4b5563" }} />
                               <YAxis tick={{ fontSize: 13, fill: "#4b5563" }} />
@@ -365,8 +395,16 @@ export default function DashBoard() {
                                   return null
                                 }}
                               />
-                              <Bar dataKey="correct" fill="#4f46e5" stackId="a" barSize={30} />
-                              <Bar dataKey="incorrect" fill="#ef4444" stackId="a" barSize={30} radius={[3, 3, 0, 0]} />
+                              <Bar dataKey="correct" fill="#4f46e5" stackId="a" barSize={30} name="Acertos" />
+                              <Bar
+                                dataKey="incorrect"
+                                fill="#ef4444"
+                                stackId="a"
+                                barSize={30}
+                                radius={[3, 3, 0, 0]}
+                                name="Erros"
+                              />
+                              <Tooltip />
                             </BarChart>
                           </ResponsiveContainer>
                         </ChartContainer>
@@ -396,6 +434,123 @@ export default function DashBoard() {
                     </Button>
                   </CardFooter>
                 </Card>
+
+                {/* Essay Scores Card - Only shown if there are essay simulations */}
+                {simulationsData.some((sim) => sim.isEssay) ? (
+                  <Card className="flex flex-col bg-white shadow-md">
+                    <CardHeader className="border-b border-gray-200">
+                      <CardTitle className="text-gray-800">Desempenho em Redações</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Visualização das notas de redação
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <ScrollArea className="w-full">
+                        <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
+                          <ChartContainer config={essayChartConfig}>
+                            <ResponsiveContainer width="100%" height={"100%"}>
+                              <BarChart
+                                data={displayedSimulations.filter((sim) => sim && sim.isEssay === true)}
+                                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis dataKey="name" tick={{ fontSize: 13, fill: "#4b5563" }} />
+                                <YAxis domain={[0, 1000]} tick={{ fontSize: 13, fill: "#4b5563" }} />
+                                <Bar
+                                  dataKey="essayScore"
+                                  fill="#10b981"
+                                  barSize={40}
+                                  name="Nota da Redação"
+                                  radius={[4, 4, 0, 0]}
+                                />
+                                <Tooltip
+                                  formatter={(value) => [`${value}/1000`, "Nota da Redação"]}
+                                  cursor={false}
+                                  contentStyle={{
+                                    backgroundColor: "white",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "0.375rem",
+                                  }}
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </ChartContainer>
+                        </div>
+                        <ScrollBar orientation="horizontal" />
+                      </ScrollArea>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center border-t border-gray-200 pt-4">
+                      <Button
+                        variant="outline"
+                        className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                        size="icon"
+                        onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                        disabled={currentPage === 0}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-gray-800">{`Página ${currentPage + 1} de ${pageCount}`}</span>
+                      <Button
+                        variant="outline"
+                        className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                        size="icon"
+                        onClick={() => setCurrentPage((prev) => Math.min(pageCount - 1, prev + 1))}
+                        disabled={currentPage === pageCount - 1}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>Melhores Categorias</CardTitle>
+                        <PieChartIcon className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <CardDescription>Top 5 categorias com maior média de acertos</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center justify-between">
+                        <div className="w-full md:w-2/3">
+                          <div className="h-[250px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={topCorrectCategories}
+                                  dataKey="value"
+                                  nameKey="name"
+                                  cx="50%"
+                                  cy="50%"
+                                  outerRadius={80}
+                                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                  labelLine={false}
+                                >
+                                  {topCorrectCategories.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                                <Tooltip
+                                  formatter={(value) => [
+                                    `${typeof value === "number" ? value.toFixed(2) : value}%`,
+                                    "Média de Acertos",
+                                  ]}
+                                  contentStyle={{
+                                    backgroundColor: "hsl(var(--card))",
+                                    border: "1px solid hsl(var(--border))",
+                                  }}
+                                />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                        <div className="w-full md:w-1/3 mt-4 md:mt-0">
+                          <CustomLegend data={topCorrectCategories} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Discipline Affinity - Fixed with proper Card structure */}
                 <Card className="flex flex-col bg-white shadow-md">
@@ -431,6 +586,56 @@ export default function DashBoard() {
                     </ChartContainer>
                   </CardContent>
                 </Card>
+
+                {/* Categorias para Melhorar */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Categorias para Melhorar</CardTitle>
+                      <PieChartIcon className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <CardDescription>Top 5 categorias com menor média de acertos</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row items-center justify-between">
+                      <div className="w-full md:w-2/3">
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={topIncorrectCategories}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                labelLine={false}
+                              >
+                                {topIncorrectCategories.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(value) => [
+                                  `${typeof value === "number" ? value.toFixed(2) : value}%`,
+                                  "Média de Acertos",
+                                ]}
+                                contentStyle={{
+                                  backgroundColor: "hsl(var(--card))",
+                                  border: "1px solid hsl(var(--border))",
+                                }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/3 mt-4 md:mt-0">
+                        <CustomLegend data={topIncorrectCategories} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Recent Simulations */}
@@ -461,9 +666,19 @@ export default function DashBoard() {
                               {sim.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-green-600">{sim.correct}</TableCell>
-                          <TableCell className="text-red-600">{sim.incorrect}</TableCell>
-                          <TableCell>{((sim.correct / (sim.correct + sim.incorrect)) * 100).toFixed(1)}%</TableCell>
+                          {sim.isEssay ? (
+                            <>
+                              <TableCell colSpan={3} className="text-center font-medium">
+                                Nota da Redação: <span className="text-indigo-600">{sim.essayScore || 0}/1000</span>
+                              </TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell className="text-green-600">{sim.correct}</TableCell>
+                              <TableCell className="text-red-600">{sim.incorrect}</TableCell>
+                              <TableCell>{((sim.correct / (sim.correct + sim.incorrect)) * 100).toFixed(1)}%</TableCell>
+                            </>
+                          )}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -541,7 +756,7 @@ export default function DashBoard() {
                   <CardHeader className="border-b border-gray-200">
                     <CardTitle className="text-gray-800">Desempenho dos Simulados</CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Visualização dos resultados (5 por página)
+                      Visualização dos resultados de questões (5 por página)
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6">
@@ -549,7 +764,10 @@ export default function DashBoard() {
                       <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
                         <ChartContainer config={chartConfig}>
                           <ResponsiveContainer width="100%" height={"100%"}>
-                            <BarChart data={displayedSimulations}>
+                            <BarChart
+                              data={displayedSimulations.filter((sim) => sim && sim.isEssay === false)}
+                              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                            >
                               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                               <XAxis dataKey="name" tick={{ fontSize: 13, fill: "#4b5563" }} />
                               <YAxis tick={{ fontSize: 13, fill: "#4b5563" }} />
@@ -580,8 +798,16 @@ export default function DashBoard() {
                                   return null
                                 }}
                               />
-                              <Bar dataKey="correct" fill="#4f46e5" stackId="a" barSize={30} />
-                              <Bar dataKey="incorrect" fill="#ef4444" stackId="a" barSize={30} radius={[3, 3, 0, 0]} />
+                              <Bar dataKey="correct" fill="#4f46e5" stackId="a" barSize={30} name="Acertos" />
+                              <Bar
+                                dataKey="incorrect"
+                                fill="#ef4444"
+                                stackId="a"
+                                barSize={30}
+                                radius={[3, 3, 0, 0]}
+                                name="Erros"
+                              />
+                              <Tooltip />
                             </BarChart>
                           </ResponsiveContainer>
                         </ChartContainer>
@@ -611,6 +837,74 @@ export default function DashBoard() {
                     </Button>
                   </CardFooter>
                 </Card>
+
+                {/* Essay Scores Card - Only shown if there are essay simulations */}
+                {simulationsData.some((sim) => sim.isEssay) && (
+                  <Card className="flex flex-col bg-white shadow-md">
+                    <CardHeader className="border-b border-gray-200">
+                      <CardTitle className="text-gray-800">Desempenho em Redações</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Visualização das notas de redação
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <ScrollArea className="w-full">
+                        <div className="w-full" style={{ height: "300px", maxWidth: "500px", margin: "0 auto" }}>
+                          <ChartContainer config={essayChartConfig}>
+                            <ResponsiveContainer width="100%" height={"100%"}>
+                              <BarChart
+                                data={displayedSimulations.filter((sim) => sim && sim.isEssay === true)}
+                                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis dataKey="name" tick={{ fontSize: 13, fill: "#4b5563" }} />
+                                <YAxis domain={[0, 1000]} tick={{ fontSize: 13, fill: "#4b5563" }} />
+                                <Bar
+                                  dataKey="essayScore"
+                                  fill="#10b981"
+                                  barSize={40}
+                                  name="Nota da Redação"
+                                  radius={[4, 4, 0, 0]}
+                                />
+                                <Tooltip
+                                  formatter={(value) => [`${value}/1000`, "Nota da Redação"]}
+                                  cursor={false}
+                                  contentStyle={{
+                                    backgroundColor: "white",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "0.375rem",
+                                  }}
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </ChartContainer>
+                        </div>
+                        <ScrollBar orientation="horizontal" />
+                      </ScrollArea>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center border-t border-gray-200 pt-4">
+                      <Button
+                        variant="outline"
+                        className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                        size="icon"
+                        onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                        disabled={currentPage === 0}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-gray-800">{`Página ${currentPage + 1} de ${pageCount}`}</span>
+                      <Button
+                        variant="outline"
+                        className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                        size="icon"
+                        onClick={() => setCurrentPage((prev) => Math.min(pageCount - 1, prev + 1))}
+                        disabled={currentPage === pageCount - 1}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                )}
 
                 <Card className="flex flex-col bg-white shadow-md">
                   <CardHeader className="border-b border-gray-200">
@@ -799,7 +1093,6 @@ export default function DashBoard() {
                           <TableHead>Acertos</TableHead>
                           <TableHead>Erros</TableHead>
                           <TableHead>Taxa de Acerto</TableHead>
-                          <TableHead>Tempo</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -812,15 +1105,21 @@ export default function DashBoard() {
                                 {sim.status}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-green-600 font-medium">{sim.correct}</TableCell>
-                            <TableCell className="text-red-600 font-medium">{sim.incorrect}</TableCell>
-                            <TableCell>{((sim.correct / (sim.correct + sim.incorrect)) * 100).toFixed(1)}%</TableCell>
-                            <TableCell className="text-muted-foreground">
-                              <div className="flex items-center">
-                                <Clock className="h-3 w-3 mr-1" />
-                                <span>30 min</span>
-                              </div>
-                            </TableCell>
+                            {sim.isEssay ? (
+                              <>
+                                <TableCell colSpan={3} className="text-center font-medium">
+                                  Nota da Redação: <span className="text-indigo-600">{sim.essayScore || 0}/1000</span>
+                                </TableCell>
+                              </>
+                            ) : (
+                              <>
+                                <TableCell className="text-green-600 font-medium">{sim.correct}</TableCell>
+                                <TableCell className="text-red-600 font-medium">{sim.incorrect}</TableCell>
+                                <TableCell>
+                                  {((sim.correct / (sim.correct + sim.incorrect)) * 100).toFixed(1)}%
+                                </TableCell>
+                              </>
+                            )}
                           </TableRow>
                         ))}
                       </TableBody>
