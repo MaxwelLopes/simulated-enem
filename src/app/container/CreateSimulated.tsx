@@ -63,36 +63,41 @@ const CreateSimulated = () => {
 
   const simulatedTypes = Object.values(SimulatedType)
 
-  const handleClick = async () => {
-    const userId = user ? user.id : null
-    if (userId) {
-      setLoading(true)
-      const createdSimulated = await createSimulated({
-        typeOfSimulated,
-        questionCount,
-        error,
-        unseen,
-        review,
-        subtypes,
-        userId,
-        nonInepEssay,
-        isDayOne,
-        isDayTwo,
-        language,
-      })
+const handleClick = async () => {
+  const userId = user?.id;
+  if (!userId) return;
 
-      if (createdSimulated) {
-        if (createdSimulated.success) {
-          router.push(`/simulated/${createdSimulated.id}`)
-        } else {
-          setError(createdSimulated.message as string)
-        }
-      } else {
-        setError("Não foi possível criar um simulado com essa combinação!")
-      }
+  setLoading(true);
+  setError(""); // limpa erro anterior, se houver
+
+  try {
+    const createdSimulated = await createSimulated({
+      typeOfSimulated,
+      questionCount,
+      error,
+      unseen,
+      review,
+      subtypes,
+      userId,
+      nonInepEssay,
+      isDayOne,
+      isDayTwo,
+      language,
+    });
+
+    if (createdSimulated?.success) {
+      // Aguarda navegação antes de remover loading
+      await router.push(`/simulated/${createdSimulated.id}`);
+    } else {
+      setError(createdSimulated?.message ?? "Erro desconhecido ao criar simulado.");
+      setLoading(false);
     }
-    setLoading(false)
+  } catch (err) {
+    console.error("Erro ao criar simulado:", err);
+    setError("Erro inesperado. Tente novamente.");
+    setLoading(false);
   }
+};
 
   const handleSelectChange = (value: string) => {
     if (!subtypes.includes(value)) {
