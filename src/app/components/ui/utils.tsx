@@ -46,7 +46,7 @@ function formatText(text: string) {
           return <em key={`${lineIndex}-${index}`}>{segment.content}</em>;
         case 'img':
           return <CldImage
-            src={segment.content.split("_")[0]}
+            src={`simulab/${segment.content}`}
             width={500}
             height={500}
             alt="img"
