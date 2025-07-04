@@ -9,6 +9,7 @@ import { evalueEssay } from "../service/essayService"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react";
 import { getSimulatedById } from "../service/simualationService";
+import { Simulated } from "@prisma/client";
 
 export const EssayForm = ({ simulatedId, simulationStatus, theme }: { simulatedId: string; simulationStatus: string; theme: string }) => {
   const [essay, setEssay] = useState("");
@@ -17,7 +18,7 @@ export const EssayForm = ({ simulatedId, simulationStatus, theme }: { simulatedI
     const fetchSimulated = async () => {
       const simulated = await getSimulatedById(simulatedId);
       if (simulated && "userText" in simulated) {
-        setEssay((simulated as any).userText || "");
+        setEssay((simulated as Simulated).userText || "");
       }
     };
     fetchSimulated();
