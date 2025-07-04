@@ -21,7 +21,7 @@ const NavBar = () => {
         {/* Logo e Título */}
         <div className="flex items-center gap-3">
           <ClipboardCheck className="h-10 w-10 text-indigo-600" />
-          <span className="text-2xl font-bold text-gray-800 hidden sm:inline-block">Simulador ENEM</span>
+          <span className="text-2xl font-bold text-gray-800 hidden sm:inline-block">SimuLab</span>
         </div>
 
         {/* Desktop Navigation */}

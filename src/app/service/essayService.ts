@@ -134,9 +134,15 @@ O JSON deve ter a seguinte estrutura:
 Responda com apenas o JSON, sem quaisquer explicações ou formatação extra.`;
 
   const temperature = 0;
-  const response = await generateText({ role, prompt, temperature });
-  const cleanedResponse = response.replace(/```json|```/g, "").trim();
-  return JSON.parse(cleanedResponse);
+  try {
+    const response = await generateText({ role, prompt, temperature });
+    const cleanedResponse = response.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanedResponse);
+  } catch (error) {
+    throw new Error(
+      `Falha ao analisar a resposta gerada${error instanceof Error ? `: ${error.message}` : ""}`
+    );
+  }
 };
 
 export const createEssay = async (
@@ -156,80 +162,97 @@ export const evalueEssay = async (
   if (simulationStatus !== SimulatedStatus.PENDING) {
     throw new Error("Redação não pode ser avaliada nesse status.");
   }
-  updateSimulated({
-    simulatedId,
-    status: SimulatedStatus.CORRECTING_ESSAY,
-    userText: essay,
-  });
-  const zeroEvaluation = await checkEssayZero(essay, theme);
-  if (zeroEvaluation.zerada) {
-    await createEssayScore(
-      "Redação zerada",
-      0,
-      zeroEvaluation.motivo,
-      simulatedId
+  try {
+    updateSimulated({
+      simulatedId,
+      status: SimulatedStatus.CORRECTING_ESSAY,
+      userText: essay,
+    });
+
+    const zeroEvaluation = await checkEssayZero(essay, theme);
+    if (zeroEvaluation.zerada) {
+      await createEssayScore(
+        "Redação zerada",
+        0,
+        zeroEvaluation.motivo,
+        simulatedId
+      );
+      updateSimulated({
+        simulatedId,
+        status: SimulatedStatus.COMPLETED,
+        essayScore: 0,
+      });
+      finishSimulation(simulatedId);
+      return { message: "Redação anulada", motivo: zeroEvaluation.motivo };
+    }
+
+const competencies = [
+  {
+    name: "Domínio da escrita formal da língua portuguesa",
+    description:
+      "Avalie se o candidato demonstra pleno domínio da norma culta da língua escrita, considerando: - Uso preciso da ortografia, incluindo acentuação gráfica e grafia correta de todas as palavras, sem desvios, ainda que sutis. Erros ortográficos reiterados ou em palavras de uso comum devem ser severamente penalizados. - Aplicação rigorosa da pontuação (vírgulas, pontos finais, travessões, parênteses, dois pontos, ponto e vírgula), assegurando clareza e coesão. Uso inadequado que comprometa a interpretação do texto deve gerar penalização significativa. - Concordância verbal e nominal absolutamente correta, sem desvios, mesmo que ocasionais. - Regência verbal e nominal adequada, evitando usos coloquiais ou incoerências. - Ausência de vícios gramaticais, como pleonasmos viciosos, cacofonias, gerundismos, ambiguidades estruturais e construções truncadas. - Estrutura sintática fluida e bem organizada, sem fragmentação de períodos ou falta de paralelismo. A escrita deve sempre estar a serviço da clareza, coesão e aderência ao tema. Cada erro identificado deve impactar a nota proporcionalmente à sua frequência e gravidade. Um grande número de desvios compromete significativamente a pontuação.",
+  },
+  {
+    name: "Compreensão do tema",
+    description:
+      "Verifique se o candidato compreende o tema proposto de maneira crítica e aprofundada, analisando detalhadamente cada palavra-chave e os conceitos presentes no enunciado, considerando: - Se o candidato desconstrói o tema, refletindo sobre o significado intrínseco de cada termo e as possíveis implicações que esses conceitos podem gerar em contextos sociais, culturais, históricos e políticos. - Se há uma análise minuciosa e crítica dos elementos centrais, demonstrando a capacidade de ir além da simples definição literal e explorando as inter-relações, ambiguidades e desafios implícitos no enunciado. - Se o candidato articula, de forma coerente e fundamentada, como os termos se interconectam e provocam impactos ou transformações, evitando interpretações superficiais e generalizações. - Se a abordagem é original e revela uma compreensão abrangente, contextualizando o tema de forma a evidenciar sua complexidade e as múltiplas perspectivas que ele pode envolver. Qualquer desvio de tema, fuga parcial ou total deve ser identificado e penalizado com severidade, conforme o grau de desconexão com a proposta.",
+  },
+  {
+    name: "Seleção e organização de argumentos",
+    description:
+      "Analise se o candidato seleciona, organiza e interpreta informações, fatos e argumentos de forma estruturada e persuasiva, considerando: - Se os argumentos são fundamentados, pertinentes e articulados de maneira lógica, evitando afirmações sem embasamento ou generalizações superficiais. - Se há um encadeamento progressivo e coerente das ideias, garantindo a coesão argumentativa e a ausência de contradições ou falhas na transição entre pontos. - Se a argumentação revela uma análise crítica que integra diferentes perspectivas, demonstrando profundidade e originalidade na abordagem do tema. - Se existe uma relação clara e lógica entre os argumentos apresentados e a conclusão proposta, evidenciando como cada ponto contribui para a defesa da tese central. Os argumentos devem estar diretamente relacionados ao tema proposto; desconexões ou incoerências devem ser penalizadas. Argumentos fragmentados, ilógicos ou desconectados devem ser rigorosamente penalizados.",
+  },
+  {
+    name: "Coesão textual",
+    description:
+      "Avalie se o candidato emprega mecanismos coesivos de maneira adequada e eficaz, garantindo fluidez e conexão entre as partes do texto, considerando: - Uso variado e pertinente de conectivos para garantir a articulação lógica entre as ideias. O uso mecânico ou repetitivo deve ser penalizado. - Estruturação dos parágrafos com encadeamento progressivo e unidade temática. - Emprego correto de pronomes, elipses e substituições lexicais para evitar repetições excessivas ou imprecisão referencial. - Uso de transições adequadas entre frases e parágrafos, assegurando continuidade e coesão global. A coesão deve estar a serviço da argumentação e do desenvolvimento temático. Falhas graves de coesão que dificultem a compreensão do texto comprometem significativamente a nota.",
+  },
+  {
+    name: "Elaboração de proposta de intervenção",
+    description:
+      "Verifique se o candidato apresenta uma proposta de intervenção detalhada, realista e bem estruturada para solucionar o problema abordado, considerando: - Se a proposta está diretamente relacionada ao tema e fundamentada nos argumentos desenvolvidos. - Se apresenta os cinco elementos essenciais: ação, agente, meio de implementação, efeito esperado e detalhamento suficiente. - Propostas que omitem elementos fundamentais devem ser penalizadas. - Se respeita os direitos humanos, evitando propostas excludentes, discriminatórias ou inviáveis. - Se a proposta demonstra reflexão crítica e está alinhada à problemática discutida no texto. Propostas de intervenção devem sempre dialogar com o tema e a tese do texto; desconexões com o foco temático devem ser consideradas na avaliação. A ausência de proposta de intervenção resulta em pontuação zero neste critério.",
+  },
+];
+
+
+
+
+    const evaluations = await Promise.all(
+      competencies.map(({ name, description }) =>
+        evaluateCompetency(essay, theme, name, description)
+          .then(evaluation => ({ name, evaluation }))
+      )
     );
+
+    let essayScore = 0;
+
+    for (const { name, evaluation } of evaluations) {
+      await createEssayScore(
+        name,
+        evaluation.nota,
+        evaluation.justificativa,
+        simulatedId
+      );
+      essayScore += evaluation.nota;
+    }
+
     updateSimulated({
       simulatedId,
       status: SimulatedStatus.COMPLETED,
-      essayScore: 0,
+      essayScore,
     });
+
     finishSimulation(simulatedId);
-    return { message: "Redação anulada", motivo: zeroEvaluation.motivo };
+  } catch (error) {
+    updateSimulated({
+      simulatedId,
+      status: SimulatedStatus.PENDING,
+    });
+    console.error("Erro ao avaliar redação:", error);
+
+    return;
   }
-
-  const competencies = [
-    {
-      name: "Domínio da escrita formal da língua portuguesa",
-      description:
-        "Avalie se o candidato demonstra pleno domínio da norma culta da língua escrita, considerando: - Uso preciso da ortografia, incluindo acentuação gráfica e grafia correta de todas as palavras, sem desvios, ainda que sutis. Erros ortográficos reiterados ou em palavras de uso comum devem ser severamente penalizados. - Aplicação rigorosa da pontuação (vírgulas, pontos finais, travessões, parênteses, dois pontos, ponto e vírgula), assegurando clareza e coesão. Uso inadequado que comprometa a interpretação do texto deve gerar penalização significativa. - Concordância verbal e nominal absolutamente correta, sem desvios, mesmo que ocasionais. - Regência verbal e nominal adequada, evitando usos coloquiais ou incoerências. - Ausência de vícios gramaticais, como pleonasmos viciosos, cacofonias, gerundismos, ambiguidades estruturais e construções truncadas. - Estrutura sintática fluida e bem organizada, sem fragmentação de períodos ou falta de paralelismo. Cada erro identificado deve impactar a nota proporcionalmente à sua frequência e gravidade. Um grande número de desvios compromete significativamente a pontuação.",
-    },
-    {
-      name: "Compreensão do tema",
-      description:
-        "Verifique se o candidato compreende o tema proposto de maneira crítica e aprofundada, analisando detalhadamente cada palavra-chave e os conceitos presentes no enunciado, considerando: - Se o candidato desconstrói o tema, refletindo sobre o significado intrínseco de cada termo e as possíveis implicações que esses conceitos podem gerar em contextos sociais, culturais, históricos e políticos. - Se há uma análise minuciosa e crítica dos elementos centrais, demonstrando a capacidade de ir além da simples definição literal e explorando as inter-relações, ambiguidades e desafios implícitos no enunciado. - Se o candidato articula, de forma coerente e fundamentada, como os termos se interconectam e provocam impactos ou transformações, evitando interpretações superficiais e generalizações. - Se a abordagem é original e revela uma compreensão abrangente, contextualizando o tema de forma a evidenciar sua complexidade e as múltiplas perspectivas que ele pode envolver. A ausência de uma análise crítica ou uma abordagem meramente descritiva e simplista deve ser severamente penalizada.",
-    },
-    {
-      name: "Seleção e organização de argumentos",
-      description:
-        "Analise se o candidato seleciona, organiza e interpreta informações, fatos e argumentos de forma estruturada e persuasiva, considerando: - Se os argumentos são fundamentados, pertinentes e articulados de maneira lógica, evitando afirmações sem embasamento ou generalizações superficiais. - Se há um encadeamento progressivo e coerente das ideias, garantindo a coesão argumentativa e a ausência de contradições ou falhas na transição entre pontos. - Se a argumentação revela uma análise crítica que integra diferentes perspectivas, demonstrando profundidade e originalidade na abordagem do tema. - Se existe uma relação clara e lógica entre os argumentos apresentados e a conclusão proposta, evidenciando como cada ponto contribui para a defesa da tese central. Argumentos fragmentados, ilógicos ou desconectados devem ser rigorosamente penalizados.",
-    },
-    {
-      name: "Coesão textual",
-      description:
-        "Avalie se o candidato emprega mecanismos coesivos de maneira adequada e eficaz, garantindo fluidez e conexão entre as partes do texto, considerando: - Uso variado e pertinente de conectivos para garantir a articulação lógica entre as ideias. O uso mecânico ou repetitivo deve ser penalizado. - Estruturação dos parágrafos com encadeamento progressivo e unidade temática. - Emprego correto de pronomes, elipses e substituições lexicais para evitar repetições excessivas ou imprecisão referencial. - Uso de transições adequadas entre frases e parágrafos, assegurando continuidade e coesão global. Falhas graves de coesão que dificultem a compreensão do texto comprometem significativamente a nota.",
-    },
-    {
-      name: "Elaboração de proposta de intervenção",
-      description:
-        "Verifique se o candidato apresenta uma proposta de intervenção detalhada, realista e bem estruturada para solucionar o problema abordado, considerando: - Se a proposta está diretamente relacionada ao tema e fundamentada nos argumentos desenvolvidos. - Se apresenta os cinco elementos essenciais: ação, agente, meio de implementação, efeito esperado e detalhamento suficiente. Propostas que omitem elementos fundamentais devem ser penalizadas. - Se respeita os direitos humanos, evitando propostas excludentes, discriminatórias ou inviáveis. - Se a proposta demonstra reflexão crítica e está alinhada à problemática discutida no texto. A ausência de proposta de intervenção resulta em pontuação zero neste critério.",
-    },
-  ];
-
-  let essayScore = 0;
-  for (const { name, description } of competencies) {
-    const evaluation = await evaluateCompetency(
-      essay,
-      theme,
-      name,
-      description
-    );
-    await createEssayScore(
-      name,
-      evaluation.nota,
-      evaluation.justificativa,
-      simulatedId
-    );
-    essayScore += evaluation.nota;
-  }
-
-  updateSimulated({
-    simulatedId,
-    status: SimulatedStatus.COMPLETED,
-    essayScore,
-  });
-  finishSimulation(simulatedId);
-};
+}
 
 export const getTheme = async (simulatedId: string) => {
   const simulated = await getSimulatedById(simulatedId);
@@ -238,7 +261,7 @@ export const getTheme = async (simulatedId: string) => {
 };
 
 export const getEssayById = async (id: number) => {
-  if(!id) {
+  if (!id) {
     return null;
   }
   return findEssayById(id);

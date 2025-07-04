@@ -2,15 +2,26 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { evalueEssay } from "../service/essayService"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react";
+import { getSimulatedById } from "../service/simualationService";
 
 export const EssayForm = ({ simulatedId, simulationStatus, theme }: { simulatedId: string; simulationStatus: string; theme: string }) => {
   const [essay, setEssay] = useState("");
+ 
+  useEffect(() => {
+    const fetchSimulated = async () => {
+      const simulated = await getSimulatedById(simulatedId);
+      if (simulated && "userText" in simulated) {
+        setEssay((simulated as any).userText || "");
+      }
+    };
+    fetchSimulated();
+  }, [simulatedId]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -19,7 +30,6 @@ export const EssayForm = ({ simulatedId, simulationStatus, theme }: { simulatedI
     setIsSubmitting(true);
     evalueEssay(simulatedId, simulationStatus, essay, theme);
     router.push("/simulated");
-    setIsSubmitting(false);
   }
 
   return (
