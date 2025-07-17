@@ -1,37 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SimuLab
 
-## Getting Started
-test
+SimuLab é uma plataforma web para geração de simulados personalizados do ENEM, desenvolvida como Trabalho de Conclusão de Curso (TCC) em Ciência da Computação pela UFRRJ. O projeto oferece uma preparação prática, inteligente e personalizada para estudantes que buscam melhorar seu desempenho no ENEM.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Funcionalidades principais
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Simulados personalizados**: escolha áreas e matérias específicas conforme sua necessidade.  
+- **Condições reais do ENEM**: controle de tempo e formato idêntico ao modelo oficial.  
+- **Correção automática de redações**: utiliza modelos de linguagem (LLMs) para gerar temas e oferecer feedback baseado nos critérios do INEP.  
+- **Painel de desempenho**: gráficos, histórico de simulados e sugestões de foco para orientar seus estudos.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tecnologias utilizadas
 
-## Learn More
+- **Front-end:** Next.js, React, Tailwind CSS, shadcn/ui  
+- **Back-end:** Node.js, TypeScript, Prisma ORM  
+- **Banco de dados:** PostgreSQL  
+- **Inteligência Artificial:** API OpenAI para geração de temas e correções de redação, DeepSeek
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Observações
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- O projeto depende de uma base de dados com questões do ENEM para funcionar corretamente.  
+- A base de dados não está incluída neste repositório e deve ser providenciada separadamente.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Desenvolvido por Maxwel Batalha e Hugo Vidal.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+🔗 [Repositório no GitHub](https://github.com/MaxwelLopes/simulated-enem)
